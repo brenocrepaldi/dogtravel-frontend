@@ -10,7 +10,6 @@ import {
 	Dog,
 	Info,
 	Lightbulb,
-	Loader2,
 	MapPin,
 	Search,
 	ShieldCheck,
@@ -29,6 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { EmptyState } from '@/components/common/empty-state';
+import { LoadingState } from '@/components/common/loading-state';
 import { trackMetricEvent } from '@/lib/metrics';
 
 // ─── Walker Avatar ────────────────────────────────────────────────────────────
@@ -482,10 +482,7 @@ export function WalkersExplorer() {
 			{/* ── Main: resultados ── */}
 			<div className="flex min-w-0 flex-1 flex-col gap-6 lg:order-1">
 				{isLoading ? (
-					<div className="flex items-center justify-center gap-3 py-20 text-muted-foreground">
-						<Loader2 className="h-5 w-5 animate-spin" />
-						<span className="text-sm">Carregando passeadores...</span>
-					</div>
+					<LoadingState variant="section" text="Carregando passeadores..." />
 				) : filteredWalkers.length === 0 ? (
 					<EmptyState
 						icon={Search}

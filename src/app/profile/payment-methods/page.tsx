@@ -24,6 +24,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { LoadingState } from '@/components/common/loading-state';
 import {
   usePaymentMethods,
   useAddPaymentMethod,
@@ -150,12 +151,7 @@ export default function PaymentMethodsPage() {
 
   function renderList() {
     if (isLoading) {
-      return (
-        <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="text-sm">Carregando métodos...</span>
-        </div>
-      );
+      return <LoadingState variant="section" text="Carregando métodos..." />;
     }
 
     if (isError) {
