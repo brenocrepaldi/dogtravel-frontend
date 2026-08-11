@@ -437,9 +437,6 @@ export const walkReviews: WalkReview[] = [
 	},
 ];
 
-// Mock PIX key shown to the client during checkout — will come from the payments API.
-export const PIX_MOCK_KEY = "pagamentos@dogtravel.com.br";
-
 // ─── Walk GPS Routes ──────────────────────────────────────────────────────────
 // Coordinates per walk ID — will come from the GPS trail stored per walk in the API.
 export const walkRoutes: Record<string, [number, number][]> = {

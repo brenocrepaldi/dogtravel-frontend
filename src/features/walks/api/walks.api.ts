@@ -1,8 +1,4 @@
 import {
-  walks as seedWalks,
-  walkRequests as seedWalkRequests,
-} from "@/lib/mock-data";
-import {
   DURATION_BASE_PRICE,
   EXTRA_PET_FEE,
   PLATFORM_AND_SAFETY_FEE_RATE,
@@ -19,9 +15,26 @@ import type {
 } from "@/types";
 import api, { isApiConfigured } from "@/services/api";
 
-// Module-level mutable stores — used only when API is not configured
-let walksStore: WalkRecord[] = [...seedWalks];
-let walkRequestsStore: WalkRequest[] = [...seedWalkRequests];
+// Module-level mutable stores — lazily populated via dynamic import so
+// mock-data.ts never reaches the client bundle when a real API is configured.
+let walksStore: WalkRecord[] | null = null;
+let walkRequestsStore: WalkRequest[] | null = null;
+
+async function getWalksStore(): Promise<WalkRecord[]> {
+  if (!walksStore) {
+    const { walks: seedWalks } = await import("@/lib/mock-data");
+    walksStore = [...seedWalks];
+  }
+  return walksStore;
+}
+
+async function getWalkRequestsStore(): Promise<WalkRequest[]> {
+  if (!walkRequestsStore) {
+    const { walkRequests: seedWalkRequests } = await import("@/lib/mock-data");
+    walkRequestsStore = [...seedWalkRequests];
+  }
+  return walkRequestsStore;
+}
 
 function randomCode() {
   return String(Math.floor(1000 + Math.random() * 9000));
@@ -32,12 +45,13 @@ function randomCode() {
 export const WalksApi = {
   list: async (role: UserRole, walkerId?: string): Promise<WalkRecord[]> => {
     if (!isApiConfigured) {
+      const store = await getWalksStore();
       if (role === "client") {
-        return [...walksStore].filter((w) =>
+        return [...store].filter((w) =>
           w.participants.some((p) => p.role === "client" && p.id === "client_1")
         );
       }
-      return [...walksStore].filter((w) => w.walkerId === walkerId);
+      return [...store].filter((w) => w.walkerId === walkerId);
     }
     const params: Record<string, string> = { role };
     if (role === "walker" && walkerId) params.walkerId = walkerId;
@@ -48,14 +62,15 @@ export const WalksApi = {
 
   getById: async (id: string): Promise<WalkRecord | undefined> => {
     if (!isApiConfigured) {
-      return walksStore.find((w) => w.id === id);
+      const store = await getWalksStore();
+      return store.find((w) => w.id === id);
     }
     return api.get<WalkRecord>(`/walks/${id}`).then((r) => r.data);
   },
 
   listRequests: async (): Promise<WalkRequest[]> => {
     if (!isApiConfigured) {
-      return [...walkRequestsStore];
+      return [...(await getWalkRequestsStore())];
     }
     return api.get<WalkRequest[]>("/walk-requests").then((r) => r.data);
   },
@@ -95,6 +110,7 @@ export const WalksApi = {
 
   create: async (dto: CreateWalkDto): Promise<WalkRecord> => {
     if (!isApiConfigured) {
+      const [walks, walkRequests] = await Promise.all([getWalksStore(), getWalkRequestsStore()]);
       const dateLabel = new Date(dto.scheduledAt).toLocaleDateString("pt-BR", {
         day: "2-digit",
         month: "short",
@@ -143,8 +159,8 @@ export const WalksApi = {
         startAddress: dto.startAddress,
         receivedMinutes: 0,
       };
-      walksStore = [newWalk, ...walksStore];
-      walkRequestsStore = [newRequest, ...walkRequestsStore];
+      walksStore = [newWalk, ...walks];
+      walkRequestsStore = [newRequest, ...walkRequests];
       return newWalk;
     }
     return api.post<WalkRecord>("/walks", dto).then((r) => r.data);
@@ -152,7 +168,8 @@ export const WalksApi = {
 
   cancel: async (id: string): Promise<void> => {
     if (!isApiConfigured) {
-      walksStore = walksStore.map((w) =>
+      const store = await getWalksStore();
+      walksStore = store.map((w) =>
         w.id === id ? { ...w, status: "cancelled" as const } : w
       );
       return;
@@ -162,7 +179,8 @@ export const WalksApi = {
 
   complete: async (walkId: string, coords?: { lat: number; lng: number }): Promise<WalkRecord> => {
     if (!isApiConfigured) {
-      const walk = walksStore.find((w) => w.id === walkId);
+      const store = await getWalksStore();
+      const walk = store.find((w) => w.id === walkId);
       if (!walk) throw new Error("WALK_NOT_FOUND");
 
       const now = new Date().toLocaleTimeString("pt-BR", {
@@ -170,7 +188,7 @@ export const WalksApi = {
         minute: "2-digit",
       });
 
-      walksStore = walksStore.map((w) => {
+      walksStore = store.map((w) => {
         if (w.id !== walkId) return w;
         return {
           ...w,
@@ -192,7 +210,8 @@ export const WalksApi = {
 
   start: async (walkId: string, code: string): Promise<WalkRecord> => {
     if (!isApiConfigured) {
-      const walk = walksStore.find((w) => w.id === walkId);
+      const store = await getWalksStore();
+      const walk = store.find((w) => w.id === walkId);
       if (!walk) throw new Error("WALK_NOT_FOUND");
       if (walk.startCode !== code) throw new Error("INVALID_CODE");
 
@@ -204,7 +223,7 @@ export const WalksApi = {
       const currentIdx     = walk.timeline.findIndex((t) => t.state === "current");
       const firstPendingIdx = walk.timeline.findIndex((t) => t.state === "pending");
 
-      walksStore = walksStore.map((w) => {
+      walksStore = store.map((w) => {
         if (w.id !== walkId) return w;
         return {
           ...w,
@@ -226,7 +245,8 @@ export const WalksApi = {
 
   accept: async (request: WalkRequest, walkerName: string, walkerId: string): Promise<WalkRecord> => {
     if (!isApiConfigured) {
-      walkRequestsStore = walkRequestsStore.filter((r) => r.id !== request.id);
+      const [walks, walkRequests] = await Promise.all([getWalksStore(), getWalkRequestsStore()]);
+      walkRequestsStore = walkRequests.filter((r) => r.id !== request.id);
 
       const now = new Date().toLocaleTimeString("pt-BR", {
         hour: "2-digit",
@@ -257,7 +277,7 @@ export const WalksApi = {
         ],
       };
 
-      walksStore = [newWalk, ...walksStore];
+      walksStore = [newWalk, ...walks];
       return newWalk;
     }
     return api
@@ -267,7 +287,8 @@ export const WalksApi = {
 
   decline: async (requestId: string): Promise<void> => {
     if (!isApiConfigured) {
-      walkRequestsStore = walkRequestsStore.filter((r) => r.id !== requestId);
+      const store = await getWalkRequestsStore();
+      walkRequestsStore = store.filter((r) => r.id !== requestId);
       return;
     }
     await api.post(`/walk-requests/${requestId}/decline`);

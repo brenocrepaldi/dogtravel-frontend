@@ -1,22 +1,32 @@
-import { documentStatus as seedStatus, walkerCertificates } from "@/lib/mock-data";
 import type { DocumentsStatus, WalkerCertDocument, DocStatus } from "@/types";
 import api, { isApiConfigured } from "@/services/api";
 
-// Module-level mutable store
-let statusStore: DocumentsStatus = { ...seedStatus, certificates: [...walkerCertificates] };
+// Module-level mutable store — lazily populated via dynamic import so
+// mock-data.ts never reaches the client bundle when a real API is configured.
+let statusStore: DocumentsStatus | null = null;
+
+async function getStatusStore(): Promise<DocumentsStatus> {
+  if (!statusStore) {
+    const { documentStatus: seedStatus, walkerCertificates } = await import("@/lib/mock-data");
+    statusStore = { ...seedStatus, certificates: [...walkerCertificates] };
+  }
+  return statusStore;
+}
 
 export const DocumentsApi = {
   getStatus: async (): Promise<DocumentsStatus> => {
     if (!isApiConfigured) {
-      return { ...statusStore, certificates: [...statusStore.certificates] };
+      const store = await getStatusStore();
+      return { ...store, certificates: [...store.certificates] };
     }
     return api.get<DocumentsStatus>("/profile/documents").then((r) => r.data);
   },
 
   uploadIdentity: async (doc: File, selfie: File): Promise<void> => {
     if (!isApiConfigured) {
+      const store = await getStatusStore();
       await new Promise((r) => setTimeout(r, 600));
-      statusStore = { ...statusStore, identity: "pending" };
+      statusStore = { ...store, identity: "pending" };
       return;
     }
     const form = new FormData();
@@ -29,8 +39,9 @@ export const DocumentsApi = {
 
   uploadBackground: async (doc: File): Promise<void> => {
     if (!isApiConfigured) {
+      const store = await getStatusStore();
       await new Promise((r) => setTimeout(r, 600));
-      statusStore = { ...statusStore, background: "pending" };
+      statusStore = { ...store, background: "pending" };
       return;
     }
     const form = new FormData();
@@ -42,6 +53,7 @@ export const DocumentsApi = {
 
   addCertificate: async (title: string, file: File): Promise<WalkerCertDocument> => {
     if (!isApiConfigured) {
+      const store = await getStatusStore();
       await new Promise((r) => setTimeout(r, 400));
       const entry: WalkerCertDocument = {
         id: crypto.randomUUID(),
@@ -50,8 +62,8 @@ export const DocumentsApi = {
         status: "pending" as DocStatus,
       };
       statusStore = {
-        ...statusStore,
-        certificates: [...statusStore.certificates, entry],
+        ...store,
+        certificates: [...store.certificates, entry],
       };
       return entry;
     }
@@ -67,9 +79,10 @@ export const DocumentsApi = {
 
   removeCertificate: async (id: string): Promise<void> => {
     if (!isApiConfigured) {
+      const store = await getStatusStore();
       statusStore = {
-        ...statusStore,
-        certificates: statusStore.certificates.filter((c) => c.id !== id),
+        ...store,
+        certificates: store.certificates.filter((c) => c.id !== id),
       };
       return;
     }

@@ -1,4 +1,3 @@
-import { chatMessagesByWalk } from "@/lib/mock-data";
 import api, { isApiConfigured } from "@/services/api";
 
 export interface ChatMsg {
@@ -9,15 +8,26 @@ export interface ChatMsg {
   read: boolean;
 }
 
-// Module-level mutable store — used only when API is not configured
-const chatStore: Record<string, ChatMsg[]> = Object.fromEntries(
-  Object.entries(chatMessagesByWalk).map(([k, v]) => [k, [...v]])
-);
+// Module-level mutable store — used only when API is not configured.
+// Lazily populated via dynamic import so mock-data.ts never reaches the
+// client bundle when a real API is configured.
+let chatStore: Record<string, ChatMsg[]> | null = null;
+
+async function getChatStore(): Promise<Record<string, ChatMsg[]>> {
+  if (!chatStore) {
+    const { chatMessagesByWalk } = await import("@/lib/mock-data");
+    chatStore = Object.fromEntries(
+      Object.entries(chatMessagesByWalk).map(([k, v]) => [k, [...v]])
+    );
+  }
+  return chatStore;
+}
 
 export const ChatApi = {
   getMessages: async (walkId: string): Promise<ChatMsg[]> => {
     if (!isApiConfigured) {
-      return [...(chatStore[walkId] ?? [])];
+      const store = await getChatStore();
+      return [...(store[walkId] ?? [])];
     }
     return api
       .get<ChatMsg[]>(`/walks/${walkId}/messages`)
@@ -26,6 +36,7 @@ export const ChatApi = {
 
   sendMessage: async (walkId: string, senderId: string, text: string): Promise<ChatMsg> => {
     if (!isApiConfigured) {
+      const store = await getChatStore();
       const msg: ChatMsg = {
         id: crypto.randomUUID(),
         senderId,
@@ -33,7 +44,7 @@ export const ChatApi = {
         sentAt: new Date().toISOString(),
         read: false,
       };
-      chatStore[walkId] = [...(chatStore[walkId] ?? []), msg];
+      store[walkId] = [...(store[walkId] ?? []), msg];
       return msg;
     }
     return api

@@ -5,8 +5,10 @@ import { CheckCircle2, Copy, Smartphone, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { PIX_MOCK_KEY } from "@/lib/mock-data";
 import type { WalkFormData } from "../walk-request-form";
+
+// Mock PIX key shown to the client during checkout — will come from the payments API.
+const PIX_MOCK_KEY = "pagamentos@dogtravel.com.br";
 
 // ── Mock QR Code (SVG) ──────────────────────────────────────────────────────
 
