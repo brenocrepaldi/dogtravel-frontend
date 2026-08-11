@@ -1,31 +1,21 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useState } from "react";
 import {
-  AlertCircle,
-  AlertTriangle,
   Award,
   CheckCircle2,
-  Clock,
   ExternalLink,
   FileCheck2,
-  FileText,
   Loader2,
-  Lock,
   Plus,
   ShieldCheck,
   Star,
-  Trash2,
   TrendingUp,
-  Upload,
-  X,
-  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { DocStatus, WalkerCertDocument } from "@/types";
+import type { DocStatus } from "@/types";
 import {
   useDocuments,
   useUploadIdentity,
@@ -44,337 +34,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// ─── Status config ──────────────────────────────────────────────────────────
-
-const STATUS: Record<DocStatus, { label: string; icon: React.ElementType; cls: string }> = {
-  idle: {
-    label: "Não enviado",
-    icon: AlertCircle,
-    cls: "bg-muted text-muted-foreground border-border/60",
-  },
-  pending: {
-    label: "Em análise",
-    icon: Clock,
-    cls: "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-400",
-  },
-  verified: {
-    label: "Verificado",
-    icon: CheckCircle2,
-    cls: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400",
-  },
-  rejected: {
-    label: "Recusado",
-    icon: XCircle,
-    cls: "bg-red-500/10 text-red-700 border-red-500/20 dark:text-red-400",
-  },
-};
-
-// ─── Badges ─────────────────────────────────────────────────────────────────
-
-function StatusBadge({ status }: { status: DocStatus }) {
-  const { label, cls, icon: Icon } = STATUS[status];
-  return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold", cls)}>
-      <Icon className="h-3 w-3 shrink-0" />
-      {label}
-    </span>
-  );
-}
-
-function RequiredBadge() {
-  return (
-    <span className="inline-flex items-center rounded-md bg-red-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400">
-      Obrigatório
-    </span>
-  );
-}
-
-function OptionalBadge() {
-  return (
-    <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-      Opcional
-    </span>
-  );
-}
-
-// ─── Banners ─────────────────────────────────────────────────────────────────
-
-function PendingBanner({ message }: { message: string }) {
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3.5">
-      <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-      <p className="text-xs leading-relaxed text-amber-700 dark:text-amber-300">{message}</p>
-    </div>
-  );
-}
-
-function VerifiedBanner({ message }: { message: string }) {
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3.5">
-      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-      <p className="text-xs leading-relaxed text-emerald-700 dark:text-emerald-300">{message}</p>
-    </div>
-  );
-}
-
-function RejectedBanner({ message }: { message: string }) {
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3.5">
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
-      <p className="text-xs leading-relaxed text-red-700 dark:text-red-300">{message}</p>
-    </div>
-  );
-}
-
-// ─── UploadZone ─────────────────────────────────────────────────────────────
-
-function UploadZone({
-  label,
-  hint,
-  file,
-  onFile,
-  disabled = false,
-  accept = ".pdf,.jpg,.jpeg,.png",
-}: {
-  label: string;
-  hint: string;
-  file: File | null;
-  onFile: (f: File | null) => void;
-  disabled?: boolean;
-  accept?: string;
-}) {
-  const ref = useRef<HTMLInputElement>(null);
-  const inputId = useId();
-
-  return (
-    <div className="space-y-2">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <input
-        ref={ref}
-        id={inputId}
-        type="file"
-        accept={accept}
-        className="sr-only"
-        disabled={disabled}
-        onChange={(e) => { onFile(e.target.files?.[0] ?? null); e.target.value = ""; }}
-      />
-      {file ? (
-        <div className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/[0.03] px-4 py-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-            <FileText className="h-4 w-4 text-primary" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
-            <p className="text-[11px] text-muted-foreground">
-              {file.size < 1024 * 1024
-                ? `${(file.size / 1024).toFixed(0)} KB`
-                : `${(file.size / (1024 * 1024)).toFixed(1)} MB`}
-            </p>
-          </div>
-          {!disabled && (
-            <button
-              type="button"
-              aria-label="Remover arquivo"
-              onClick={() => onFile(null)}
-              className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      ) : (
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => ref.current?.click()}
-          className={cn(
-            "flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-all",
-            disabled
-              ? "cursor-not-allowed border-border/30 opacity-50"
-              : "cursor-pointer border-border/60 hover:border-primary/40 hover:bg-primary/[0.02]",
-          )}
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
-            <Upload className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-foreground">Selecionar arquivo</p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p>
-          </div>
-        </button>
-      )}
-    </div>
-  );
-}
-
-// ─── DocCardHeader ──────────────────────────────────────────────────────────
-
-function DocCardHeader({
-  icon: Icon, iconBg, iconColor, barClass, title, description, status, required,
-}: {
-  icon: React.ElementType; iconBg: string; iconColor: string;
-  barClass: string; title: string; description: string;
-  status: DocStatus; required: boolean;
-}) {
-  return (
-    <>
-      <div className={cn("h-1 w-full bg-gradient-to-r", barClass)} />
-      <CardHeader className="pb-4 pt-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", iconBg)}>
-              <Icon className={cn("h-4 w-4", iconColor)} />
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <CardTitle className="text-sm font-semibold">{title}</CardTitle>
-                {required ? <RequiredBadge /> : <OptionalBadge />}
-              </div>
-              <CardDescription className="mt-0.5 text-xs">{description}</CardDescription>
-            </div>
-          </div>
-          <StatusBadge status={status} />
-        </div>
-      </CardHeader>
-    </>
-  );
-}
-
-// ─── Onboarding progress card ────────────────────────────────────────────────
-
-function ChecklistItem({ label, status }: { label: string; status: DocStatus }) {
-  const Icon =
-    status === "verified" ? CheckCircle2
-    : status === "pending" ? Clock
-    : status === "rejected" ? XCircle
-    : AlertCircle;
-
-  const iconCls =
-    status === "verified" ? "text-emerald-600 dark:text-emerald-400"
-    : status === "pending" ? "text-amber-600 dark:text-amber-400"
-    : status === "rejected" ? "text-red-600 dark:text-red-400"
-    : "text-muted-foreground";
-
-  return (
-    <div className="flex items-center gap-3">
-      <Icon className={cn("h-4 w-4 shrink-0", iconCls)} />
-      <span className="flex-1 text-xs text-foreground">{label}</span>
-      <StatusBadge status={status} />
-    </div>
-  );
-}
-
-function OnboardingProgressCard({
-  identityStatus,
-  bgStatus,
-}: {
-  identityStatus: DocStatus;
-  bgStatus: DocStatus;
-}) {
-  const requiredCompleted = [identityStatus, bgStatus].filter((s) => s === "verified").length;
-  const canAcceptWalks = requiredCompleted === 2;
-  const progress = (requiredCompleted / 2) * 100;
-
-  return (
-    <Card className="overflow-hidden py-0 gap-0">
-      <div
-        className={cn("h-1.5 w-full bg-gradient-to-r",
-          canAcceptWalks
-            ? "from-emerald-400/60 via-emerald-500 to-emerald-400/40"
-            : "from-amber-400/60 via-amber-500 to-amber-400/40",
-        )}
-      />
-      <CardContent className="space-y-4 py-5">
-        <div className="flex items-start gap-3">
-          <div
-            className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-              canAcceptWalks ? "bg-emerald-500/10" : "bg-amber-500/10",
-            )}
-          >
-            {canAcceptWalks ? (
-              <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            ) : (
-              <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">
-              {canAcceptWalks
-                ? "Perfil ativo — você pode realizar passeios"
-                : "Conclua os requisitos para realizar passeios"}
-            </p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {canAcceptWalks
-                ? "Todos os documentos obrigatórios foram aprovados pela DogTravel."
-                : `${requiredCompleted} de 2 requisitos obrigatórios aprovados`}
-            </p>
-          </div>
-          <span className="shrink-0 text-sm font-bold tabular-nums text-foreground">
-            {requiredCompleted}/2
-          </span>
-        </div>
-
-        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className={cn("h-full rounded-full transition-all duration-700",
-              canAcceptWalks ? "bg-emerald-500" : progress > 0 ? "bg-amber-500" : "bg-muted-foreground/30",
-            )}
-            style={{ width: `${Math.max(progress, progress > 0 ? 4 : 0)}%` }}
-          />
-        </div>
-
-        <Separator />
-
-        <div className="space-y-2.5">
-          <ChecklistItem label="Verificação de identidade" status={identityStatus} />
-          <ChecklistItem label="Antecedentes criminais" status={bgStatus} />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ─── CertRow ────────────────────────────────────────────────────────────────
-
-function CertRow({ cert, onRemove, isRemoving }: {
-  cert: WalkerCertDocument;
-  onRemove: (id: string) => void;
-  isRemoving: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-4 rounded-xl border border-border/60 bg-card px-4 py-3.5 transition-colors hover:bg-accent/20">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-        <Award className="h-4 w-4 text-primary" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-foreground">{cert.title}</p>
-        <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-muted-foreground">
-          <FileText className="h-3 w-3 shrink-0" />
-          {cert.fileName}
-        </p>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <StatusBadge status={cert.status} />
-        {cert.status !== "verified" && (
-          <button
-            type="button"
-            aria-label={`Remover ${cert.title}`}
-            disabled={isRemoving}
-            onClick={() => onRemove(cert.id)}
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
-          >
-            {isRemoving ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Trash2 className="h-3.5 w-3.5" />
-            )}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
+import {
+  DocCardHeader,
+  OptionalBadge,
+  PendingBanner,
+  RejectedBanner,
+  VerifiedBanner,
+} from "./walker-documents-badges";
+import { UploadZone } from "./walker-documents-upload-zone";
+import { OnboardingProgressCard } from "./walker-documents-progress-card";
+import { CertRow } from "./walker-documents-cert-row";
 
 // ─── Main component ─────────────────────────────────────────────────────────
 
