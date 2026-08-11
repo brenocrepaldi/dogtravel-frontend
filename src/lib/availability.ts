@@ -30,7 +30,8 @@ export function formatAvailabilityLabel(slots: AvailabilitySlot[]): string {
     DAYS.map((d) => [d.key, d.short]),
   ) as Record<DayKey, string>;
 
-  const firstKey = `${active[0].start}–${active[0].end}`;
+  const first = active[0]!;
+  const firstKey = `${first.start}–${first.end}`;
   const allSame = active.every((s) => `${s.start}–${s.end}` === firstKey);
 
   const dayList = active.map((s) => dayShort[s.day]).join(', ');

@@ -25,8 +25,8 @@ export default function WalkRouteMap({ walkId }: { walkId: string }) {
     [Math.max(...lngs) + 0.0015, Math.max(...lats) + 0.0015],
   ];
 
-  const [startLng, startLat] = route[0];
-  const [endLng,   endLat]   = route[route.length - 1];
+  const [startLng, startLat] = route[0]!;
+  const [endLng,   endLat]   = route[route.length - 1]!;
 
   const geojson = {
     type: "FeatureCollection" as const,

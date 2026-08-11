@@ -202,9 +202,11 @@ export function AvailabilityPicker({ value, onChange }: Props) {
                     </span>
                     {' '}·{' '}
                     {(() => {
-                      const [sh, sm] = entry.start.split(':').map(Number);
-                      const [eh, em] = entry.end.split(':').map(Number);
-                      const total = (eh * 60 + em) - (sh * 60 + sm);
+                      const toMinutes = (hhmm: string) => {
+                        const [h = 0, m = 0] = hhmm.split(':').map(Number);
+                        return h * 60 + m;
+                      };
+                      const total = toMinutes(entry.end) - toMinutes(entry.start);
                       const h = Math.floor(total / 60);
                       const m = total % 60;
                       return m === 0 ? `${h}h de trabalho` : `${h}h${m}min de trabalho`;

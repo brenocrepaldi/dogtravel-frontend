@@ -59,7 +59,8 @@ async function forwardGeocode(query: string): Promise<{ lat: number; lng: number
   );
   const results = await res.json() as Array<{ lat: string; lon: string }>;
   if (!results.length) return null;
-  return { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) };
+  const first = results[0]!;
+  return { lat: parseFloat(first.lat), lng: parseFloat(first.lon) };
 }
 
 function buildCombinedAddress(d: Pick<WalkFormData, "addressStreet" | "addressComplement" | "addressNeighborhood" | "addressCity">) {

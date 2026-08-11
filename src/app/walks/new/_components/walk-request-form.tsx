@@ -75,7 +75,7 @@ const INITIAL_DATA: WalkFormData = {
 function toDateAndTime(iso: string) {
 	const dateTime = new Date(iso);
 	const localDateTime = new Date(dateTime.getTime() - dateTime.getTimezoneOffset() * 60000);
-	const [date, time] = localDateTime.toISOString().split('T');
+	const [date, time] = localDateTime.toISOString().split('T') as [string, string];
 	return { date, time: time.slice(0, 5) };
 }
 
@@ -106,7 +106,7 @@ function StepIndicator({
 					<p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
 						Passo {currentStep + 1} de {STEPS.length}
 					</p>
-					<p className="text-lg font-semibold text-foreground mt-0.5">{STEPS[currentStep].label}</p>
+					<p className="text-lg font-semibold text-foreground mt-0.5">{STEPS[currentStep]?.label}</p>
 				</div>
 			</div>
 
