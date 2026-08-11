@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Image as ImageIcon, ArrowLeft, Loader2 } from "lucide-react";
+import { Send, ArrowLeft, Loader2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -114,14 +114,6 @@ export function ChatInterface({
       {/* ─── Input Area ─── */}
       <div className="p-4 border-t border-border bg-background">
         <form onSubmit={handleSend} className="flex items-end gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="shrink-0 text-muted-foreground hover:text-foreground"
-          >
-            <ImageIcon className="h-5 w-5" />
-          </Button>
           <div className="flex-1 relative">
             <Input
               value={input}
