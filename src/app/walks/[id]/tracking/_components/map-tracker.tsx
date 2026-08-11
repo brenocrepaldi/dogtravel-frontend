@@ -150,7 +150,7 @@ function ProgressSection({ startAddress, startedAt, remaining, progress, timeDon
 export default function MapTracker({ walkId }: { walkId: string }) {
   const { data: session } = useSession();
   const { data: walk } = useWalkById(walkId);
-  const { data: location, isLoading } = useWalkLocation(walkId);
+  const { data: location, isLoading, isStale: signalLost } = useWalkLocation(walkId);
   const { mutate: completeWalk, isPending: completing } = useCompleteWalk();
 
   const isWalker = session?.user?.role === 'walker';
@@ -270,6 +270,16 @@ export default function MapTracker({ walkId }: { walkId: string }) {
             </Marker>
           )}
         </Map>
+
+        {/* ── Lost-signal banner — client only, walker already sees its own GPS status ── */}
+        {hasLocation && signalLost && !isWalker && (
+          <div className="pointer-events-none absolute inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-[600] flex justify-center px-4">
+            <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50/95 px-3.5 py-2 text-xs font-semibold text-amber-800 shadow-lg backdrop-blur-md dark:border-amber-800/50 dark:bg-amber-900/90 dark:text-amber-300">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+              Sinal do passeador perdido — última posição pode estar desatualizada
+            </div>
+          </div>
+        )}
 
         {/* ── No-location overlay ────────────────────────────────── */}
         {!hasLocation && (
