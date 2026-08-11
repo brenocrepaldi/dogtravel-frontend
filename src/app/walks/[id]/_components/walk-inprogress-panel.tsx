@@ -24,20 +24,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useCompleteWalk } from '@/features/walks/hooks/use-walk-actions';
+import { useCountdown } from '@/features/tracking/hooks/use-countdown';
+import { haversineMeters } from '@/lib/geo';
 import type { WalkRecord } from '@/types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6_371_000;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 function formatCountdown(s: number) {
   const m = Math.floor(s / 60);
@@ -61,27 +52,10 @@ export function WalkInProgressPanel({ walk }: { walk: WalkRecord }) {
   const { mutate: completeWalk, isPending: completing } = useCompleteWalk();
 
   // ── Countdown ───────────────────────────────────────────────────────────────
-  const totalSeconds = walk.durationMinutes * 60;
-
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(() => {
-    if (!walk.startedAt) return 0;
-    const endMs = new Date(walk.startedAt).getTime() + totalSeconds * 1000;
-    return Math.max(0, Math.ceil((endMs - Date.now()) / 1000));
-  });
-
-  const timeReady = remainingSeconds === 0;
-  const progress = Math.min(100, ((totalSeconds - remainingSeconds) / totalSeconds) * 100);
-
-  useEffect(() => {
-    if (timeReady) return;
-    const id = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) { clearInterval(id); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [timeReady]);
+  const { remaining: remainingSeconds, progress, done: timeReady } = useCountdown(
+    walk.startedAt,
+    walk.durationMinutes,
+  );
 
   // ── GPS ─────────────────────────────────────────────────────────────────────
   const [gps, setGps] = useState<GpsState>({ status: 'loading' });
@@ -123,7 +97,6 @@ export function WalkInProgressPanel({ walk }: { walk: WalkRecord }) {
           const remaining = err?.response?.data?.remainingSeconds as number | undefined;
           const distM = err?.response?.data?.distanceMeters as number | undefined;
           if (code === 'WALK_DURATION_NOT_REACHED') {
-            if (remaining) setRemainingSeconds(remaining);
             toast.error('Tempo insuficiente', {
               description: `Aguarde mais ${formatCountdown(remaining ?? 60)} para concluir.`,
             });

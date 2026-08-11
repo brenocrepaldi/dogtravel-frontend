@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -15,6 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useCountdown } from '@/features/tracking/hooks/use-countdown';
 import type { WalkRecord, WalkerProfile } from '@/types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -38,19 +38,8 @@ interface Props {
 
 export function WalkClientInProgressPanel({ walk, walker }: Props) {
   const totalSeconds = walk.durationMinutes * 60;
-
-  const [elapsed, setElapsed] = useState<number>(() => {
-    if (!walk.startedAt) return 0;
-    return Math.max(0, Math.floor((Date.now() - new Date(walk.startedAt).getTime()) / 1000));
-  });
-
-  useEffect(() => {
-    const id = setInterval(() => setElapsed((p) => Math.min(p + 1, totalSeconds)), 1000);
-    return () => clearInterval(id);
-  }, [totalSeconds]);
-
-  const progress = totalSeconds > 0 ? Math.min(100, (elapsed / totalSeconds) * 100) : 0;
-  const done = elapsed >= totalSeconds;
+  const { remaining, progress, done } = useCountdown(walk.startedAt, walk.durationMinutes);
+  const elapsed = totalSeconds - remaining;
 
   return (
     <Card className="overflow-hidden py-0 gap-0 ring-1 ring-emerald-500/20">

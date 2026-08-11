@@ -30,6 +30,7 @@ import { useWalkLocation, useLocationBroadcast } from '@/features/tracking/hooks
 import { useWalkById } from '@/features/walks/hooks/use-walks';
 import { useCompleteWalk } from '@/features/walks/hooks/use-walk-actions';
 import { useCountdown } from '@/features/tracking/hooks/use-countdown';
+import { haversineMeters } from '@/lib/geo';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -50,17 +51,6 @@ interface ApiError {
 const RADIUS_M = 300;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
-  const R = 6_371_000;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 export function formatCountdown(s: number) {
   const m = Math.floor(s / 60);

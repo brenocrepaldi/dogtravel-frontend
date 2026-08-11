@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dialog';
 import { useStartWalk } from '@/features/walks/hooks/use-walk-actions';
 import { isApiConfigured } from '@/services/api';
+import { haversineMeters } from '@/lib/geo';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -34,16 +35,6 @@ const WINDOW_MINUTES = 15;
 const RADIUS_METERS  = 300;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
-  const R  = 6_371_000;
-  const φ1 = (lat1 * Math.PI) / 180;
-  const φ2 = (lat2 * Math.PI) / 180;
-  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-  const Δλ = ((lng2 - lng1) * Math.PI) / 180;
-  const a  = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 function fmtCountdown(secs: number) {
   const h = Math.floor(secs / 3600);
