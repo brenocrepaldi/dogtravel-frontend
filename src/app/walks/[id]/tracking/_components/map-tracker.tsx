@@ -31,6 +31,7 @@ import { useWalkById } from '@/features/walks/hooks/use-walks';
 import { useCompleteWalk } from '@/features/walks/hooks/use-walk-actions';
 import { useCountdown } from '@/features/tracking/hooks/use-countdown';
 import { haversineMeters } from '@/lib/geo';
+import { DogMarker } from '@/components/common/dog-marker';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,34 +69,6 @@ function initials(name: string) {
 }
 
 // ─── Shared sub-components ────────────────────────────────────────────────────
-
-function DogMarker({ pets, walkerAvatarUrl }: { pets: Pet[]; walkerAvatarUrl?: string | null }) {
-  const firstPhoto = pets.find((p) => p.photoUrl)?.photoUrl ?? null;
-  const count = pets.length;
-  return (
-    <div className="relative flex items-center justify-center">
-      <span className="absolute h-16 w-16 animate-ping rounded-full bg-primary/20" />
-      <div className="relative h-12 w-12 overflow-hidden rounded-full border-[3px] border-white bg-amber-100 shadow-lg">
-        {firstPhoto ? (
-          <Image src={firstPhoto} alt={pets[0]?.name ?? 'Cão'} fill sizes="48px" className="object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-2xl">🦮</div>
-        )}
-      </div>
-      {/* Walker avatar — overlaid bottom-right of the dog bubble */}
-      {walkerAvatarUrl && (
-        <div className="absolute -bottom-1 -right-1 h-6 w-6 overflow-hidden rounded-full border-2 border-white shadow-sm">
-          <Image src={walkerAvatarUrl} alt="Passeador" fill sizes="24px" className="object-cover" />
-        </div>
-      )}
-      {count > 1 && !walkerAvatarUrl && (
-        <div className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-primary text-[10px] font-bold text-primary-foreground shadow">
-          {count}
-        </div>
-      )}
-    </div>
-  );
-}
 
 function PetsRow({ pets }: { pets: Pet[] }) {
   return (
@@ -293,7 +266,7 @@ export default function MapTracker({ walkId }: { walkId: string }) {
 
           {location && (
             <Marker longitude={location.lng} latitude={location.lat} anchor="center">
-              <DogMarker pets={pets} walkerAvatarUrl={walk?.walkerAvatarUrl} />
+              <DogMarker pets={pets} walkerAvatarUrl={walk?.walkerAvatarUrl} size="lg" />
             </Marker>
           )}
         </Map>

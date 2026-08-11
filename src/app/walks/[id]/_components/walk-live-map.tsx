@@ -1,10 +1,10 @@
 'use client';
 
-import Image from 'next/image';
 import Map, { Marker } from 'react-map-gl/mapbox';
 import { useSession } from 'next-auth/react';
 import { MapPin } from 'lucide-react';
 import { useWalkLocation, useLocationBroadcast } from '@/features/tracking/hooks/use-tracking';
+import { DogMarker } from '@/components/common/dog-marker';
 
 type Pet = { name: string; photoUrl?: string | null };
 
@@ -14,35 +14,6 @@ interface Props {
   startLng?: number | null;
   pets?: Pet[];
   walkerAvatarUrl?: string | null;
-}
-
-function DogMarker({ pets = [], walkerAvatarUrl }: { pets: Pet[]; walkerAvatarUrl?: string | null }) {
-  const firstPhoto = pets.find((p) => p.photoUrl)?.photoUrl ?? null;
-  const count = pets.length;
-
-  return (
-    <div className="relative flex items-center justify-center">
-      <span className="absolute h-14 w-14 animate-ping rounded-full bg-primary/20" />
-      <div className="relative h-11 w-11 overflow-hidden rounded-full border-[3px] border-white bg-amber-100 shadow-lg">
-        {firstPhoto ? (
-          <Image src={firstPhoto} alt={pets[0]?.name ?? 'Cão'} fill sizes="44px" className="object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-xl">🦮</div>
-        )}
-      </div>
-      {/* Walker avatar — overlaid bottom-right of the dog bubble */}
-      {walkerAvatarUrl && (
-        <div className="absolute -bottom-1 -right-1 h-5 w-5 overflow-hidden rounded-full border-2 border-white shadow-sm">
-          <Image src={walkerAvatarUrl} alt="Passeador" fill sizes="20px" className="object-cover" />
-        </div>
-      )}
-      {count > 1 && !walkerAvatarUrl && (
-        <div className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-primary text-[10px] font-bold text-primary-foreground shadow">
-          {count}
-        </div>
-      )}
-    </div>
-  );
 }
 
 export default function WalkLiveMap({ walkId, startLat, startLng, pets = [], walkerAvatarUrl }: Props) {
@@ -82,7 +53,7 @@ export default function WalkLiveMap({ walkId, startLat, startLng, pets = [], wal
         {/* Live walker position — dog photo or emoji fallback */}
         {location && (
           <Marker longitude={location.lng} latitude={location.lat} anchor="center">
-            <DogMarker pets={pets} walkerAvatarUrl={walkerAvatarUrl} />
+            <DogMarker pets={pets} walkerAvatarUrl={walkerAvatarUrl} size="sm" />
           </Marker>
         )}
       </Map>
