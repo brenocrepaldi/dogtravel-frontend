@@ -6,6 +6,7 @@ export function useDogs() {
   return useQuery({
     queryKey: ["dogs"],
     queryFn: DogsApi.list,
+    staleTime: 10 * 60 * 1000,
   });
 }
 

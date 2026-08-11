@@ -6,6 +6,7 @@ export function usePaymentMethods() {
   return useQuery({
     queryKey: ["payment-methods"],
     queryFn: PaymentsApi.getMethods,
+    staleTime: 10 * 60 * 1000,
   });
 }
 
