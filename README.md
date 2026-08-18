@@ -76,7 +76,7 @@ src/
 │   ├── index.ts                # DTOs e interfaces globais
 │   └── next-auth.d.ts          # Augmentação de tipos NextAuth (Session, JWT, User)
 │
-└── middleware.ts               # Proteção de rotas por autenticação e role (Edge)
+└── proxy.ts                    # Proteção de rotas por autenticação e role (Edge; renomeado de middleware.ts na convenção do Next.js 16)
 ```
 
 ---
