@@ -25,6 +25,7 @@ export default function LocationPickerMap({ lat, lng, onDragEnd }: Props) {
       mapStyle="mapbox://styles/mapbox/streets-v12"
       style={{ width: '100%', height: '100%' }}
       attributionControl={false}
+      cooperativeGestures
     >
       <Marker
         longitude={lng}
