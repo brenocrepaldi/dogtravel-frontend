@@ -181,7 +181,7 @@ function EarningRow({ item }: { item: PaymentHistoryItem }) {
               </p>
             )}
           </div>
-          <div className="hidden sm:flex w-7 h-7 rounded-lg border border-border/50 bg-muted/40 items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/5 hover:border-primary/30 hover:text-primary">
+          <div className="flex w-7 h-7 rounded-lg border border-border/50 bg-muted/40 items-center justify-center text-muted-foreground opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:bg-primary/5 hover:border-primary/30 hover:text-primary">
             <ChevronRight className="w-3.5 h-3.5" />
           </div>
         </div>
