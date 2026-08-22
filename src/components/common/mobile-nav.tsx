@@ -17,6 +17,7 @@ export function MobileNav({ children, className }: MobileNavProps) {
 	const pathname = usePathname();
 
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: resets the drawer's open state on route change, not a state-synchronization anti-pattern.
 		setOpen(false);
 	}, [pathname]);
 
