@@ -66,7 +66,7 @@ const pricingPlans = [
 
 export default function HomePage() {
 	return (
-		<main className="flex flex-col min-h-screen">
+		<main className="flex flex-col min-h-dvh">
 			{/* ─── Header ──────────────────────────────────────────────────────── */}
 			<header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

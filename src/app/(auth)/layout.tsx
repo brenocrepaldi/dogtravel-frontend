@@ -12,7 +12,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="min-h-dvh grid lg:grid-cols-2">
 
       {/* ─── Left panel ──────────────────────────────────────────────────────── */}
       <div className="hidden lg:flex flex-col justify-between bg-primary p-10 relative overflow-hidden">
@@ -107,7 +107,7 @@ export default function AuthLayout({
       </div>
 
       {/* ─── Right panel — form ──────────────────────────────────────────────── */}
-      <div className="flex min-h-screen flex-col items-center justify-center p-8">
+      <div className="flex min-h-dvh flex-col items-center justify-center p-8">
         <Link
           href="/"
           className="lg:hidden mb-8 flex items-center gap-2 text-xl font-bold text-primary"
