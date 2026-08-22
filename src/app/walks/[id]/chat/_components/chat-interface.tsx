@@ -112,7 +112,7 @@ export function ChatInterface({
       </div>
 
       {/* ─── Input Area ─── */}
-      <div className="p-4 border-t border-border bg-background">
+      <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-border bg-background">
         <form onSubmit={handleSend} className="flex items-end gap-2">
           <div className="flex-1 relative">
             <Input
