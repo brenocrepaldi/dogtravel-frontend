@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 
 // Invisible ≥44px hit area centered on the button, without changing its visual size
 // (WCAG/Apple HIG touch target guidance) — applied to the size variants below.
-const TOUCH_TARGET =
+export const TOUCH_TARGET =
   "after:absolute after:left-1/2 after:top-1/2 after:size-11 after:-translate-x-1/2 after:-translate-y-1/2 after:content-['']";
 
 const buttonVariants = cva(

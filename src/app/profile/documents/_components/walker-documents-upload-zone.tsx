@@ -1,6 +1,7 @@
 import { useId, useRef } from "react";
 import { FileText, Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TOUCH_TARGET } from "@/components/ui/button";
 
 export function UploadZone({
   label,
@@ -50,7 +51,10 @@ export function UploadZone({
               type="button"
               aria-label="Remover arquivo"
               onClick={() => onFile(null)}
-              className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className={cn(
+                "relative flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                TOUCH_TARGET,
+              )}
             >
               <X className="h-3.5 w-3.5" />
             </button>

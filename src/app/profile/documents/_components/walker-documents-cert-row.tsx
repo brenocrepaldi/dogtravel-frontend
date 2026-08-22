@@ -1,4 +1,6 @@
 import { Award, FileText, Loader2, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { TOUCH_TARGET } from "@/components/ui/button";
 import type { WalkerCertDocument } from "@/types";
 import { StatusBadge } from "./walker-documents-badges";
 
@@ -27,7 +29,10 @@ export function CertRow({ cert, onRemove, isRemoving }: {
             aria-label={`Remover ${cert.title}`}
             disabled={isRemoving}
             onClick={() => onRemove(cert.id)}
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+            className={cn(
+              "relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50",
+              TOUCH_TARGET,
+            )}
           >
             {isRemoving ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

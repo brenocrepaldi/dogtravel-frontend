@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { TOUCH_TARGET } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSubmitReview } from "@/features/reviews/hooks/use-reviews";
 import type { WalkReview } from "@/types";
@@ -100,8 +101,9 @@ export function WalkReviewForm({
                     type="button"
                     onClick={() => editing && setRating(current)}
                     className={cn(
-                      "rounded-md p-1 transition",
-                      editing ? "hover:scale-105" : "cursor-default"
+                      "relative rounded-md p-1 transition",
+                      editing ? "hover:scale-105" : "cursor-default",
+                      TOUCH_TARGET,
                     )}
                     aria-label={`Dar nota ${current}`}
                   >
