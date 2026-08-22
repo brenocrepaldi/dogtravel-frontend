@@ -50,7 +50,7 @@ export function useChat(walkId: string) {
     };
   }, [walkId, queryClient]);
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ["chat", walkId],
     queryFn: () => ChatApi.getMessages(walkId),
     enabled: Boolean(walkId),
@@ -59,6 +59,8 @@ export function useChat(walkId: string) {
     refetchInterval: connected ? false : 5_000,
     staleTime: 0,
   });
+
+  return { ...query, connected };
 }
 
 export function useSendMessage(walkId: string) {

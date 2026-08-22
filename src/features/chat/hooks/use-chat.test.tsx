@@ -151,4 +151,24 @@ describe("useChat (subscrição via WebSocket)", () => {
     expect(cached).toHaveLength(1);
     expect(cached?.[0]).toEqual(incoming);
   });
+
+  it("expõe connected refletindo o estado do socket (connect/disconnect)", async () => {
+    const fakeSocket = createFakeSocket();
+    createSocketMock.mockReturnValue(fakeSocket as never);
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    const { result } = renderHook(() => useChat("walk-1"), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    expect(result.current.connected).toBe(false);
+
+    await waitFor(() => expect(createSocketMock).toHaveBeenCalledWith("/chat", "fake-token"));
+    fakeSocket.trigger("connect");
+    await waitFor(() => expect(result.current.connected).toBe(true));
+
+    fakeSocket.trigger("disconnect");
+    await waitFor(() => expect(result.current.connected).toBe(false));
+  });
 });
