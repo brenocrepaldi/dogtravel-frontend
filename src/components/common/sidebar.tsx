@@ -139,7 +139,7 @@ function StepRow({ icon: Icon, label, status }: Omit<Step, "href">) {
 
 // ─── Walker onboarding widget ─────────────────────────────────────────────────
 
-function WalkerOnboarding() {
+export function WalkerOnboarding() {
   const { data: docStatus } = useDocuments();
   const { data: profile } = useProfile();
 

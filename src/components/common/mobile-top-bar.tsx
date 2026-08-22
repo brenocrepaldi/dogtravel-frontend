@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { PawPrint } from "lucide-react";
 import { MobileNav } from "./mobile-nav";
-import { SidebarNavLinks, clientNav, walkerNav } from "./sidebar";
+import { SidebarNavLinks, WalkerOnboarding, clientNav, walkerNav } from "./sidebar";
 
 export function MobileTopBar() {
   const pathname = usePathname();
@@ -24,6 +24,7 @@ export function MobileTopBar() {
       </Link>
       <MobileNav>
         <SidebarNavLinks navItems={navItems} pathname={pathname} />
+        {role === "walker" && <WalkerOnboarding />}
       </MobileNav>
     </header>
   );
