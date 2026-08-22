@@ -1,7 +1,7 @@
 'use client';
 
 import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -15,12 +15,10 @@ interface MobileNavProps {
 export function MobileNav({ children, className }: MobileNavProps) {
 	const [open, setOpen] = useState(false);
 	const pathname = usePathname();
-	const [lastPathname, setLastPathname] = useState(pathname);
 
-	if (pathname !== lastPathname) {
-		setLastPathname(pathname);
+	useEffect(() => {
 		setOpen(false);
-	}
+	}, [pathname]);
 
 	return (
 		<Sheet open={open} onOpenChange={setOpen}>
@@ -49,7 +47,7 @@ export function MobileNav({ children, className }: MobileNavProps) {
 							<X className="h-4 w-4" />
 						</Button>
 					</div>
-					<nav className="flex-1 overflow-y-auto p-4">{children}</nav>
+					<nav className="flex-1 overflow-y-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">{children}</nav>
 				</div>
 			</SheetContent>
 		</Sheet>
