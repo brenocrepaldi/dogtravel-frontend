@@ -231,7 +231,7 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
 			</Button>
 
 			{/* Benefícios rápidos */}
-			<div className="mt-10 grid grid-cols-3 gap-6 text-center">
+			<div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-6 text-center">
 				{[
 					{ icon: <Heart className="w-4 h-4" />, text: "Cuidado personalizado" },
 					{ icon: <Shield className="w-4 h-4" />, text: "Passeadores verificados" },
