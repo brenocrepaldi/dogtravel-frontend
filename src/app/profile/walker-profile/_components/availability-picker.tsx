@@ -25,7 +25,7 @@ function TimeSelect({ id, value, options, placeholder, disabled, onChange }: Tim
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
-          'w-full cursor-pointer appearance-none rounded-lg border bg-background px-3 py-2 pr-8 text-base transition-colors',
+          'w-full cursor-pointer appearance-none rounded-lg border bg-background px-3 py-2 pr-8 text-base md:text-sm transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-primary/20',
           disabled
             ? 'cursor-not-allowed border-border/30 bg-muted/40 text-muted-foreground/50'
