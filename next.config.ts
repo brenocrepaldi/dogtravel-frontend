@@ -13,6 +13,14 @@ const remotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
     protocol: "https",
     hostname: "lh3.googleusercontent.com",
   },
+  {
+    protocol: "https",
+    hostname: "i.pravatar.cc",
+  },
+  {
+    protocol: "https",
+    hostname: "picsum.photos",
+  },
 ];
 
 // Allow the media storage (MinIO) host — serves avatars, pet photos and
