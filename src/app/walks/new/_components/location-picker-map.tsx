@@ -26,6 +26,11 @@ export default function LocationPickerMap({ lat, lng, onDragEnd }: Props) {
       style={{ width: '100%', height: '100%' }}
       attributionControl={false}
       cooperativeGestures
+      locale={{
+        'TouchPanBlocker.Message': 'Use dois dedos para mover o mapa',
+        'ScrollZoomBlocker.CtrlMessage': 'Use ctrl + scroll para dar zoom no mapa',
+        'ScrollZoomBlocker.CmdMessage': 'Use ⌘ + scroll para dar zoom no mapa',
+      }}
     >
       <Marker
         longitude={lng}
@@ -34,7 +39,7 @@ export default function LocationPickerMap({ lat, lng, onDragEnd }: Props) {
         anchor="bottom"
         onDragEnd={(e) => onDragEnd(e.lngLat.lat, e.lngLat.lng)}
       >
-        <div className="w-9 h-9 bg-primary text-primary-foreground rounded-full border-2 border-white flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing">
+        <div className="w-9 h-9 bg-primary text-primary-foreground rounded-full border-2 border-white flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing touch-none">
           <MapPin className="w-4 h-4" />
         </div>
       </Marker>
