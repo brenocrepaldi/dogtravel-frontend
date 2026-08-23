@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useChat, useSendMessage } from "./use-chat";
@@ -170,5 +170,35 @@ describe("useChat (subscrição via WebSocket)", () => {
 
     fakeSocket.trigger("disconnect");
     await waitFor(() => expect(result.current.connected).toBe(false));
+  });
+
+  it("só mostra showReconnecting após um período de graça, evitando flash em toda conexão", async () => {
+    vi.useFakeTimers();
+    try {
+      const fakeSocket = createFakeSocket();
+      createSocketMock.mockReturnValue(fakeSocket as never);
+
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+      const { result } = renderHook(() => useChat("walk-1"), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      // Not connected yet, but still within the grace period — banner must stay hidden.
+      expect(result.current.showReconnecting).toBe(false);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1500);
+      });
+      expect(result.current.showReconnecting).toBe(true);
+
+      // Connecting clears it immediately, even mid-grace-period on a future disconnect.
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+      expect(result.current.showReconnecting).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

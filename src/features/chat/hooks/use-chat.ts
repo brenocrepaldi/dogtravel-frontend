@@ -9,6 +9,20 @@ export function useChat(walkId: string) {
   const queryClient = useQueryClient();
   const socketRef = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
+  const [showReconnecting, setShowReconnecting] = useState(false);
+
+  useEffect(() => {
+    if (connected) return;
+
+    const timer = setTimeout(() => setShowReconnecting(true), 1500);
+    // Runs on unmount and whenever `connected` flips back to true (before the
+    // next effect run), so the banner clears immediately on reconnect without
+    // calling setState synchronously from the effect body.
+    return () => {
+      clearTimeout(timer);
+      setShowReconnecting(false);
+    };
+  }, [connected]);
 
   useEffect(() => {
     if (!walkId) return;
@@ -60,7 +74,7 @@ export function useChat(walkId: string) {
     staleTime: 0,
   });
 
-  return { ...query, connected };
+  return { ...query, connected, showReconnecting };
 }
 
 export function useSendMessage(walkId: string) {
