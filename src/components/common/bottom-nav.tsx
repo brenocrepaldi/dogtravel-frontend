@@ -64,7 +64,9 @@ export function BottomNav() {
               className={cn(
                 "flex w-full flex-col items-center gap-0.5 whitespace-nowrap rounded-2xl px-1 py-1.5 text-[10px] font-medium transition-colors",
                 isPrimary
-                  ? "rounded-full bg-primary px-3 text-primary-foreground shadow-sm shadow-primary/30"
+                  ? active
+                    ? "rounded-full bg-[oklch(0.45_0.22_262)] px-3 text-primary-foreground shadow-sm shadow-primary/30"
+                    : "rounded-full bg-primary px-3 text-primary-foreground shadow-sm shadow-primary/30"
                   : active
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:text-foreground",
