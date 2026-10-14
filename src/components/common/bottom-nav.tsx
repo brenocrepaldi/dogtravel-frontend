@@ -60,7 +60,7 @@ export function BottomNav() {
               aria-label={item.label}
             >
               <span className="h-5 w-5" />
-              <span className="absolute -top-6 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 ring-2 ring-muted-foreground transition-transform active:scale-95">
+              <span className="absolute -top-6 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 ring-4 ring-background transition-transform active:scale-95">
                 <item.icon className="h-5 w-5" />
               </span>
               <span className="text-[10px] font-medium text-muted-foreground">
