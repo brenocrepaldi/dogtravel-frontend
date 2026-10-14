@@ -56,7 +56,7 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="relative flex flex-1 flex-col items-center justify-center gap-1 pt-5"
+              className="relative flex flex-1 flex-col items-center justify-center gap-1 pt-2"
               aria-label={item.label}
             >
               <span className="h-5 w-5" />
@@ -75,7 +75,7 @@ export function BottomNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-1 pt-5 text-[10px] font-medium transition-colors",
+              "flex flex-1 flex-col items-center justify-center gap-1 pt-2 text-[10px] font-medium transition-colors",
               active ? "text-primary" : "text-muted-foreground hover:text-foreground",
             )}
             aria-label={item.label}
