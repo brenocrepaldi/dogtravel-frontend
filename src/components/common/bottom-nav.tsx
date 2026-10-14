@@ -45,7 +45,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t border-border bg-background pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex min-h-16 items-stretch border-t border-border bg-background pb-[calc(0.5rem+env(safe-area-inset-bottom))] lg:hidden"
       aria-label="Navegação principal"
     >
       {items.map((item, index) => {
