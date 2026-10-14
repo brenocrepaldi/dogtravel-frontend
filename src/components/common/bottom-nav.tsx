@@ -50,7 +50,7 @@ export function BottomNav() {
     >
       {items.map((item, index) => {
         if (index === primaryIndex) {
-          return <span key={item.href} aria-hidden="true" className="flex-1" />;
+          return <span key={item.href} aria-hidden="true" className="w-12" />;
         }
 
         const active = isActive(pathname, item.href);
@@ -86,12 +86,11 @@ export function BottomNav() {
             aria-label={primary.label}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "absolute -top-3 left-1/2 flex h-12 -translate-x-1/2 flex-col items-center justify-center gap-0.5 whitespace-nowrap rounded-full px-4 text-[10px] font-medium text-primary-foreground shadow-sm shadow-primary/30 transition-colors",
+              "absolute -top-3 left-1/2 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full text-primary-foreground shadow-sm shadow-primary/30 transition-colors",
               active ? "bg-[oklch(0.45_0.22_262)]" : "bg-primary",
             )}
           >
             <primary.icon className="h-5 w-5" />
-            {primary.label}
           </Link>
         );
       })()}
