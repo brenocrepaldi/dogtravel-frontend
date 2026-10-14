@@ -34,6 +34,19 @@ if (process.env.NEXT_PUBLIC_MEDIA_URL) {
   });
 }
 
+// Uploaded files store their full public URL (host baked in) at upload
+// time, so switching NEXT_PUBLIC_MEDIA_URL later (e.g. localhost -> a LAN
+// IP for phone testing) leaves already-stored URLs pointing at the old
+// host. Always also allow plain localhost:9000 (the default dev value) so
+// that doesn't 404/crash next/image for files uploaded before the switch.
+if (process.env.NEXT_PUBLIC_MEDIA_URL !== "http://localhost:9000") {
+  remotePatterns.push({
+    protocol: "http",
+    hostname: "localhost",
+    port: "9000",
+  });
+}
+
 // Dev-only: Next.js 16 blocks cross-origin requests for its dev assets
 // (JS chunks, HMR) unless the requesting origin is explicitly allowlisted —
 // needed to test the app from another device (e.g. a phone) on the same
