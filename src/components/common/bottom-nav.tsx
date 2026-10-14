@@ -45,7 +45,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center rounded-full bg-background/75 shadow-lg shadow-black/10 ring-1 ring-border/60 backdrop-blur-xl backdrop-saturate-150 lg:hidden"
+      className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-1 rounded-full bg-background/75 p-1.5 shadow-lg shadow-black/10 ring-1 ring-border/60 backdrop-blur-xl backdrop-saturate-150 lg:hidden"
       aria-label="Navegação principal"
     >
       {items.map((item, index) => {
@@ -56,15 +56,15 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className="flex flex-1 flex-col items-center justify-center py-2"
+            className="flex flex-1 items-center justify-center"
             aria-label={item.label}
             aria-current={active ? "page" : undefined}
           >
             <span
               className={cn(
-                "flex flex-col items-center gap-1 whitespace-nowrap rounded-2xl px-3 py-2 text-[10px] font-medium transition-colors",
+                "flex w-full flex-col items-center gap-0.5 whitespace-nowrap rounded-2xl px-1 py-1.5 text-[10px] font-medium transition-colors",
                 isPrimary
-                  ? "rounded-full bg-primary px-5 text-primary-foreground shadow-sm shadow-primary/30"
+                  ? "rounded-full bg-primary px-3 text-primary-foreground shadow-sm shadow-primary/30"
                   : active
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:text-foreground",
