@@ -59,17 +59,22 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className="flex flex-1 items-center justify-center"
+            className="flex flex-1 items-center justify-center active:scale-95 transition-transform duration-150 ease-out"
             aria-label={item.label}
             aria-current={active ? "page" : undefined}
           >
             <span
               className={cn(
-                "flex flex-col items-center gap-0.5 whitespace-nowrap rounded-2xl px-3 py-1.5 text-[10px] font-medium transition-colors",
+                "flex flex-col items-center gap-0.5 whitespace-nowrap rounded-2xl px-3 py-1.5 text-[10px] font-medium transition-all duration-300 ease-out",
                 active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
               )}
             >
-              <item.icon className={cn("h-5 w-5", active && "scale-110")} />
+              <item.icon
+                className={cn(
+                  "h-5 w-5 transition-transform duration-300 ease-out",
+                  active && "scale-110",
+                )}
+              />
               {item.label}
             </span>
           </Link>
@@ -86,8 +91,8 @@ export function BottomNav() {
             aria-label={primary.label}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "absolute -top-3 left-1/2 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full text-primary-foreground shadow-sm shadow-primary/30 transition-colors",
-              active ? "bg-[oklch(0.45_0.22_262)]" : "bg-primary",
+              "absolute -top-3 left-1/2 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full text-primary-foreground shadow-sm shadow-primary/30 transition-all duration-300 ease-out active:scale-90",
+              active ? "scale-105 bg-[oklch(0.45_0.22_262)]" : "bg-primary",
             )}
           >
             <primary.icon className="h-5 w-5" />
