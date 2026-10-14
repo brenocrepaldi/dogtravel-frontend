@@ -45,7 +45,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-1 rounded-full bg-background/75 p-1.5 shadow-lg shadow-black/10 ring-1 ring-border/60 backdrop-blur-xl backdrop-saturate-150 lg:hidden"
+      className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-1 rounded-full bg-background/75 p-1 shadow-lg shadow-black/10 ring-1 ring-border/60 backdrop-blur-xl backdrop-saturate-150 lg:hidden"
       aria-label="Navegação principal"
     >
       {items.map((item, index) => {
@@ -65,7 +65,7 @@ export function BottomNav() {
           >
             <span
               className={cn(
-                "flex flex-col items-center gap-0.5 whitespace-nowrap rounded-2xl px-3 py-1.5 text-[10px] font-medium transition-colors",
+                "flex w-full flex-col items-center gap-0.5 whitespace-nowrap rounded-2xl px-3 py-1.5 text-[10px] font-medium transition-colors",
                 active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
               )}
             >
