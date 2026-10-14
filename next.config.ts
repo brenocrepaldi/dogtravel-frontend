@@ -70,6 +70,11 @@ const nextConfig: NextConfig = {
 
   allowedDevOrigins,
 
+  // Dev-only: the floating Next.js dev-tools badge sits in a screen corner
+  // and overlaps the fixed mobile bottom nav — disable it since it's a dev
+  // convenience, not something end users ever see anyway.
+  devIndicators: false,
+
   /**
    * Turbopack config (Next.js 16 default bundler).
    * Empty object signals we're aware and opted in.
