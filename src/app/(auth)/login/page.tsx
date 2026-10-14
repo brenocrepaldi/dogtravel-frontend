@@ -10,7 +10,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, TOUCH_TARGET } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -99,13 +99,17 @@ export default function LoginPage() {
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               autoComplete="current-password"
+              className="pr-10"
               {...register("password")}
               aria-invalid={!!errors.password}
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className={cn(
+                "absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors",
+                TOUCH_TARGET,
+              )}
               aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
