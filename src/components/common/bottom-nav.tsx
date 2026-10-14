@@ -45,7 +45,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-background pb-[calc(1.25rem+env(safe-area-inset-bottom))] lg:hidden"
+      className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex rounded-full bg-background/75 shadow-lg shadow-black/10 ring-1 ring-border/60 backdrop-blur-xl backdrop-saturate-150 lg:hidden"
       aria-label="Navegação principal"
     >
       {items.map((item, index) => {
@@ -56,7 +56,7 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="relative flex flex-1 flex-col items-center justify-center gap-1 pt-2"
+              className="relative flex flex-1 flex-col items-center justify-center gap-1 py-2"
               aria-label={item.label}
             >
               <span className="h-5 w-5" />
@@ -74,15 +74,19 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-1 pt-2 text-[10px] font-medium transition-colors",
-              active ? "text-primary" : "text-muted-foreground hover:text-foreground",
-            )}
+            className="flex flex-1 flex-col items-center justify-center py-2"
             aria-label={item.label}
             aria-current={active ? "page" : undefined}
           >
-            <item.icon className={cn("h-5 w-5", active && "scale-110")} />
-            {item.label}
+            <span
+              className={cn(
+                "flex flex-col items-center gap-1 rounded-2xl px-3 py-1 text-[10px] font-medium transition-colors",
+                active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <item.icon className={cn("h-5 w-5", active && "scale-110")} />
+              {item.label}
+            </span>
           </Link>
         );
       })}
