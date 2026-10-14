@@ -34,6 +34,19 @@ if (process.env.NEXT_PUBLIC_MEDIA_URL) {
   });
 }
 
+// Dev-only: Next.js 16 blocks cross-origin requests for its dev assets
+// (JS chunks, HMR) unless the requesting origin is explicitly allowlisted —
+// needed to test the app from another device (e.g. a phone) on the same
+// Wi-Fi via this machine's LAN IP, which NEXT_PUBLIC_APP_URL is set to in
+// that case. No effect on production builds.
+const allowedDevOrigins: string[] = [];
+if (process.env.NEXT_PUBLIC_APP_URL) {
+  const appHostname = new URL(process.env.NEXT_PUBLIC_APP_URL).hostname;
+  if (appHostname !== "localhost") {
+    allowedDevOrigins.push(appHostname);
+  }
+}
+
 const nextConfig: NextConfig = {
   /**
    * Allow external image domains (used for user avatars, pet photos, map tiles, etc.)
@@ -41,6 +54,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns,
   },
+
+  allowedDevOrigins,
 
   /**
    * Turbopack config (Next.js 16 default bundler).
