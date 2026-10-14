@@ -62,7 +62,7 @@ export function BottomNav() {
               <span className="absolute -top-6 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 ring-4 ring-background transition-transform active:scale-95">
                 <item.icon className="h-5 w-5" />
               </span>
-              <span className="mt-6 text-[10px] font-medium text-muted-foreground">
+              <span className="mt-8 text-[10px] font-medium text-muted-foreground">
                 {item.label}
               </span>
             </Link>
