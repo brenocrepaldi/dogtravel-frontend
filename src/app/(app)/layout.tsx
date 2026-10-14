@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { Sidebar } from "@/components/common/sidebar";
 import { MobileTopBar } from "@/components/common/mobile-top-bar";
+import { BottomNav } from "@/components/common/bottom-nav";
 
 /**
  * Shared authenticated app shell — mounted once for every route under this
@@ -26,6 +27,7 @@ export default async function AppLayout({
       <MobileTopBar />
       <Sidebar />
       {children}
+      <BottomNav />
     </div>
   );
 }
