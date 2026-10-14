@@ -65,7 +65,7 @@ export function BottomNav() {
           >
             <span
               className={cn(
-                "flex w-full flex-col items-center gap-0.5 whitespace-nowrap rounded-2xl px-1 py-2.5 text-[10px] font-medium transition-colors",
+                "flex flex-col items-center gap-0.5 whitespace-nowrap rounded-2xl px-3 py-1.5 text-[10px] font-medium transition-colors",
                 active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
               )}
             >
