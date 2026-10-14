@@ -26,6 +26,11 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     siteName: "DogTravel",
   },
+  appleWebApp: {
+    capable: true,
+    title: "DogTravel",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
