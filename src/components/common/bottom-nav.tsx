@@ -49,8 +49,11 @@ export function BottomNav() {
       aria-label="Navegação principal"
     >
       {items.map((item, index) => {
+        if (index === primaryIndex) {
+          return <span key={item.href} aria-hidden="true" className="flex-1" />;
+        }
+
         const active = isActive(pathname, item.href);
-        const isPrimary = index === primaryIndex;
 
         return (
           <Link
@@ -63,21 +66,35 @@ export function BottomNav() {
             <span
               className={cn(
                 "flex w-full flex-col items-center gap-0.5 whitespace-nowrap rounded-2xl px-1 py-1.5 text-[10px] font-medium transition-colors",
-                isPrimary
-                  ? active
-                    ? "rounded-full bg-[oklch(0.45_0.22_262)] px-3 text-primary-foreground shadow-sm shadow-primary/30"
-                    : "rounded-full bg-primary px-3 text-primary-foreground shadow-sm shadow-primary/30"
-                  : active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground",
+                active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
               )}
             >
-              <item.icon className={cn("h-5 w-5", !isPrimary && active && "scale-110")} />
+              <item.icon className={cn("h-5 w-5", active && "scale-110")} />
               {item.label}
             </span>
           </Link>
         );
       })}
+
+      {(() => {
+        const primary = items[primaryIndex];
+        const active = isActive(pathname, primary.href);
+
+        return (
+          <Link
+            href={primary.href}
+            aria-label={primary.label}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "absolute -top-3 left-1/2 flex h-12 -translate-x-1/2 flex-col items-center justify-center gap-0.5 whitespace-nowrap rounded-full px-4 text-[10px] font-medium text-primary-foreground shadow-sm shadow-primary/30 transition-colors",
+              active ? "bg-[oklch(0.45_0.22_262)]" : "bg-primary",
+            )}
+          >
+            <primary.icon className="h-5 w-5" />
+            {primary.label}
+          </Link>
+        );
+      })()}
     </nav>
   );
 }
