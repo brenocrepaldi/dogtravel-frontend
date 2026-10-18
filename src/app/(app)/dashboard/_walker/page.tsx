@@ -5,34 +5,34 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
-  CheckCircle2, ChevronRight, ClipboardList, Clock,
+  CheckCircle2, ClipboardList, Clock,
   FileCheck2, Lock, MapPin, PawPrint, Star, Timer, TrendingUp,
   Wallet, User, XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { formatBRL, getGreeting, getInitials } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useWalkRequests } from "@/features/walks/hooks/use-walks";
+import { useWalkRequests, useWalks } from "@/features/walks/hooks/use-walks";
 import { useAcceptWalk, useDeclineWalk } from "@/features/walks/hooks/use-walk-actions";
-import { useWalks } from "@/features/walks/hooks/use-walks";
 import { useWalkerStats } from "@/features/stats/hooks/use-stats";
 import { useWalkerAvailability, useUpdateWalkerAvailability, useWalkerProfile } from "@/features/walkers/hooks/use-walkers";
 import { useDocuments } from "@/features/documents/hooks/use-documents";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import type { WalkRequest } from "@/types";
+import { DashboardHero } from "../_components/dashboard-hero";
+import { QuickActions, type QuickActionItem } from "../_components/quick-actions";
+import { ActiveWalkBanner } from "../_components/active-walk-banner";
+import { SectionHeader } from "../_components/section-header";
 
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Bom dia";
-  if (h < 18) return "Boa tarde";
-  return "Boa noite";
-}
-
-function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
-}
+const quickActions: QuickActionItem[] = [
+  { href: "/walks",             icon: ClipboardList, label: "Meus passeios", bg: "bg-primary/10",     fg: "text-primary" },
+  { href: "/profile/payments",  icon: Wallet,        label: "Ganhos",        bg: "bg-emerald-500/10", fg: "text-emerald-600 dark:text-emerald-400" },
+  { href: "/profile/documents", icon: FileCheck2,    label: "Documentos",    bg: "bg-blue-500/10",    fg: "text-blue-600 dark:text-blue-400" },
+  { href: "/profile",           icon: User,          label: "Meu perfil",    bg: "bg-amber-500/10",   fg: "text-amber-600 dark:text-amber-400" },
+];
 
 function getHeroSubtitle(canToggle: boolean, available: boolean, requestCount: number): string {
   if (!canToggle) return "Conclua seu perfil para ativar sua disponibilidade.";
@@ -41,21 +41,9 @@ function getHeroSubtitle(canToggle: boolean, available: boolean, requestCount: n
   return "Você está online. Aguardando novos pedidos.";
 }
 
-function SectionHeader({ title, href, linkLabel }: { title: string; href: string; linkLabel: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-      <Link href={href} className="flex items-center gap-0.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
-        {linkLabel} <ChevronRight className="h-3.5 w-3.5" />
-      </Link>
-    </div>
-  );
-}
-
 export default function WalkerDashboardPage() {
   const { data: session, status: sessionStatus } = useSession();
   const firstName = session?.user?.name?.split(" ")[0] ?? "Passeador";
-  const greeting  = getGreeting();
   const router    = useRouter();
 
   const { data: walkerRequests = [] } = useWalkRequests();
@@ -146,25 +134,37 @@ export default function WalkerDashboardPage() {
     });
   }
 
+  const statItems = [
+    {
+      label: "passeios totais",
+      value: stats ? String(stats.totalWalks) : "—",
+      href: "/walks", icon: ClipboardList,
+      color: "text-primary", bg: "bg-primary/10",
+    },
+    {
+      label: "passeios este mês",
+      value: stats ? String(stats.walksThisMonth) : "—",
+      href: "/walks", icon: TrendingUp,
+      color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-500/10",
+    },
+    {
+      label: `${stats?.totalReviews ?? "—"} avaliações`,
+      value: stats ? `${stats.rating.toFixed(1)} ★` : "—",
+      href: "/profile", icon: Star,
+      color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10",
+    },
+  ] as const;
+
   return (
-    <div className="space-y-7 pb-8">
+    <div className="space-y-6 pb-8 lg:space-y-7">
 
       {/* ── Hero ── */}
-      <div className={cn(
-        "relative overflow-hidden rounded-2xl px-6 py-8 md:px-8 text-primary-foreground transition-all duration-500",
-        available && canToggle
-          ? "bg-gradient-to-br from-primary via-primary to-emerald-700/60"
-          : "bg-gradient-to-br from-primary via-primary to-primary/80",
-      )}>
-        <div className="pointer-events-none absolute -right-12 -top-12 h-52 w-52 rounded-full bg-white/5" />
-        <div className="pointer-events-none absolute -bottom-16 right-8 h-72 w-72 rounded-full bg-white/[0.03]" />
-        <PawPrint className="pointer-events-none absolute bottom-3 right-5 h-32 w-32 text-white/[0.07]" />
-
-        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+      <DashboardHero className={cn("transition-all duration-500", available && canToggle && "to-emerald-700/60")}>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
           <div>
-            <p className="text-sm font-medium text-primary-foreground/65">{greeting}</p>
-            <h1 className="mt-0.5 text-3xl font-bold tracking-tight">{firstName}!</h1>
-            <p className="mt-1.5 text-sm text-primary-foreground/70">
+            <p className="text-sm font-medium text-primary-foreground/65">{getGreeting()}</p>
+            <h1 className="mt-0.5 text-2xl font-bold tracking-tight lg:text-3xl">{firstName}!</h1>
+            <p className="mt-1 text-sm text-primary-foreground/70 lg:mt-1.5">
               {getHeroSubtitle(canToggle, available, walkerRequests.length)}
             </p>
 
@@ -174,7 +174,7 @@ export default function WalkerDashboardPage() {
               onClick={handleAvailabilityClick}
               disabled={updatingAvailability}
               className={cn(
-                "mt-5 flex w-52 cursor-pointer select-none items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 disabled:opacity-70",
+                "mt-4 flex w-full cursor-pointer select-none items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 disabled:opacity-70 lg:mt-5 lg:w-52",
                 available && canToggle
                   ? "bg-emerald-500/20 ring-1 ring-emerald-500/30 hover:bg-emerald-500/25"
                   : "bg-white/10 hover:bg-white/[0.15]",
@@ -190,8 +190,8 @@ export default function WalkerDashboardPage() {
                     available && canToggle ? "bg-emerald-400" : "bg-white/30",
                   )} />
                 </span>
-                <div>
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-primary-foreground/50">
+                <div className="text-left">
+                  <p className="text-[11px] font-medium text-primary-foreground/60">
                     {!canToggle ? "Disponibilidade" : "Status"}
                   </p>
                   <p className="text-sm font-semibold leading-tight text-primary-foreground">
@@ -217,106 +217,26 @@ export default function WalkerDashboardPage() {
           </div>
 
           {/* Earnings stats (API-driven) */}
-          <div className="flex gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:flex-col sm:gap-0">
-            <div className="flex-1 px-5 py-3 text-center sm:text-right">
-              <p className="text-2xl font-bold leading-none text-emerald-300">
-                {stats ? `R$ ${stats.earningsToday}` : "—"}
+          <div className="flex gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 lg:flex-col lg:gap-0">
+            <div className="flex-1 px-4 py-2.5 text-center lg:px-5 lg:py-3 lg:text-right">
+              <p className="text-xl font-bold leading-none text-emerald-300 lg:text-2xl">
+                {stats ? formatBRL(stats.earningsToday) : "—"}
               </p>
               <p className="mt-0.5 text-xs text-primary-foreground/60">hoje</p>
             </div>
-            <div className="w-px bg-white/10 sm:h-px sm:w-auto" />
-            <div className="flex-1 px-5 py-3 text-center sm:text-right">
-              <p className="text-2xl font-bold leading-none">
-                {stats ? `R$ ${stats.earningsMonth}` : "—"}
+            <div className="w-px bg-white/10 lg:h-px lg:w-auto" />
+            <div className="flex-1 px-4 py-2.5 text-center lg:px-5 lg:py-3 lg:text-right">
+              <p className="text-xl font-bold leading-none lg:text-2xl">
+                {stats ? formatBRL(stats.earningsMonth) : "—"}
               </p>
               <p className="mt-0.5 text-xs text-primary-foreground/60">este mês</p>
             </div>
           </div>
         </div>
-      </div>
+      </DashboardHero>
 
       {/* ── Active walk banner (API-driven) ── */}
-      {activeWalk && (
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/8 px-5 py-4">
-          <div className="flex items-center gap-3">
-            <span className="relative flex h-3 w-3 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-foreground">Passeio em andamento</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {activeWalk.petNames.join(", ")} · {activeWalk.durationMinutes} min
-              </p>
-            </div>
-          </div>
-          <Link
-            href={`/walks/${activeWalk.id}/tracking`}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-500/20 dark:text-emerald-400"
-          >
-            <MapPin className="h-3.5 w-3.5" />
-            Acompanhar
-          </Link>
-        </div>
-      )}
-
-      {/* ── Quick actions ── */}
-      <section className="space-y-3.5">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Acesso rápido</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {([
-            { href: "/walks",             icon: ClipboardList, label: "Meus passeios", bg: "bg-primary/10",     fg: "text-primary"                          },
-            { href: "/profile/payments",  icon: Wallet,        label: "Ganhos",        bg: "bg-emerald-500/10", fg: "text-emerald-600 dark:text-emerald-400" },
-            { href: "/profile/documents", icon: FileCheck2,    label: "Documentos",    bg: "bg-blue-500/10",    fg: "text-blue-600 dark:text-blue-400"       },
-            { href: "/profile",           icon: User,          label: "Meu perfil",    bg: "bg-amber-500/10",   fg: "text-amber-600 dark:text-amber-400"     },
-          ] as const).map(({ href, icon: Icon, label, bg, fg }) => (
-            <Link key={href} href={href}>
-              <div className="group flex flex-col items-center gap-3 rounded-xl border border-border/60 bg-card p-4 text-center transition-all duration-150 hover:border-border hover:bg-accent/40">
-                <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", bg)}>
-                  <Icon className={cn("h-5 w-5", fg)} />
-                </div>
-                <span className="text-xs font-semibold leading-tight text-foreground">{label}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Stats row (API-driven) ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {([
-          {
-            label: "passeios totais",
-            value: stats ? String(stats.totalWalks) : "—",
-            href: "/walks", icon: ClipboardList,
-            color: "text-primary", bg: "bg-primary/10",
-          },
-          {
-            label: "passeios este mês",
-            value: stats ? String(stats.walksThisMonth) : "—",
-            href: "/walks", icon: TrendingUp,
-            color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-500/10",
-          },
-          {
-            label: `${stats?.totalReviews ?? "—"} avaliações`,
-            value: stats ? `${stats.rating.toFixed(1)} ★` : "—",
-            href: "/profile", icon: Star,
-            color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10",
-          },
-        ] as const).map(({ label, value, href, icon: Icon, color, bg }) => (
-          <Link key={label} href={href}>
-            <div className="group flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 transition-all duration-150 hover:border-border hover:bg-accent/40">
-              <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", bg)}>
-                <Icon className={cn("h-4 w-4", color)} />
-              </div>
-              <div>
-                <p className="text-xl font-bold tracking-tight text-foreground">{value}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+      <ActiveWalkBanner walk={activeWalk} />
 
       {/* ── Incoming requests ── */}
       <section className="space-y-3.5">
@@ -439,7 +359,7 @@ export default function WalkerDashboardPage() {
                     {/* Price — main motivator, visually dominant */}
                     <div className="shrink-0 text-right">
                       <p className="text-2xl font-bold leading-none text-emerald-600 dark:text-emerald-400">
-                        R$ {req.price.toFixed(2).replace(".", ",")}
+                        {formatBRL(req.price)}
                       </p>
                       <p className="mt-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
                         ganho estimado
@@ -501,6 +421,28 @@ export default function WalkerDashboardPage() {
         )}
       </section>
 
+      {/* ── Quick actions ── */}
+      <QuickActions items={quickActions} />
+
+      {/* ── Stats strip (API-driven) ── */}
+      <div className="grid grid-cols-3 divide-x divide-border/50 overflow-hidden rounded-xl border border-border/60 bg-card lg:gap-3 lg:divide-x-0 lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent">
+        {statItems.map(({ label, value, href, icon: Icon, color, bg }) => (
+          <Link
+            key={label}
+            href={href}
+            className="group flex flex-col items-center gap-1 px-2 py-3.5 text-center transition-colors hover:bg-accent/40 lg:items-start lg:gap-3 lg:rounded-xl lg:border lg:border-border/60 lg:bg-card lg:p-4 lg:text-left lg:transition-all lg:duration-150 lg:hover:border-border"
+          >
+            <div className={cn("hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl lg:flex", bg)}>
+              <Icon className={cn("h-4 w-4", color)} />
+            </div>
+            <div>
+              <p className="text-lg font-bold tracking-tight text-foreground lg:text-xl">{value}</p>
+              <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground lg:text-xs">{label}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
       {/* ── Recent completed walks — only shown when there is history ── */}
       {(walksLoading || completedWalks.length > 0) && (
         <section className="space-y-3.5">
@@ -531,7 +473,7 @@ export default function WalkerDashboardPage() {
                         Concluído
                       </span>
                       <span className="text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
-                        +R$ {walk.price.toFixed(2).replace(".", ",")}
+                        +{formatBRL(walk.price)}
                       </span>
                     </div>
                   </div>
