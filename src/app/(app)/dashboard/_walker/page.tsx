@@ -251,13 +251,13 @@ export default function WalkerDashboardPage() {
 
         {/* State 1: offline or profile incomplete */}
         {!available && (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 py-10 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+          <div className="flex items-center gap-3 rounded-xl border border-dashed border-border/60 p-4 lg:flex-col lg:py-10 lg:text-center">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted lg:h-12 lg:w-12">
               <ClipboardList className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground">Você está offline</p>
-              <p className="mt-0.5 text-xs text-muted-foreground max-w-[260px]">
+              <p className="mt-0.5 text-xs text-muted-foreground lg:mx-auto lg:max-w-[260px]">
                 {!canToggle
                   ? "Conclua seu perfil para poder receber pedidos de passeio."
                   : "Ative sua disponibilidade para começar a receber pedidos."}
@@ -267,9 +267,10 @@ export default function WalkerDashboardPage() {
               <button
                 type="button"
                 onClick={handleAvailabilityClick}
-                className="mt-1 cursor-pointer rounded-lg border border-primary/20 bg-primary/8 px-4 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/15"
+                className="h-11 shrink-0 cursor-pointer rounded-lg border border-primary/20 bg-primary/8 px-4 text-xs font-semibold text-primary transition-colors hover:bg-primary/15 lg:mt-1 lg:h-auto lg:py-1.5"
               >
-                Ativar disponibilidade
+                <span className="lg:hidden">Ativar</span>
+                <span className="hidden lg:inline">Ativar disponibilidade</span>
               </button>
             )}
           </div>
@@ -277,20 +278,20 @@ export default function WalkerDashboardPage() {
 
         {/* State 2: online, no requests yet */}
         {available && walkerRequests.length === 0 && (
-          <div className="flex flex-col items-center gap-4 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] py-10 text-center">
-            <div className="relative flex h-12 w-12 items-center justify-center">
+          <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-4 lg:flex-col lg:gap-4 lg:py-10 lg:text-center">
+            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center lg:h-12 lg:w-12">
               <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500/20" />
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-500/30">
+              <div className="relative flex h-full w-full items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-500/30">
                 <PawPrint className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground">Você está online</p>
-              <p className="mt-0.5 text-xs text-muted-foreground max-w-[260px]">
+              <p className="mt-0.5 text-xs text-muted-foreground lg:mx-auto lg:max-w-[260px]">
                 Aguardando novos pedidos de passeio. Você será notificado assim que chegarem.
               </p>
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/70">
+            <div className="hidden items-center gap-1.5 text-[11px] text-muted-foreground/70 lg:flex">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
               Disponível para receber pedidos
             </div>
@@ -361,7 +362,7 @@ export default function WalkerDashboardPage() {
                       <p className="text-2xl font-bold leading-none text-emerald-600 dark:text-emerald-400">
                         {formatBRL(req.price)}
                       </p>
-                      <p className="mt-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
+                      <p className="mt-1 text-[11px] font-medium text-muted-foreground/70">
                         ganho estimado
                       </p>
                     </div>
@@ -387,17 +388,17 @@ export default function WalkerDashboardPage() {
                   <div className="mt-4 border-t border-border/40" />
 
                   {/* Action row: timestamp + buttons */}
-                  <div className="mt-3.5 flex items-center justify-between gap-3">
+                  <div className="mt-3.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground/80">
                       <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
                       {req.receivedMinutes < 2 ? "Recebido agora" : `Recebido há ${req.receivedMinutes} min`}
                     </span>
 
-                    <div className="flex items-center gap-2">
+                    <div className="grid grid-cols-2 gap-2 lg:flex lg:items-center">
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-8 rounded-lg px-3 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/8"
+                        className="h-11 rounded-lg border border-border/60 px-3 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/8 lg:h-8 lg:border-0"
                         onClick={(e) => { e.stopPropagation(); handleDecline(req); }}
                       >
                         <XCircle className="h-3.5 w-3.5 mr-1.5" />
@@ -405,7 +406,7 @@ export default function WalkerDashboardPage() {
                       </Button>
                       <Button
                         size="sm"
-                        className="h-8 rounded-lg px-4 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shadow-sm shadow-emerald-500/25"
+                        className="h-11 rounded-lg px-4 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shadow-sm shadow-emerald-500/25 lg:h-8"
                         onClick={(e) => { e.stopPropagation(); handleAccept(req); }}
                         disabled={isAccepting}
                       >
