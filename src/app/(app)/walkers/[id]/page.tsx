@@ -144,9 +144,10 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 		? new Date(walker.joinedAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
 		: undefined;
 
+	const firstName = walker.name.split(' ')[0];
 
 	return (
-		<div className="flex flex-col gap-6 pb-10">
+		<div className="flex flex-col gap-6 pb-4 md:pb-10">
 			{/* Back */}
 			<Link
 				href="/walkers"
@@ -320,8 +321,8 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 					{/* Reviews */}
 					<WalkerReviewsSection walkerId={id} />
 
-					{/* Bottom CTA banner */}
-					<div className="rounded-2xl border border-primary/15 bg-primary/5 px-5 py-5 sm:px-6 flex flex-col sm:flex-row sm:items-center gap-5">
+					{/* Bottom CTA banner — desktop; mobile uses the sticky bar */}
+					<div className="hidden md:flex rounded-2xl border border-primary/15 bg-primary/5 px-5 py-5 sm:px-6 flex-col sm:flex-row sm:items-center gap-5">
 						<div className="w-10 h-10 rounded-xl bg-primary/10 items-center justify-center shrink-0 hidden sm:flex">
 							<CalendarClock className="w-5 h-5 text-primary" />
 						</div>
@@ -341,7 +342,7 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 				</div>
 
 				{/* ── Sidebar: booking panel ── */}
-				<aside className="w-full shrink-0 lg:w-80 lg:sticky lg:top-8 lg:self-start">
+				<aside className="hidden md:block w-full shrink-0 lg:w-80 lg:sticky lg:top-8 lg:self-start">
 					<Card className="overflow-hidden">
 						<div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/40" />
 						<CardContent className="p-5 space-y-4">
@@ -373,7 +374,7 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 									className={cn(buttonVariants({ size: 'xl' }), 'w-full shadow-sm')}
 								>
 									<CalendarClock className="w-4 h-4 mr-2 shrink-0" />
-									Agendar passeio com {walker.name.split(' ')[0]}
+									Agendar passeio com {firstName}
 								</Link>
 								<p className="text-center text-[11px] text-muted-foreground leading-relaxed">
 									Escolha data, horário e pets na próxima etapa
@@ -417,6 +418,18 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 						</CardContent>
 					</Card>
 				</aside>
+			</div>
+
+			{/* Mobile booking bar — replaces the sidebar panel and the CTA banner below md */}
+			<div className="sticky bottom-0 z-30 space-y-2 rounded-2xl bg-background/75 p-3 shadow-lg shadow-black/10 ring-1 ring-border/60 backdrop-blur-xl backdrop-saturate-150 md:hidden">
+				<WalkerAvailabilityBadge walkerId={walker.id} scheduleLabel={walker.availability} />
+				<Link
+					href={`/walks/new?walker=${walker.id}`}
+					className={cn(buttonVariants({ size: 'xl' }), 'w-full shadow-sm')}
+				>
+					<CalendarClock className="w-4 h-4 mr-2 shrink-0" />
+					Agendar passeio com {firstName}
+				</Link>
 			</div>
 		</div>
 	);
