@@ -55,7 +55,7 @@ function StatCard({
 	return (
 		<div
 			className={cn(
-				'flex flex-col gap-1.5 rounded-xl border border-border/50 bg-card px-4 py-3.5',
+				'flex flex-col gap-1.5 px-4 py-3 md:rounded-xl md:border md:border-border/50 md:bg-card md:py-3.5',
 				className,
 			)}
 		>
@@ -182,13 +182,17 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 						</CardContent>
 					</Card>
 
-					{/* Stats */}
-					<div className="grid grid-cols-2 gap-3">
-						<StatCard icon={MapPin} label="Área de atendimento" value={walker.serviceArea} />
+					{/* Stats — one card with two rows on mobile, two cards side by side from md */}
+					<div className="flex flex-col rounded-xl border border-border/50 bg-card max-md:divide-y max-md:divide-border/50 md:grid md:grid-cols-2 md:gap-3 md:rounded-none md:border-0 md:bg-transparent">
+						<StatCard
+							icon={MapPin}
+							label="Área de atendimento"
+							value={walker.serviceArea || 'Não informada'}
+						/>
 						<StatCard
 							icon={Clock3}
 							label="Passeios realizados"
-							value={`${walker.completedWalks}+`}
+							value={walker.completedWalks > 0 ? `${walker.completedWalks}+` : 'Nenhum ainda'}
 						/>
 					</div>
 
