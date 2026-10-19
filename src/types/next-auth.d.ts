@@ -27,5 +27,7 @@ declare module "next-auth/jwt" {
     refreshToken?: string;
     /** Unix timestamp (seconds) matching the access token's exp claim. */
     expiresAt?: number;
+    /** Set when refreshing the access token failed; the session can't be revived. */
+    error?: string;
   }
 }
