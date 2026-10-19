@@ -59,7 +59,7 @@ function StatCard({
 				className,
 			)}
 		>
-			<div className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+			<div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground md:text-[11px] md:font-semibold md:uppercase md:tracking-wider">
 				<Icon className="w-3.5 h-3.5 shrink-0" />
 				{label}
 			</div>
@@ -215,7 +215,7 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 										const entry = walker.availability.find((s) => s.day === d.key)!;
 										return (
 											<div key={d.key} className="flex items-center gap-3">
-												<span className="w-8 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+												<span className="w-8 shrink-0 text-xs font-medium text-muted-foreground md:text-[11px] md:font-semibold md:uppercase md:tracking-wider">
 													{d.short}
 												</span>
 												<span className="rounded-md border border-border/60 bg-muted/40 px-2.5 py-1 text-xs font-medium tabular-nums">
@@ -246,7 +246,7 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 								))}
 							</div>
 							<div>
-								<p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+								<p className="text-xs font-medium text-muted-foreground mb-2 md:text-[11px] md:font-semibold md:uppercase md:tracking-wider">
 									Portes atendidos
 								</p>
 								<div className="flex flex-wrap gap-1.5">

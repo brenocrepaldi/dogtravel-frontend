@@ -78,7 +78,7 @@ export function TrustItemCard({ icon: Icon, label, value, verified = true, accen
 				<div className="flex items-center gap-2">
 					<p
 						className={cn(
-							'text-xs font-bold uppercase tracking-wider',
+							'text-sm font-semibold md:text-xs md:font-bold md:uppercase md:tracking-wider',
 							theme.label,
 						)}
 					>
