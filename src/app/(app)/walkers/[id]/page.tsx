@@ -89,7 +89,7 @@ function SectionHeader({
 				</div>
 				<div>
 					<CardTitle className="text-sm font-semibold">{title}</CardTitle>
-					<CardDescription className="text-xs mt-0.5">{description}</CardDescription>
+					<CardDescription className="hidden text-xs mt-0.5 md:block">{description}</CardDescription>
 				</div>
 			</div>
 		</CardHeader>
@@ -147,13 +147,13 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 	const firstName = walker.name.split(' ')[0];
 
 	return (
-		<div className="flex flex-col gap-6 pb-4 md:pb-10">
+		<div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-10">
 			{/* Back */}
 			<Link
 				href="/walkers"
 				className={cn(
 					buttonVariants({ variant: 'ghost', size: 'sm' }),
-					'-ml-2 self-start text-muted-foreground hover:text-foreground',
+					'-ml-2 h-11 self-start text-muted-foreground hover:text-foreground md:h-7',
 				)}
 			>
 				<ArrowLeft className="mr-1.5 h-4 w-4" />
@@ -163,7 +163,7 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 			{/* Two-column layout */}
 			<div className="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-10">
 				{/* ── Main content ── */}
-				<div className="flex min-w-0 flex-1 flex-col gap-6">
+				<div className="flex min-w-0 flex-1 flex-col gap-4 md:gap-6">
 					{/* Hero */}
 					<Card className="overflow-hidden">
 						<div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/40" />

@@ -51,7 +51,7 @@ export function TrustItemCard({ icon: Icon, label, value, verified = true, accen
 	return (
 		<div
 			className={cn(
-				'flex gap-4 rounded-xl border-l-4 p-4',
+				'flex gap-3 rounded-xl border-l-4 p-3 md:gap-4 md:p-4',
 				'transition-all duration-300 hover:shadow-md hover:translate-x-1',
 				theme.borderLeft,
 				theme.background,
@@ -102,7 +102,7 @@ export function TrustItemCard({ icon: Icon, label, value, verified = true, accen
 						</span>
 					)} */}
 				</div>
-				<p className={cn('mt-1.5 text-sm font-medium leading-relaxed', theme.value)}>{value}</p>
+				<p className={cn('mt-0.5 text-sm font-medium leading-relaxed md:mt-1.5', theme.value)}>{value}</p>
 			</div>
 		</div>
 	);
