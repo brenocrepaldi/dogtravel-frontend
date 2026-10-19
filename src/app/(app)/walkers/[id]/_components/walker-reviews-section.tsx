@@ -59,8 +59,22 @@ function ReviewCard({
   );
 }
 
+function ReviewsHeader({ subtitle }: { subtitle: string }) {
+  return (
+    <div className="px-5 pt-5 pb-4 flex items-center gap-2.5">
+      <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+        <MessageSquare className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+      </div>
+      <div>
+        <p className="text-sm font-semibold">Avaliações dos clientes</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
 export function WalkerReviewsSection({ walkerId }: { walkerId: string }) {
-  const { data: reviews, isLoading } = useWalkerReviews(walkerId);
+  const { data: reviews, isLoading, isError } = useWalkerReviews(walkerId);
 
   if (isLoading) {
     return (
@@ -91,24 +105,24 @@ export function WalkerReviewsSection({ walkerId }: { walkerId: string }) {
     );
   }
 
-  if (!reviews || reviews.length === 0) return null;
+  // A failed request stays hidden rather than claiming the walker has no reviews
+  if (isError) return null;
+
+  if (!reviews || reviews.length === 0) {
+    return (
+      <Card className="overflow-hidden pt-1">
+        <ReviewsHeader subtitle="Ainda sem avaliações. Elas aparecem aqui depois dos primeiros passeios." />
+      </Card>
+    );
+  }
 
   const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
   return (
     <Card className="overflow-hidden pt-1">
-      <div className="px-5 pt-5 pb-4 flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-          <MessageSquare className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold">Avaliações dos clientes</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {avg.toFixed(1)} de média · {reviews.length}{" "}
-            {reviews.length === 1 ? "avaliação" : "avaliações"}
-          </p>
-        </div>
-      </div>
+      <ReviewsHeader
+        subtitle={`${avg.toFixed(1)} de média · ${reviews.length} ${reviews.length === 1 ? "avaliação" : "avaliações"}`}
+      />
       <Separator />
       <CardContent className="pb-5 space-y-4 pt-4">
         {reviews.map((review, i) => (
