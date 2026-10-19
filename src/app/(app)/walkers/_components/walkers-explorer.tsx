@@ -488,8 +488,8 @@ export function WalkersExplorer() {
 						icon={Search}
 						title="Nenhum passeador encontrado"
 						description="Ajuste os filtros para ampliar a busca e encontrar um perfil mais compatível."
-						actionLabel="Limpar filtros"
-						actionHref="/walkers"
+						actionLabel={hasActiveFilters ? 'Limpar filtros' : undefined}
+						onAction={clearFilters}
 					/>
 				) : (
 					<>
