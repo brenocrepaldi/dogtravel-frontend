@@ -25,19 +25,12 @@ import { WalkerAvatar } from '@/components/walkers/walker-avatar';
 import { TrustItemCard } from '@/components/walkers/trust-item-card';
 import { WalkersApi } from '@/features/walkers/api/walkers.api';
 import { DAYS } from '@/lib/availability';
-import type { DogSize } from '@/types';
+import { DOG_SIZE_LABEL } from '@/lib/pets';
 import { Separator } from '@/components/ui/separator';
 import { WalkerReviewsSection } from './_components/walker-reviews-section';
 import { WalkerAvailabilityBadge } from './_components/walker-availability-badge';
 
 export const metadata: Metadata = { title: 'Perfil do Passeador | DogTravel' };
-
-const SIZE_LABEL: Record<DogSize, string> = {
-	small: 'Pequeno',
-	medium: 'Médio',
-	large: 'Grande',
-	giant: 'Gigante',
-};
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -229,40 +222,46 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 						</CardContent>
 					</Card>
 
-					{/* Especialidades */}
-					<Card className="overflow-hidden pt-1">
-						<SectionHeader
-							icon={Target}
-							title="Especialidades"
-							description="Áreas de atuação e portes atendidos"
-						/>
-						<Separator />
-						<CardContent className="pb-5 space-y-4">
-							<div className="flex flex-wrap gap-2">
-								{specialtyLabels.map((tag) => (
-									<Badge key={tag} variant="secondary" className="text-xs font-normal px-2.5 py-1">
-										{tag}
-									</Badge>
-								))}
-							</div>
-							<div>
-								<p className="text-xs font-medium text-muted-foreground mb-2 md:text-[11px] md:font-semibold md:uppercase md:tracking-wider">
-									Portes atendidos
-								</p>
-								<div className="flex flex-wrap gap-1.5">
-									{walker.supportedSizes.map((size) => (
-										<Badge
-											key={size}
-											variant="outline"
-											className="text-[11px] text-muted-foreground"
-										>
-											{SIZE_LABEL[size]}
-										</Badge>
-									))}
-								</div>
-							</div>
-						</CardContent>
-					</Card>
+					{/* Especialidades — only the parts the walker filled in */}
+					{(specialtyLabels.length > 0 || walker.supportedSizes.length > 0) && (
+						<Card className="overflow-hidden pt-1">
+							<SectionHeader
+								icon={Target}
+								title="Especialidades"
+								description="Áreas de atuação e portes atendidos"
+							/>
+							<Separator />
+							<CardContent className="pb-5 space-y-4">
+								{specialtyLabels.length > 0 && (
+									<div className="flex flex-wrap gap-2">
+										{specialtyLabels.map((tag) => (
+											<Badge key={tag} variant="secondary" className="text-xs font-normal px-2.5 py-1">
+												{tag}
+											</Badge>
+										))}
+									</div>
+								)}
+								{walker.supportedSizes.length > 0 && (
+									<div>
+										<p className="text-xs font-medium text-muted-foreground mb-2 md:text-[11px] md:font-semibold md:uppercase md:tracking-wider">
+											Portes atendidos
+										</p>
+										<div className="flex flex-wrap gap-1.5">
+											{walker.supportedSizes.map((size) => (
+												<Badge
+													key={size}
+													variant="outline"
+													className="text-[11px] text-muted-foreground"
+												>
+													{DOG_SIZE_LABEL[size]}
+												</Badge>
+											))}
+										</div>
+									</div>
+								)}
+							</CardContent>
+						</Card>
+					)}
 
 					{/* Trust & Security */}
 					<Card className="overflow-hidden pt-1">
