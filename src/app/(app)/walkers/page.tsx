@@ -6,17 +6,17 @@ export const metadata: Metadata = { title: "Passeadores | DogTravel" };
 
 export default function WalkersPage() {
   return (
-    <div className="flex flex-col gap-8 pb-8">
+    <div className="flex flex-col gap-5 pb-8 lg:gap-8">
       <header className="space-y-1.5">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Passeadores Parceiros
+          <h1 className="text-2xl font-bold tracking-tight text-foreground lg:text-3xl">
+            Passeadores parceiros
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Encontre passeadores verificados com experiência comprovada e porte compatível com seu cão.
           </p>
         </div>
-        <Separator className="mt-6" />
+        <Separator className="mt-6 hidden lg:block" />
       </header>
 
       <WalkersExplorer />
