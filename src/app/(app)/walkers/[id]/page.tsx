@@ -166,7 +166,7 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 					{/* Hero */}
 					<Card className="overflow-hidden">
 						<div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/40" />
-						<CardContent className="p-6">
+						<CardContent className="px-4 py-0 md:p-6">
 							<WalkerHero
 								name={walker.name}
 								avatarUrl={walker.avatarUrl}
