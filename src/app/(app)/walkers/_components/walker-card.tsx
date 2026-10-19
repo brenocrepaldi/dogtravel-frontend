@@ -90,18 +90,22 @@ export function WalkerCard({ walker, index }: { walker: WalkerProfile; index: nu
 									<span className="text-xs">({walker.reviews})</span>
 									<span className="text-xs lg:hidden">· {walker.completedWalks} passeios</span>
 								</span>
-								<span className="flex items-center gap-1 min-w-0 max-w-full lg:max-w-[180px]">
-									<MapPin className="w-3.5 h-3.5 shrink-0" />
-									<span className="truncate text-xs">{walker.location}</span>
-								</span>
+								{walker.location && (
+									<span className="flex items-center gap-1 min-w-0 max-w-full lg:max-w-[180px]">
+										<MapPin className="w-3.5 h-3.5 shrink-0" />
+										<span className="truncate text-xs">{walker.location}</span>
+									</span>
+								)}
 							</div>
 						</div>
 					</div>
 
 					{/* Descrição */}
-					<p className="text-sm text-muted-foreground line-clamp-1 leading-relaxed lg:line-clamp-2">
-						{walker.description}
-					</p>
+					{walker.description && (
+						<p className="text-sm text-muted-foreground line-clamp-1 leading-relaxed lg:line-clamp-2">
+							{walker.description}
+						</p>
+					)}
 
 					{/* Tags — no mobile só as 3 primeiras + contador */}
 					{walker.tags.length > 0 && (
