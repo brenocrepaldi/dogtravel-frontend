@@ -1,58 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
-import { useState } from 'react';
 import { Calendar, ChevronRight, Clock3, MapPin, ShieldCheck, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatAvailabilityLabel } from '@/lib/availability';
-import { getInitials } from '@/lib/format';
 import { DOG_SIZE_LABEL } from '@/lib/pets';
 import type { WalkerProfile } from '@/types';
 import { buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
-const WALKER_GRADIENTS = [
-	'from-blue-400/30 to-indigo-500/30',
-	'from-emerald-400/30 to-teal-500/30',
-	'from-amber-400/30 to-orange-500/30',
-	'from-rose-400/30 to-pink-500/30',
-	'from-violet-400/30 to-purple-500/30',
-	'from-cyan-400/30 to-sky-500/30',
-];
+import { WalkerAvatar } from '@/components/walkers/walker-avatar';
 
 // Tags beyond this count collapse into a "+n" badge on mobile
 const MOBILE_TAG_LIMIT = 3;
-
-function WalkerAvatar({ name, avatarUrl }: { name: string; avatarUrl?: string | null }) {
-	const [failed, setFailed] = useState(false);
-
-	if (avatarUrl && !failed) {
-		return (
-			<div className="relative w-14 h-14 rounded-2xl shrink-0 ring-2 ring-border/30 overflow-hidden">
-				<Image
-					src={avatarUrl}
-					alt={name}
-					fill
-					sizes="56px"
-					className="object-cover"
-					onError={() => setFailed(true)}
-				/>
-			</div>
-		);
-	}
-
-	return (
-		<div
-			className={cn(
-				'w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center shrink-0 ring-2 ring-border/30',
-				WALKER_GRADIENTS[name.charCodeAt(0) % WALKER_GRADIENTS.length],
-			)}
-		>
-			<span className="text-base font-bold text-foreground/70">{getInitials(name)}</span>
-		</div>
-	);
-}
 
 export function WalkerCard({ walker, index }: { walker: WalkerProfile; index: number }) {
 	const hiddenTagCount = Math.max(walker.tags.length - MOBILE_TAG_LIMIT, 0);
@@ -68,7 +27,13 @@ export function WalkerCard({ walker, index }: { walker: WalkerProfile; index: nu
 				<div className="flex flex-col flex-1 p-4 gap-3 lg:p-5 lg:gap-4">
 					{/* Avatar + nome + avaliação */}
 					<div className="flex items-center gap-4">
-						<WalkerAvatar name={walker.name} avatarUrl={walker.avatarUrl} />
+						<WalkerAvatar
+							name={walker.name}
+							avatarUrl={walker.avatarUrl}
+							sizes="56px"
+							className="w-14 h-14 rounded-2xl"
+							initialsClassName="text-base"
+						/>
 
 						<div className="flex-1 min-w-0">
 							<div className="flex items-center gap-1.5 flex-wrap">

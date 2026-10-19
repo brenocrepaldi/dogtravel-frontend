@@ -1,28 +1,5 @@
-import Image from 'next/image';
 import { MapPin, ShieldCheck, Star } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-const WALKER_GRADIENTS = [
-  'from-blue-400/30 to-indigo-500/30',
-  'from-emerald-400/30 to-teal-500/30',
-  'from-amber-400/30 to-orange-500/30',
-  'from-rose-400/30 to-pink-500/30',
-  'from-violet-400/30 to-purple-500/30',
-  'from-cyan-400/30 to-sky-500/30',
-];
-
-export function walkerGradient(name: string) {
-  return WALKER_GRADIENTS[name.charCodeAt(0) % WALKER_GRADIENTS.length];
-}
-
-export function walkerInitials(name: string) {
-  return name
-    .split(' ')
-    .map((p) => p[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-}
+import { WalkerAvatar } from './walker-avatar';
 
 type WalkerHeroProps = {
   name: string;
@@ -49,20 +26,13 @@ export function WalkerHero({
   return (
     <div className="flex flex-col sm:flex-row items-start gap-6">
       {/* Avatar */}
-      {avatarUrl ? (
-        <div className="relative w-20 h-20 rounded-2xl shrink-0 ring-2 ring-border/30 overflow-hidden">
-          <Image src={avatarUrl} alt={name} fill sizes="80px" className="object-cover" />
-        </div>
-      ) : (
-        <div
-          className={cn(
-            'w-20 h-20 rounded-2xl bg-gradient-to-br flex items-center justify-center shrink-0 ring-2 ring-border/30',
-            walkerGradient(name)
-          )}
-        >
-          <span className="text-2xl font-bold text-foreground/70">{walkerInitials(name)}</span>
-        </div>
-      )}
+      <WalkerAvatar
+        name={name}
+        avatarUrl={avatarUrl}
+        sizes="80px"
+        className="w-20 h-20 rounded-2xl"
+        initialsClassName="text-2xl"
+      />
 
       {/* Info */}
       <div className="flex-1 min-w-0">

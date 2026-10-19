@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import type { ElementType } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import {
 	ArrowLeft,
@@ -21,7 +20,8 @@ import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { WalkerHero, walkerGradient, walkerInitials } from '@/components/walkers/walker-hero';
+import { WalkerHero } from '@/components/walkers/walker-hero';
+import { WalkerAvatar } from '@/components/walkers/walker-avatar';
 import { TrustItemCard } from '@/components/walkers/trust-item-card';
 import { WalkersApi } from '@/features/walkers/api/walkers.api';
 import { DAYS } from '@/lib/availability';
@@ -93,26 +93,6 @@ function SectionHeader({
 				</div>
 			</div>
 		</CardHeader>
-	);
-}
-
-function SidebarAvatar({ name, avatarUrl }: { name: string; avatarUrl?: string | null }) {
-	if (avatarUrl) {
-		return (
-			<div className="relative w-10 h-10 rounded-xl shrink-0 ring-2 ring-border/30 overflow-hidden">
-				<Image src={avatarUrl} alt={name} fill sizes="40px" className="object-cover" />
-			</div>
-		);
-	}
-	return (
-		<div
-			className={cn(
-				'w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shrink-0 ring-2 ring-border/30',
-				walkerGradient(name),
-			)}
-		>
-			<span className="text-sm font-bold text-foreground/70">{walkerInitials(name)}</span>
-		</div>
 	);
 }
 
@@ -367,7 +347,13 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 						<CardContent className="p-5 space-y-4">
 							{/* Mini perfil */}
 							<div className="flex items-center gap-3">
-								<SidebarAvatar name={walker.name} avatarUrl={walker.avatarUrl} />
+								<WalkerAvatar
+									name={walker.name}
+									avatarUrl={walker.avatarUrl}
+									sizes="40px"
+									className="w-10 h-10 rounded-xl"
+									initialsClassName="text-sm"
+								/>
 								<div className="min-w-0">
 									<p className="font-semibold text-sm text-foreground truncate">{walker.name}</p>
 									<div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
