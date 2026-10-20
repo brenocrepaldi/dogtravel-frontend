@@ -2,8 +2,8 @@ import axios from "axios";
 import { getSession, signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { REFRESH_ERROR } from "@/lib/auth-refresh";
+import { SESSION_EXPIRED_MESSAGE, SESSION_EXPIRED_PARAM } from "@/lib/session-expiry";
 
-const SESSION_EXPIRED_MESSAGE = "Sua sessão expirou. Faça login novamente.";
 const REDIRECT_DELAY_MS = 1500;
 
 // A page usually fires several requests at once, so a dead session fails all
@@ -24,7 +24,7 @@ export async function handleSessionExpired(): Promise<void> {
   setTimeout(() => {
     // Full reload on purpose: no router here, and it drops the dead session's client state
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-    window.location.href = "/login";
+    window.location.href = `/login?${SESSION_EXPIRED_PARAM}=1`;
   }, REDIRECT_DELAY_MS);
 }
 

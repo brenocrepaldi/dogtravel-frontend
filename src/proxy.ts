@@ -1,6 +1,7 @@
 import { getToken, type JWT } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { SESSION_EXPIRED_PARAM } from "@/lib/session-expiry";
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
 const CLIENT_ONLY_PREFIXES = ["/dogs", "/walkers", "/walks/new"];
@@ -33,7 +34,7 @@ export async function proxy(req: NextRequest) {
   // A token whose refresh failed can't be revived. Counting it as logged in
   // sent /login back to /dashboard and the client back to /login, forever.
   const deadSession = !!token?.error;
-  const res = route(req, deadSession ? null : token);
+  const res = route(req, deadSession ? null : token, { expired: deadSession });
 
   if (deadSession) {
     for (const { name } of req.cookies.getAll()) {
@@ -46,7 +47,7 @@ export async function proxy(req: NextRequest) {
   return res;
 }
 
-function route(req: NextRequest, session: JWT | null) {
+function route(req: NextRequest, session: JWT | null, { expired }: { expired: boolean }) {
   const { pathname } = req.nextUrl;
   const isAuthPath = AUTH_PATHS.some((p) => pathname.startsWith(p));
 
@@ -59,6 +60,8 @@ function route(req: NextRequest, session: JWT | null) {
   if (!session && !isAuthPath) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
+    // Lets /login explain why the user is there
+    if (expired) loginUrl.searchParams.set(SESSION_EXPIRED_PARAM, "1");
     return NextResponse.redirect(loginUrl);
   }
 

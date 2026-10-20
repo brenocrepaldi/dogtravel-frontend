@@ -45,6 +45,7 @@ describe("proxy", () => {
     expect(res.status).toBe(307);
     expect(location.pathname).toBe("/login");
     expect(location.searchParams.get("callbackUrl")).toBe("/dashboard");
+    expect(location.searchParams.get("expired")).toBe("1");
     expect(clearedCookies(res)).toHaveLength(2);
   });
 
@@ -65,6 +66,7 @@ describe("proxy", () => {
 
     expect(location.pathname).toBe("/login");
     expect(location.searchParams.get("callbackUrl")).toBe("/dashboard");
+    expect(location.searchParams.has("expired")).toBe(false);
     expect(clearedCookies(res)).toHaveLength(0);
   });
 });
