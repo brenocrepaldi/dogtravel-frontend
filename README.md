@@ -69,14 +69,16 @@ src/
 │   └── api.ts                  # Instância Axios com interceptors de auth e 401
 │
 ├── lib/
-│   ├── auth.ts                 # Configuração NextAuth: authorize, JWT callback, refresh lock
+│   ├── auth.ts                 # Configuração NextAuth: authorize, JWT callback
+│   ├── auth-refresh.ts         # Renovação do access token (só em rotas /api/auth/*; chamadas duplicadas compartilham uma rotação)
+│   ├── session-expiry.ts       # Mensagem e parâmetro ?expired usados quando a sessão expira
 │   └── utils.ts
 │
 ├── types/
 │   ├── index.ts                # DTOs e interfaces globais
 │   └── next-auth.d.ts          # Augmentação de tipos NextAuth (Session, JWT, User)
 │
-└── proxy.ts                    # Proteção de rotas por autenticação e role (Edge; renomeado de middleware.ts na convenção do Next.js 16)
+└── proxy.ts                    # Proteção de rotas por autenticação e role (Node.js; renomeado de middleware.ts na convenção do Next.js 16)
 ```
 
 ---
@@ -135,9 +137,10 @@ src/
 - Dados bancários para repasse (banco, agência, conta, CPF titular, chave PIX)
 - Upload de documentos: RG/CNH + selfie, certidão de antecedentes, certificados profissionais
 
-### Proteção de rotas (middleware Edge)
+### Proteção de rotas (`src/proxy.ts`, runtime Node.js)
 - Usuários não autenticados → redirecionados para `/login`
 - Usuários autenticados em páginas de auth → redirecionados para `/dashboard`
+- Sessão cuja renovação falhou → tratada como deslogada: cookie apagado e redirecionamento para `/login?expired=1`, que exibe "Sua sessão expirou"
 - Rotas exclusivas de cliente protegidas contra walkers e vice-versa
 
 ---
