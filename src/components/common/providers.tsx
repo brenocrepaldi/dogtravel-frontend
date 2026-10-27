@@ -29,7 +29,7 @@ export default function Providers({ children, session }: ProvidersProps) {
     <SessionProvider session={session}>
       <QueryClientProvider client={queryClient}>
         {children}
-        <Toaster position="top-right" richColors closeButton toastOptions={{ duration: 4000 }} />
+        <Toaster theme="light" position="top-right" richColors closeButton toastOptions={{ duration: 4000 }} />
       </QueryClientProvider>
     </SessionProvider>
   );
