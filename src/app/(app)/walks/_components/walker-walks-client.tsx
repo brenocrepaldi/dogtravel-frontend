@@ -3,15 +3,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { buttonVariants, TOUCH_TARGET } from '@/components/ui/button';
+import { Button, buttonVariants, TOUCH_TARGET } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useSession } from 'next-auth/react';
 import { useWalks } from '@/features/walks/hooks/use-walks';
 import { cn } from '@/lib/utils';
 import { WalkStartButton } from './walk-start-button';
 import type { WalkRecord } from '@/types';
 import {
+	AlertTriangle,
+	ArrowRight,
 	CalendarDays,
 	Clock,
 	Dog,
@@ -261,6 +264,15 @@ function WalkerWalksEmptyState({ filtered = false }: { filtered?: boolean }) {
 					? 'Tente mudar o filtro ou a busca para encontrar outros passeios.'
 					: 'Aceite pedidos na dashboard para começar a ver seus passeios aqui.'}
 			</p>
+			{!filtered && (
+				<Link
+					href="/dashboard"
+					className={cn(buttonVariants({ size: 'default' }), 'mt-6 rounded-lg gap-2')}
+				>
+					Ver pedidos
+					<ArrowRight className="w-4 h-4" />
+				</Link>
+			)}
 		</div>
 	);
 }
@@ -281,7 +293,7 @@ export function WalkerWalksClient() {
 	const { data: session } = useSession();
 	const walkerId = session?.user?.id;
 
-	const { data: rawWalks = [], isLoading } = useWalks('walker', walkerId ?? '', {
+	const { data: rawWalks = [], isLoading, isError, refetch } = useWalks('walker', walkerId ?? '', {
 		enabled: !!walkerId,
 	});
 	const [activeFilter, setActiveFilter] = useState<FilterValue>('todos');
@@ -307,12 +319,22 @@ export function WalkerWalksClient() {
 		[allWalks],
 	);
 
-	if (isLoading) {
+	// The query stays disabled until the session resolves — show the skeleton
+	// meanwhile instead of flashing the empty state.
+	if (isLoading || !walkerId) {
 		return (
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pt-8">
-				{[1, 2, 3].map((i) => (
-					<div key={i} className="rounded-2xl border bg-card h-64 animate-pulse" />
-				))}
+			<div className="space-y-5 pb-8 md:space-y-8" aria-busy="true" aria-label="Carregando passeios">
+				<Skeleton className="h-8 w-44" />
+				<div className="flex gap-2 overflow-hidden">
+					{[72, 104, 120, 104].map((w, i) => (
+						<Skeleton key={i} className="h-9 shrink-0 rounded-lg" style={{ width: w }} />
+					))}
+				</div>
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					{[1, 2, 3].map((i) => (
+						<Skeleton key={i} className="h-60 rounded-2xl md:h-64" />
+					))}
+				</div>
 			</div>
 		);
 	}
@@ -385,7 +407,20 @@ export function WalkerWalksClient() {
 			</div>
 
 			{/* Grid */}
-			{filtered.length === 0 ? (
+			{isError ? (
+				<div className="flex flex-col items-center gap-4 py-12 rounded-2xl border border-border/60 bg-card text-center">
+					<div className="w-10 h-10 rounded-2xl bg-destructive/10 flex items-center justify-center">
+						<AlertTriangle className="h-5 w-5 text-destructive" />
+					</div>
+					<div>
+						<p className="text-sm font-semibold text-foreground">Erro ao carregar</p>
+						<p className="text-xs text-muted-foreground mt-0.5">Não foi possível buscar seus passeios.</p>
+					</div>
+					<Button variant="outline" size="sm" onClick={() => refetch()}>
+						Tentar novamente
+					</Button>
+				</div>
+			) : filtered.length === 0 ? (
 				<WalkerWalksEmptyState filtered={activeFilter !== 'todos' || search.length > 0} />
 			) : (
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
