@@ -244,6 +244,10 @@ export default function MapTracker({ walkId }: { walkId: string }) {
   const hasLocation = !!location;
   const mapLat = location?.lat ?? walk?.startLat ?? -23.55;
   const mapLng = location?.lng ?? walk?.startLng ?? -46.63;
+  // On mobile the bottom card covers the lower half of the map: centre the
+  // marker in the visible area above it. Client-only component, so window is safe.
+  const isMobile = window.matchMedia('(max-width: 767px)').matches;
+  const mapPadding = { top: 0, left: 0, right: 0, bottom: isMobile ? 300 : 0 };
 
   return (
     <>
@@ -252,7 +256,12 @@ export default function MapTracker({ walkId }: { walkId: string }) {
         {/* ── Map ─────────────────────────────────────────────────── */}
         <Map
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-          initialViewState={{ longitude: mapLng, latitude: mapLat, zoom: hasLocation ? 17 : 15 }}
+          initialViewState={{
+            longitude: mapLng,
+            latitude: mapLat,
+            zoom: hasLocation ? 17 : 15,
+            padding: mapPadding,
+          }}
           mapStyle="mapbox://styles/mapbox/streets-v12"
           style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
           attributionControl={false}
