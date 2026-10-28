@@ -81,6 +81,9 @@ function OtpInput({
           ref={(el) => { inputRefs.current[i] = el; }}
           type="text"
           inputMode="numeric"
+          pattern="[0-9]*"
+          autoComplete={i === 0 ? 'one-time-code' : 'off'}
+          aria-label={`Dígito ${i + 1} do código`}
           maxLength={1}
           disabled={disabled}
           value={value[i] ?? ''}
