@@ -343,7 +343,7 @@ export default function MapTracker({ walkId }: { walkId: string }) {
         </div>
 
         {/* ── Bottom card ─────────────────────────────────────────── */}
-        <div className="pointer-events-none absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-[1000] flex justify-center">
+        <div className="pointer-events-none absolute bottom-[calc(2.25rem+env(safe-area-inset-bottom))] left-3 right-3 z-[1000] flex justify-center md:bottom-[calc(1rem+env(safe-area-inset-bottom))] md:left-4 md:right-4">
           {isWalker ? (
 
             /* ── Walker card ─────────────────────────────────────── */
