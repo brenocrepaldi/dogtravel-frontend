@@ -113,7 +113,7 @@ function ProgressSection({ startAddress, startedAt, remaining, progress, timeDon
             <MapPin className="h-3.5 w-3.5 text-emerald-600" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium text-muted-foreground md:text-[11px] md:font-semibold md:uppercase md:tracking-wider">
+            <p className="text-xs font-medium text-muted-foreground md:text-[11px] md:leading-normal md:font-semibold md:uppercase md:tracking-wider">
               <span className="md:hidden">Partida e chegada</span>
               <span className="hidden md:inline">Ponto de partida e chegada</span>
             </p>
