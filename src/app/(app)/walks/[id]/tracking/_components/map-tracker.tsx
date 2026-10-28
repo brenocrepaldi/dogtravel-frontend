@@ -32,6 +32,7 @@ import { useCompleteWalk } from '@/features/walks/hooks/use-walk-actions';
 import { useCountdown } from '@/features/tracking/hooks/use-countdown';
 import { haversineMeters } from '@/lib/geo';
 import { DogMarker } from '@/components/common/dog-marker';
+import { TRACKING_STATUS } from './tracking-status';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -155,6 +156,7 @@ export default function MapTracker({ walkId }: { walkId: string }) {
 
   const isWalker = session?.user?.role === 'walker';
   const isInProgress = walk?.status === 'in_progress';
+  const status = TRACKING_STATUS[walk?.status ?? 'in_progress'];
 
   useLocationBroadcast(walkId, isWalker && isInProgress);
 
@@ -273,10 +275,13 @@ export default function MapTracker({ walkId }: { walkId: string }) {
 
         {/* ── Lost-signal banner — client only, walker already sees its own GPS status ── */}
         {hasLocation && signalLost && !isWalker && (
-          <div className="pointer-events-none absolute inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-[600] flex justify-center px-4">
+          <div className="pointer-events-none absolute inset-x-0 top-[calc(4.25rem+env(safe-area-inset-top))] z-[600] flex justify-center px-3 md:top-[calc(1rem+env(safe-area-inset-top))] md:px-4">
             <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50/95 px-3.5 py-2 text-xs font-semibold text-amber-800 shadow-lg backdrop-blur-md dark:border-amber-800/50 dark:bg-amber-900/90 dark:text-amber-300">
               <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
-              Sinal do passeador perdido — última posição pode estar desatualizada
+              <span className="md:hidden">Sinal perdido · posição pode estar desatualizada</span>
+              <span className="hidden md:inline">
+                Sinal do passeador perdido — última posição pode estar desatualizada
+              </span>
             </div>
           </div>
         )}
@@ -299,22 +304,24 @@ export default function MapTracker({ walkId }: { walkId: string }) {
           <Link
             href={`/walks/${walkId}`}
             aria-label="Voltar"
-            className="pointer-events-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-background/85 shadow-lg backdrop-blur-md text-muted-foreground transition-colors hover:text-foreground"
+            className="pointer-events-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-background/85 shadow-lg backdrop-blur-md text-muted-foreground transition-colors hover:text-foreground md:h-10 md:w-10"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
 
           <div
             className={cn(
-              'pointer-events-auto flex shrink-0 items-center gap-2 rounded-xl border border-white/20 bg-background/85 px-4 py-2.5 shadow-lg backdrop-blur-md',
+              'pointer-events-auto flex h-11 shrink-0 items-center gap-2 rounded-xl border border-white/20 bg-background/85 px-4 py-2.5 shadow-lg backdrop-blur-md md:h-auto',
               timeDone && isInProgress && 'border-emerald-500/40 bg-emerald-500/10',
             )}
           >
             <span className="relative flex h-2 w-2 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              {status.live && (
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+              )}
+              <span className={cn('relative inline-flex h-2 w-2 rounded-full', status.dotClass)} />
             </span>
-            <span className="text-sm font-semibold text-foreground">Em andamento</span>
+            <span className="text-sm font-semibold text-foreground">{status.label}</span>
 
             {isInProgress && walk?.startedAt && (
               <>
@@ -333,7 +340,7 @@ export default function MapTracker({ walkId }: { walkId: string }) {
                   {timeDone ? '00:00' : formatCountdown(remaining)}
                 </span>
                 {walk?.durationMinutes && (
-                  <span className="border-l border-border/50 pl-2 text-xs text-muted-foreground">
+                  <span className="hidden border-l border-border/50 pl-2 text-xs text-muted-foreground md:inline">
                     {walk.durationMinutes}min
                   </span>
                 )}
