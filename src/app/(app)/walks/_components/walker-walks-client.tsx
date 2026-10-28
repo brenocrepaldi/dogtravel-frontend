@@ -389,7 +389,7 @@ export function WalkerWalksClient() {
 						<div
 							key={walk.id}
 							style={{ animationDelay: `${i * 40}ms` }}
-							className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+							className="min-w-0 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 duration-300"
 						>
 							<WalkerWalkCard walk={walk} />
 						</div>
