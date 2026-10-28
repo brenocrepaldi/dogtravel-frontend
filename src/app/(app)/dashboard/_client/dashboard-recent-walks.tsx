@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -54,12 +55,18 @@ export function DashboardRecentWalks() {
                 "group flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-muted/30 sm:gap-4 sm:px-5 sm:py-4",
                 isCancelled && "opacity-50"
               )}>
-                <div className={cn(
-                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-transform duration-150 group-hover:scale-105",
-                  isCancelled || awaitingWalker ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"
-                )}>
-                  {awaitingWalker ? <Clock className="h-4 w-4" /> : getInitials(walkerName)}
-                </div>
+                {!awaitingWalker && walk.walkerAvatarUrl ? (
+                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-border/30 transition-transform duration-150 group-hover:scale-105">
+                    <Image src={walk.walkerAvatarUrl} alt={walkerName} fill sizes="40px" className="object-cover" />
+                  </div>
+                ) : (
+                  <div className={cn(
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-transform duration-150 group-hover:scale-105",
+                    isCancelled || awaitingWalker ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"
+                  )}>
+                    {awaitingWalker ? <Clock className="h-4 w-4" /> : getInitials(walkerName)}
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <p className={cn(
                     "truncate text-sm font-semibold",
