@@ -71,7 +71,7 @@ function initials(name: string) {
 
 // ─── Shared sub-components ────────────────────────────────────────────────────
 
-function PetsRow({ pets }: { pets: Pet[] }) {
+function PetsRow({ pets, durationMinutes }: { pets: Pet[]; durationMinutes?: number }) {
   return (
     <div className="flex flex-wrap items-center gap-2.5 px-5 py-3">
       {pets.map((pet, i) => (
@@ -88,6 +88,9 @@ function PetsRow({ pets }: { pets: Pet[] }) {
           <span className="text-sm font-semibold text-foreground">{pet.name}</span>
         </div>
       ))}
+      {durationMinutes ? (
+        <p className="ml-auto text-xs text-muted-foreground md:hidden">Passeio de {durationMinutes} min</p>
+      ) : null}
     </div>
   );
 }
@@ -109,8 +112,9 @@ function ProgressSection({ startAddress, startedAt, remaining, progress, timeDon
             <MapPin className="h-3.5 w-3.5 text-emerald-600" />
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Ponto de partida e chegada
+            <p className="text-xs font-medium text-muted-foreground md:text-[11px] md:font-semibold md:uppercase md:tracking-wider">
+              <span className="md:hidden">Partida e chegada</span>
+              <span className="hidden md:inline">Ponto de partida e chegada</span>
             </p>
             <p className="mt-0.5 text-sm font-medium leading-snug text-foreground">{startAddress}</p>
           </div>
@@ -357,7 +361,7 @@ export default function MapTracker({ walkId }: { walkId: string }) {
             <div className="pointer-events-auto w-full max-w-lg divide-y divide-border/40 rounded-2xl border border-white/20 bg-background/95 shadow-xl backdrop-blur-md overflow-hidden">
 
               {/* 1 — Pets */}
-              <PetsRow pets={pets} />
+              <PetsRow pets={pets} durationMinutes={walk?.durationMinutes} />
 
               {/* 2 — Location + progress */}
               <ProgressSection
