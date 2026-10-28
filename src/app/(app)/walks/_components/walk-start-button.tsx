@@ -199,8 +199,8 @@ export function WalkStartButton({ walkId, scheduledAt, startLat, startLng }: Pro
 
   if (isLocked) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-        <Lock className="h-3.5 w-3.5 shrink-0" />
+      <div className="flex min-h-11 items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive md:min-h-0 md:text-xs">
+        <Lock className="h-4 w-4 shrink-0 md:h-3.5 md:w-3.5" />
         Bloqueado — {Math.ceil(lockSecsLeft / 60)} min restantes
       </div>
     );
@@ -213,7 +213,7 @@ export function WalkStartButton({ walkId, scheduledAt, startLat, startLng }: Pro
         onClick={openModal}
         className={cn(
           buttonVariants({ size: 'lg' }),
-          'w-full rounded-lg gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-0 cursor-pointer',
+          'h-11 md:h-9 w-full rounded-lg gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-0 cursor-pointer',
         )}
       >
         <KeyRound className="h-3.5 w-3.5" />

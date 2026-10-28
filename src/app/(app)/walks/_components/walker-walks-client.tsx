@@ -130,7 +130,7 @@ function WalkerWalkCard({ walk }: { walk: WalkRecord }) {
 			)}
 
 			{/* Header */}
-			<div className="px-5 pt-5 pb-4 flex items-start justify-between gap-3">
+			<div className="px-4 pt-4 pb-3 md:px-5 md:pt-5 md:pb-4 flex items-start justify-between gap-3">
 				<div className="flex items-start gap-3 min-w-0">
 					{walk.clientAvatarUrl ? (
 						<div className="relative w-10 h-10 rounded-2xl shrink-0 ring-1 ring-border/30 overflow-hidden">
@@ -145,7 +145,7 @@ function WalkerWalkCard({ walk }: { walk: WalkRecord }) {
 						<p className="text-sm font-semibold text-foreground leading-tight truncate">
 							{walk.clientName}
 						</p>
-						<div className="flex items-center gap-1.5 mt-1 text-[11px] text-muted-foreground">
+						<div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground md:text-[11px] md:leading-normal">
 							<CalendarDays className="w-3 h-3 shrink-0" />
 							<span className="truncate">{walk.dateLabel}</span>
 						</div>
@@ -157,14 +157,14 @@ function WalkerWalkCard({ walk }: { walk: WalkRecord }) {
 			<Separator className="opacity-50" />
 
 			{/* Info */}
-			<div className="px-5 py-4 flex-1 space-y-3">
+			<div className="px-4 py-3 flex-1 space-y-2.5 md:px-5 md:py-4 md:space-y-3">
 				<div className="flex items-center justify-between gap-2">
 					<div className="flex flex-wrap items-center gap-1.5 min-w-0">
 						{walk.petNames.map((name, i) => (
 							<PetBadge key={`${name}-${i}`} name={name} />
 						))}
 					</div>
-					<div className="flex items-center gap-1.5 text-[11px] text-muted-foreground shrink-0">
+					<div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0 md:text-[11px] md:leading-normal">
 						<Clock className="w-3 h-3" />
 						{walk.durationMinutes} min
 					</div>
@@ -183,12 +183,12 @@ function WalkerWalkCard({ walk }: { walk: WalkRecord }) {
 			</div>
 
 			{/* Actions */}
-			<div className="px-5 pb-5">
+			<div className="px-4 pb-4 md:px-5 md:pb-5">
 				{isActive && (
 					<div className="grid grid-cols-2 gap-2">
 						<Link
 							href={`/walks/${walk.id}`}
-							className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'rounded-lg w-full')}
+							className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-11 md:h-9 rounded-lg w-full')}
 						>
 							Detalhes
 						</Link>
@@ -196,7 +196,7 @@ function WalkerWalkCard({ walk }: { walk: WalkRecord }) {
 							href={`/walks/${walk.id}/tracking`}
 							className={cn(
 								buttonVariants({ size: 'lg' }),
-								'rounded-lg gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white border-0',
+								'h-11 md:h-9 rounded-lg gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white border-0',
 							)}
 						>
 							<MapPin className="w-3.5 h-3.5" />
@@ -216,7 +216,7 @@ function WalkerWalkCard({ walk }: { walk: WalkRecord }) {
 							/>
 							<Link
 								href={`/walks/${walk.id}`}
-								className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'rounded-lg w-full')}
+								className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-11 md:h-9 rounded-lg w-full max-md:order-first')}
 							>
 								Ver detalhes
 							</Link>
@@ -224,7 +224,7 @@ function WalkerWalkCard({ walk }: { walk: WalkRecord }) {
 					) : (
 						<Link
 							href={`/walks/${walk.id}`}
-							className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'rounded-lg w-full')}
+							className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-11 md:h-9 rounded-lg w-full')}
 						>
 							Ver detalhes
 						</Link>
@@ -234,7 +234,7 @@ function WalkerWalkCard({ walk }: { walk: WalkRecord }) {
 				{(isCompleted || isCancelled) && (
 					<Link
 						href={`/walks/${walk.id}`}
-						className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'rounded-lg w-full')}
+						className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-11 md:h-9 rounded-lg w-full')}
 					>
 						Ver detalhes
 					</Link>
