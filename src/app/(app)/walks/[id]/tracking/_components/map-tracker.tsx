@@ -32,6 +32,7 @@ import { useCompleteWalk } from '@/features/walks/hooks/use-walk-actions';
 import { useCountdown } from '@/features/tracking/hooks/use-countdown';
 import { haversineMeters } from '@/lib/geo';
 import { DogMarker } from '@/components/common/dog-marker';
+import { TrackingLoader } from './tracking-loader';
 import { TRACKING_STATUS } from './tracking-status';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -227,19 +228,7 @@ export default function MapTracker({ walkId }: { walkId: string }) {
   };
 
   // ── Loading ────────────────────────────────────────────────────────────────
-  if (isLoading) {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-4">
-        <div className="relative flex h-16 w-16 items-center justify-center">
-          <span className="absolute h-full w-full animate-ping rounded-full bg-primary/20" />
-          <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        </div>
-        <p className="text-sm font-medium text-muted-foreground">Localizando o passeador…</p>
-      </div>
-    );
-  }
+  if (isLoading) return <TrackingLoader label="Localizando o passeador…" />;
 
   const hasLocation = !!location;
   const mapLat = location?.lat ?? walk?.startLat ?? -23.55;
