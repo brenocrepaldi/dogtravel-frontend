@@ -370,10 +370,10 @@ export default function MapTracker({ walkId }: { walkId: string }) {
 
               {/* 3 — Actions */}
               <div className="space-y-2 px-5 py-3">
-                <div className={cn('grid gap-2', clientPhone ? 'grid-cols-3' : 'grid-cols-2')}>
+                <div className={cn('grid gap-2', clientPhone ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2')}>
                   <Link
                     href={`/walks/${walkId}`}
-                    className={cn(buttonVariants({ variant: 'outline' }), 'gap-2')}
+                    className={cn(buttonVariants({ variant: 'outline' }), 'hidden gap-2 md:inline-flex')}
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Voltar
@@ -383,7 +383,7 @@ export default function MapTracker({ walkId }: { walkId: string }) {
                       href={`tel:${clientPhone}`}
                       className={cn(
                         buttonVariants({ variant: 'outline' }),
-                        'gap-2 border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 hover:text-white',
+                        'h-11 gap-2 border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 hover:text-white md:h-10',
                       )}
                     >
                       <Phone className="h-4 w-4" />
@@ -392,7 +392,7 @@ export default function MapTracker({ walkId }: { walkId: string }) {
                   )}
                   <Link
                     href={`/walks/${walkId}/chat`}
-                    className={cn(buttonVariants({ variant: 'outline' }), 'gap-2')}
+                    className={cn(buttonVariants({ variant: 'outline' }), 'h-11 gap-2 md:h-10')}
                   >
                     <MessageSquare className="h-4 w-4" />
                     Chat
@@ -401,7 +401,7 @@ export default function MapTracker({ walkId }: { walkId: string }) {
 
                 <Button
                   className={cn(
-                    'w-full gap-2 font-semibold transition-all',
+                    'h-12 w-full gap-2 text-base font-semibold transition-all md:h-10 md:text-sm',
                     timeDone
                       ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20'
                       : 'bg-muted text-muted-foreground hover:bg-muted',
@@ -483,18 +483,19 @@ export default function MapTracker({ walkId }: { walkId: string }) {
                     href={`tel:${walkerPhone}`}
                     className={cn(
                       buttonVariants({ variant: 'outline' }),
-                      'gap-2 border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 hover:text-white',
+                      'h-11 gap-2 border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 hover:text-white md:h-10',
                     )}
                   >
                     <Phone className="h-4 w-4" />
-                    Ligar para passeador
+                    <span className="md:hidden">Ligar</span>
+                    <span className="hidden md:inline">Ligar para passeador</span>
                   </Link>
                 )}
                 <Link
                   href={`/walks/${walkId}/chat`}
                   className={cn(
                     buttonVariants({ variant: walkerPhone ? 'outline' : 'default' }),
-                    'gap-2',
+                    'h-11 gap-2 md:h-10',
                   )}
                 >
                   <MessageSquare className="h-4 w-4" />
