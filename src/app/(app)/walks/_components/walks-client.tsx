@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { buttonVariants } from '@/components/ui/button';
+import { buttonVariants, TOUCH_TARGET } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { useWalks } from '@/features/walks/hooks/use-walks';
@@ -120,34 +120,34 @@ export function WalksClient() {
 	}
 
 	return (
-		<div className="space-y-8 pb-8">
+		<div className="space-y-5 pb-8 md:space-y-8">
 			{/* Header */}
 			<div className="space-y-1.5">
-				<div className="flex flex-wrap items-start justify-between gap-4">
+				<div className="flex items-center justify-between gap-3 md:flex-wrap md:items-start md:gap-4">
 					<div>
 						<h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
 							Meus Passeios
 						</h1>
-						<p className="text-sm text-muted-foreground">
+						<p className="hidden text-sm text-muted-foreground md:block">
 							Histórico e acompanhamento de todos os passeios.
 						</p>
 					</div>
 					<div className="flex items-center gap-2">
 						<Link
 							href="/walks/new"
-							className={cn(buttonVariants({ variant: 'default' }), 'gap-1.5 shadow-sm rounded-lg')}
+							className={cn(buttonVariants({ variant: 'default' }), 'h-11 shrink-0 gap-1.5 shadow-sm rounded-lg md:h-10')}
 						>
 							<Plus className="w-3.5 h-3.5" />
 							Novo passeio
 						</Link>
 					</div>
 				</div>
-				<Separator className="mt-6" />
+				<Separator className="mt-6 hidden md:block" />
 			</div>
 
 			{/* Filters + search */}
-			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-				<div className="flex flex-wrap items-center gap-2">
+			<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 md:gap-4">
+				<div className="-mx-4 flex items-center gap-2 overflow-x-auto no-scrollbar px-4 py-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:py-0">
 					{FILTERS.map((f) => {
 						const count    = counts[f.value] ?? 0;
 						const isActive = activeFilter === f.value;
@@ -156,8 +156,10 @@ export function WalksClient() {
 								key={f.value}
 								type="button"
 								onClick={() => setActiveFilter(f.value)}
+								aria-pressed={isActive}
 								className={cn(
-									'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer border',
+									'relative inline-flex h-9 shrink-0 items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer border md:h-auto',
+									TOUCH_TARGET,
 									isActive
 										? 'bg-primary text-primary-foreground border-primary shadow-sm'
 										: 'bg-background text-muted-foreground border-border/60 hover:border-border hover:text-foreground hover:bg-muted/40',
@@ -183,13 +185,15 @@ export function WalksClient() {
 				</div>
 
 				<div className="relative w-full sm:w-64">
-					<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+					<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none md:w-3.5 md:h-3.5" />
 					<Input
 						type="search"
 						placeholder="Pet, passeador ou endereço..."
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
-						className="pl-9 rounded-lg bg-background h-9"
+						aria-label="Buscar passeios"
+						enterKeyHint="search"
+						className="pl-9 rounded-lg bg-background h-11 md:h-9"
 					/>
 				</div>
 			</div>
