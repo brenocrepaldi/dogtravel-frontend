@@ -43,14 +43,22 @@ export function FlowActions({
   primaryIcon,
   className,
 }: FlowActionsProps) {
+  const hasCancel = Boolean(cancelHref ?? onCancel);
+  // With Back + Cancel + primary, both secondaries collapse to icons on mobile
+  // so the primary label still fits on a 360px screen.
+  const compactSecondaries = showBack && hasCancel;
+
+  // Mobile: one thumb-height row — secondary actions sized to their content on
+  // the left, the primary filling the rest on the right (forward = right).
+  // From sm up the original layout is kept untouched.
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 border-t border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between",
+        "flex items-center gap-3 border-t border-border/70 pt-5 sm:justify-between",
         className
       )}
     >
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2 sm:flex-wrap">
         {showBack && (
           <FlowButton
             variant="ghost"
@@ -58,16 +66,19 @@ export function FlowActions({
             icon={<ArrowLeft className="h-4 w-4" />}
             href={backHref}
             onClick={onBack}
+            iconOnlyOnMobile={compactSecondaries}
+            className="max-sm:border-border max-sm:bg-background"
           />
         )}
 
-        {(cancelHref ?? onCancel) && (
+        {hasCancel && (
           <FlowButton
             variant="outline"
             label={cancelLabel}
             icon={<X className="h-4 w-4" />}
             href={cancelHref}
             onClick={onCancel}
+            iconOnlyOnMobile={compactSecondaries}
           />
         )}
       </div>
@@ -79,6 +90,7 @@ export function FlowActions({
         href={primaryHref}
         onClick={onPrimary}
         disabled={primaryDisabled || primaryLoading}
+        className="min-w-0 flex-1 sm:flex-none"
       />
     </div>
   );
@@ -91,22 +103,44 @@ interface FlowButtonProps {
   href?: string;
   onClick?: () => void;
   disabled?: boolean;
+  /** Show only the icon below sm (label stays for screen readers). */
+  iconOnlyOnMobile?: boolean;
+  className?: string;
 }
 
-function FlowButton({ variant, label, icon, href, onClick, disabled }: FlowButtonProps) {
+function FlowButton({
+  variant,
+  label,
+  icon,
+  href,
+  onClick,
+  disabled,
+  iconOnlyOnMobile,
+  className,
+}: FlowButtonProps) {
+  const classes = cn(
+    "max-sm:h-12 max-sm:px-4",
+    iconOnlyOnMobile && "max-sm:w-12 max-sm:px-0",
+    className
+  );
+  const content = (
+    <>
+      {icon}
+      <span className={iconOnlyOnMobile ? "max-sm:sr-only" : "truncate"}>{label}</span>
+    </>
+  );
+
   if (href) {
     return (
-      <Button variant={variant} render={<Link href={href} />} disabled={disabled}>
-        {icon}
-        {label}
+      <Button variant={variant} render={<Link href={href} />} disabled={disabled} className={classes}>
+        {content}
       </Button>
     );
   }
 
   return (
-    <Button variant={variant} onClick={onClick} disabled={disabled}>
-      {icon}
-      {label}
+    <Button variant={variant} onClick={onClick} disabled={disabled} className={classes}>
+      {content}
     </Button>
   );
 }
