@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -82,7 +82,7 @@ export function ProfileInfo() {
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -94,7 +94,7 @@ export function ProfileInfo() {
     reset({ name: profile.name ?? '', email: profile.email ?? '', phone: profile.phone ?? '' });
   }, [profile, reset]);
 
-  const watchedName = watch('name');
+  const watchedName = useWatch({ control, name: 'name' });
   const displayName = isEditing ? watchedName : (profile?.name ?? '');
   const displayImage = isEditing ? previewAvatarUrl || profile?.avatarUrl : profile?.avatarUrl;
 
