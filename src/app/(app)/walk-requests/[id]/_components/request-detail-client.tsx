@@ -27,7 +27,6 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useWalkRequestById } from '@/features/walks/hooks/use-walks';
 import { useAcceptWalk, useDeclineWalk } from '@/features/walks/hooks/use-walk-actions';
 import { useWalkerProfile } from '@/features/walkers/hooks/use-walkers';

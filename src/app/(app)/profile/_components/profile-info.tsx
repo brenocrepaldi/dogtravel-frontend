@@ -48,45 +48,6 @@ function ReadonlyField({
   );
 }
 
-function EditField({
-  id,
-  label,
-  icon,
-  value,
-  type = 'text',
-  onChange,
-}: {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  value: string;
-  type?: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label
-        htmlFor={id}
-        className="text-xs font-medium text-muted-foreground uppercase tracking-wider"
-      >
-        {label}
-      </Label>
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 pointer-events-none">
-          {icon}
-        </div>
-        <Input
-          id={id}
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="pl-9 rounded-lg"
-        />
-      </div>
-    </div>
-  );
-}
-
 // ─── Profile skeleton ─────────────────────────────────────────────────────────
 
 function ProfileSkeleton() {
