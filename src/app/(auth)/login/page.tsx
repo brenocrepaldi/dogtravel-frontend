@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -10,10 +10,11 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, TOUCH_TARGET } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { SessionExpiredNotice } from "./_components/session-expired-notice";
 
 // ─── Validation schema ────────────────────────────────────────────────────────
 const loginSchema = z.object({
@@ -64,6 +65,11 @@ export default function LoginPage() {
         </p>
       </div>
 
+      {/* useSearchParams needs a Suspense boundary so the page can still be prerendered */}
+      <Suspense fallback={null}>
+        <SessionExpiredNotice />
+      </Suspense>
+
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Email */}
@@ -87,7 +93,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Senha</Label>
             <Link
-              href="#"
+              href="/forgot-password"
               className="text-xs text-muted-foreground hover:text-primary transition-colors"
             >
               Esqueci minha senha
@@ -99,13 +105,17 @@ export default function LoginPage() {
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               autoComplete="current-password"
+              className="pr-10"
               {...register("password")}
               aria-invalid={!!errors.password}
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className={cn(
+                "absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors",
+                TOUCH_TARGET,
+              )}
               aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

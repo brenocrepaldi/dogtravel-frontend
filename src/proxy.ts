@@ -1,40 +1,85 @@
-import { auth } from "@/lib/auth";
+import { getToken, type JWT } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { SESSION_EXPIRED_PARAM } from "@/lib/session-expiry";
 
-/**
- * Next.js Proxy (formerly Middleware) using Auth.js.
- * Protects authenticated routes and redirects appropriately.
- */
-export default auth((req) => {
-  const { nextUrl, auth: session } = req;
-  const isLoggedIn = !!session;
+const AUTH_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
+const CLIENT_ONLY_PREFIXES = ["/dogs", "/walkers", "/walks/new"];
+const WALKER_ONLY_PREFIXES = [
+  "/profile/walker-profile",
+  "/profile/documents",
+  "/profile/bank-account",
+  "/walk-requests",
+];
+// Matches authjs.session-token, __Secure-authjs.session-token and their chunks (.0, .1, …)
+const SESSION_COOKIE = "authjs.session-token";
 
-  const isAuthRoute =
-    nextUrl.pathname.startsWith("/login") ||
-    nextUrl.pathname.startsWith("/register");
+export async function proxy(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-  const isProtectedRoute =
-    nextUrl.pathname.startsWith("/dashboard") ||
-    nextUrl.pathname.startsWith("/walk") ||
-    nextUrl.pathname.startsWith("/chat") ||
-    nextUrl.pathname.startsWith("/profile");
-
-  // Already logged in and trying to access auth pages → redirect to dashboard
-  if (isLoggedIn && isAuthRoute) {
-    return NextResponse.redirect(new URL("/dashboard", nextUrl));
+  if (
+    pathname === "/" ||
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/_next") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
   }
 
-  // Not logged in and trying to access protected routes → redirect to login
-  if (!isLoggedIn && isProtectedRoute) {
-    const loginUrl = new URL("/login", nextUrl);
-    loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  // A token whose refresh failed can't be revived. Counting it as logged in
+  // sent /login back to /dashboard and the client back to /login, forever.
+  const deadSession = !!token?.error;
+  const res = route(req, deadSession ? null : token, { expired: deadSession });
+
+  if (deadSession) {
+    for (const { name } of req.cookies.getAll()) {
+      if (name.includes(SESSION_COOKIE)) {
+        res.cookies.set(name, "", { maxAge: 0, path: "/", secure: name.startsWith("__Secure-") });
+      }
+    }
+  }
+
+  return res;
+}
+
+function route(req: NextRequest, session: JWT | null, { expired }: { expired: boolean }) {
+  const { pathname } = req.nextUrl;
+  const isAuthPath = AUTH_PATHS.some((p) => pathname.startsWith(p));
+
+  // Redirect authenticated users away from auth pages
+  if (session && isAuthPath) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
+  // Redirect unauthenticated users to login
+  if (!session && !isAuthPath) {
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    // Lets /login explain why the user is there
+    if (expired) loginUrl.searchParams.set(SESSION_EXPIRED_PARAM, "1");
     return NextResponse.redirect(loginUrl);
   }
 
+  if (session) {
+    const isClientOnly = CLIENT_ONLY_PREFIXES.some((p) => pathname.startsWith(p));
+    if (isClientOnly && session.role !== "client") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
+    const isWalkerOnly = WALKER_ONLY_PREFIXES.some((p) => pathname.startsWith(p));
+    if (isWalkerOnly && session.role !== "walker") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+  }
+
   return NextResponse.next();
-});
+}
 
 export const config = {
-  // Run on all routes except static assets and Next.js internals
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

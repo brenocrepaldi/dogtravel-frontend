@@ -1,9 +1,34 @@
 import axios from "axios";
+import { getSession, signOut } from "next-auth/react";
+import { toast } from "sonner";
+import { REFRESH_ERROR } from "@/lib/auth-refresh";
+import { SESSION_EXPIRED_MESSAGE, SESSION_EXPIRED_PARAM } from "@/lib/session-expiry";
+import { isApiConfigured } from "@/lib/api-mode";
 
-/**
- * Axios instance pre-configured for the DogTravel API.
- * Base URL is set from the NEXT_PUBLIC_API_URL environment variable.
- */
+const REDIRECT_DELAY_MS = 1500;
+
+// A page usually fires several requests at once, so a dead session fails all
+// of them together — only the first one warns the user and signs out.
+let sessionExpiredHandled = false;
+
+export async function handleSessionExpired(): Promise<void> {
+  if (sessionExpiredHandled) return;
+  sessionExpiredHandled = true;
+
+  toast.error(SESSION_EXPIRED_MESSAGE);
+  try {
+    // Clears the session cookie so /login doesn't send the user back to /dashboard
+    await signOut({ redirect: false });
+  } catch {
+    // The proxy also clears a dead session cookie, so /login still renders
+  }
+  setTimeout(() => {
+    // Full reload on purpose: no router here, and it drops the dead session's client state
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+    window.location.href = `/login?${SESSION_EXPIRED_PARAM}=1`;
+  }, REDIRECT_DELAY_MS);
+}
+
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api",
   timeout: 10000,
@@ -12,12 +37,19 @@ const api = axios.create({
   },
 });
 
-// ─── Request interceptor ──────────────────────────────────────────────────────
 api.interceptors.request.use(
-  (config) => {
-    // Attach auth token from localStorage if available (client-side only)
+  async (config) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("authToken");
+      const session = await getSession();
+
+      // If the JWT callback flagged a refresh failure, stop here instead of
+      // sending a request that will certainly return 401.
+      if (session?.error === REFRESH_ERROR) {
+        void handleSessionExpired();
+        return Promise.reject(new Error(REFRESH_ERROR));
+      }
+
+      const token = session?.accessToken;
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -27,18 +59,16 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ─── Response interceptor ─────────────────────────────────────────────────────
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      // Redirect to login on unauthorized
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      void handleSessionExpired();
     }
     return Promise.reject(error);
   }
 );
+
+export { isApiConfigured };
 
 export default api;

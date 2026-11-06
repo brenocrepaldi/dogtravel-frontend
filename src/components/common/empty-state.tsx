@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 
 interface EmptyStateProps {
@@ -9,6 +9,7 @@ interface EmptyStateProps {
   description: string;
   actionLabel?: string;
   actionHref?: string;
+  onAction?: () => void;
   className?: string;
 }
 
@@ -21,6 +22,7 @@ export function EmptyState({
   description,
   actionLabel,
   actionHref,
+  onAction,
   className,
 }: EmptyStateProps) {
   return (
@@ -44,6 +46,15 @@ export function EmptyState({
         >
           {actionLabel}
         </Link>
+      )}
+      {actionLabel && !actionHref && onAction && (
+        <button
+          type="button"
+          onClick={onAction}
+          className={cn(buttonVariants({ variant: "default", size: "default" }))}
+        >
+          {actionLabel}
+        </button>
       )}
     </div>
   );

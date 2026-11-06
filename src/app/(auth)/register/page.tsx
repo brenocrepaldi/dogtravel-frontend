@@ -7,17 +7,19 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Dog, ArrowLeft, UserStar } from "lucide-react";
+import type { Value as PhoneValue } from "react-phone-number-input";
 
 import { cn } from "@/lib/utils";
 import { maskCPF } from "@/lib/cpf";
 import { registerSchema, type RegisterFormValues } from "@/lib/validations/auth";
+import type { UserRole } from "@/types";
+import { useRegister } from "@/features/auth/hooks/use-auth";
+import { signIn } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
-
-type UserRole = "client" | "walker";
 
 // ─── Role Cards ───────────────────────────────────────────────────────────────
 const roleOptions: {
@@ -97,9 +99,10 @@ function DataStep({
   onBack: () => void;
 }) {
   const router = useRouter();
+  const { mutateAsync: register } = useRegister();
 
   const {
-    register,
+    register: registerField,
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -109,17 +112,39 @@ function DataStep({
 
   async function onSubmit(data: RegisterFormValues) {
     try {
-      // TODO: call AuthService.register({ ...data, role }) when backend is ready
-      // For now, simulate registration success
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { confirmPassword: _, ...registerData } = data;
+      await register({ ...registerData, role });
 
       toast.success("Conta criada com sucesso!", {
         description: "Bem-vindo ao DogTravel!",
       });
-      router.push("/login");
-    } catch {
+
+      // Auto-login after registration
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (result?.ok) {
+        // Walkers are directed to complete their professional profile before starting
+        router.push(role === "walker" ? "/profile/walker-profile?onboarding=true" : "/dashboard");
+      } else {
+        router.push("/login");
+      }
+    } catch (err) {
+      const apiMessage =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (err as any)?.response?.data?.message?.message ??
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (err as any)?.response?.data?.message ??
+        null;
       toast.error("Erro ao criar conta", {
-        description: "Tente novamente em instantes.",
+        description:
+          typeof apiMessage === "string"
+            ? apiMessage
+            : "Tente novamente em instantes.",
       });
     }
   }
@@ -151,7 +176,7 @@ function DataStep({
             id="name"
             placeholder="Seu nome"
             autoComplete="name"
-            {...register("name")}
+            {...registerField("name")}
             aria-invalid={!!errors.name}
           />
           {errors.name && (
@@ -200,7 +225,7 @@ function DataStep({
             type="email"
             placeholder="voce@exemplo.com"
             autoComplete="email"
-            {...register("email")}
+            {...registerField("email")}
             aria-invalid={!!errors.email}
           />
           {errors.email && (
@@ -219,8 +244,8 @@ function DataStep({
                 id="phone"
                 defaultCountry="BR"
                 international
-                value={field.value as any}
-                onChange={field.onChange}
+                value={field.value as PhoneValue}
+                onChange={(value) => field.onChange(value ?? "")}
                 className={cn(errors.phone && "ring-1 ring-destructive rounded-lg")}
               />
             )}
@@ -238,7 +263,7 @@ function DataStep({
             type="password"
             placeholder="Mínimo 6 caracteres"
             autoComplete="new-password"
-            {...register("password")}
+            {...registerField("password")}
             aria-invalid={!!errors.password}
           />
           {errors.password && (
@@ -254,7 +279,7 @@ function DataStep({
             type="password"
             placeholder="Repita a senha"
             autoComplete="new-password"
-            {...register("confirmPassword")}
+            {...registerField("confirmPassword")}
             aria-invalid={!!errors.confirmPassword}
           />
           {errors.confirmPassword && (

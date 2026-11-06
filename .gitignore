@@ -9,7 +9,6 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-.github/
 
 # testing
 /coverage
@@ -40,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agents markdown file
+AGENTS.md
+
+# claude code
+.claude/
+.superpowers/
