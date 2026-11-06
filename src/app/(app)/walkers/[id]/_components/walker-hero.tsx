@@ -1,5 +1,5 @@
 import { MapPin, ShieldCheck, Star } from 'lucide-react';
-import { WalkerAvatar } from './walker-avatar';
+import { WalkerAvatar } from '@/app/(app)/walkers/_components/walker-avatar';
 
 type WalkerHeroProps = {
   name: string;

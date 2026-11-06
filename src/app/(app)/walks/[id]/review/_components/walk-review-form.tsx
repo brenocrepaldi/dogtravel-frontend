@@ -4,7 +4,7 @@ import { useState } from "react";
 import { MessageSquare, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@/app/(app)/walks/[id]/review/_components/page-header";
+import { PageHeader } from "./page-header";
 import { FlowActions } from "@/app/(app)/walks/_components/flow-actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
