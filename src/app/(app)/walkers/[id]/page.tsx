@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 import {
 	ArrowLeft,
 	Award,
-	Calendar,
 	CalendarClock,
 	CheckCircle2,
 	Clock3,

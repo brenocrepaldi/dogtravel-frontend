@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
@@ -64,7 +64,7 @@ export default function BankAccountPage() {
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<BankAccountFormValues>({
@@ -92,7 +92,7 @@ export default function BankAccountPage() {
     });
   }
 
-  const accountType = watch("accountType");
+  const accountType = useWatch({ control, name: "accountType" });
 
   if (isLoading) {
     return (

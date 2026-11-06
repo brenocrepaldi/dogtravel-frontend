@@ -24,6 +24,7 @@ import {
 import { useStartWalk } from '@/features/walks/hooks/use-walk-actions';
 import { isApiConfigured } from '@/services/api';
 import { haversineMeters } from '@/lib/geo';
+import { useNow } from '@/lib/use-now';
 
 const MAX_ATTEMPTS   = 3;
 const LOCKOUT_MS     = 2 * 60 * 1000;
@@ -112,28 +113,20 @@ interface Props {
 
 export function WalkStartButton({ walkId, scheduledAt, startLat, startLng }: Props) {
   // ── Time window ────────────────────────────────────────────────────────────
-  const [isTimeReady, setIsTimeReady] = useState(false);
-
-  useEffect(() => {
-    function tick() {
-      const windowStart = new Date(scheduledAt).getTime() - WINDOW_MINUTES * 60_000;
-      setIsTimeReady(Date.now() >= windowStart);
-    }
-    tick();
-    const id = setInterval(tick, 10_000);
-    return () => clearInterval(id);
-  }, [scheduledAt]);
+  const now = useNow(10_000);
+  const isTimeReady = now >= new Date(scheduledAt).getTime() - WINDOW_MINUTES * 60_000;
 
   // ── Geolocation ────────────────────────────────────────────────────────────
-  const [withinRange, setWithinRange] = useState(false);
+  const [nearStart, setNearStart] = useState(false);
+  const withinRange = !isApiConfigured || nearStart;
 
   useEffect(() => {
-    if (!isApiConfigured) { setWithinRange(true); return; }
+    if (!isApiConfigured) return;
     if (!startLat || !startLng || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const dist = haversineMeters(pos.coords.latitude, pos.coords.longitude, startLat, startLng);
-        setWithinRange(dist <= RADIUS_METERS);
+        setNearStart(dist <= RADIUS_METERS);
       },
       () => {},
       { timeout: 10_000, enableHighAccuracy: true },
@@ -147,19 +140,19 @@ export function WalkStartButton({ walkId, scheduledAt, startLat, startLng }: Pro
   const [lockSecsLeft, setLockSecsLeft] = useState(0);
   const [attempts,     setAttempts]     = useState(0);
 
+  // The seconds left are set when the lock starts (event handler) and refreshed
+  // from the interval callback only, never synchronously inside the effect.
   useEffect(() => {
     if (!lockedUntil) return;
-    function tick() {
-      const left = Math.max(0, Math.ceil((lockedUntil! - Date.now()) / 1000));
+    const id = setInterval(() => {
+      const left = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
       setLockSecsLeft(left);
       if (left === 0) { setLockedUntil(null); setAttempts(0); }
-    }
-    tick();
-    const id = setInterval(tick, 1000);
+    }, 1000);
     return () => clearInterval(id);
   }, [lockedUntil]);
 
-  const isLocked = !!lockedUntil && Date.now() < lockedUntil;
+  const isLocked = lockedUntil !== null;
 
   // ── Modal ──────────────────────────────────────────────────────────────────
   const router  = useRouter();
@@ -186,6 +179,7 @@ export function WalkStartButton({ walkId, scheduledAt, startLat, startLng }: Pro
         setCode('');
         if (next >= MAX_ATTEMPTS) {
           setLockedUntil(Date.now() + LOCKOUT_MS);
+          setLockSecsLeft(LOCKOUT_MS / 1000);
           setShowModal(false);
           toast.error('Muitas tentativas incorretas', { description: 'Aguarde 2 minutos para tentar novamente.' });
         } else {

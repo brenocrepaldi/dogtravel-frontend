@@ -83,10 +83,19 @@ interface Props {
 export function StepLocation({ data, updateData, onNext, onBack }: Props) {
   const [locating,  setLocating]  = useState(false);
   const [adjusting, setAdjusting] = useState(false);
-  const [geoStatus, setGeoStatus] = useState<GeoStatus>("idle");
+  // Only the outcome of the last failed lookup is state, keyed by the address it
+  // was made for so that editing the address resets it. The rest is derived.
+  const [notFoundFor, setNotFoundFor] = useState<string | null>(null);
 
   const hasCoords  = data.lat !== null && data.lng !== null;
   const canGeocode = !!data.addressStreet && !!data.addressCity;
+  const geoStatus: GeoStatus = !canGeocode
+    ? "idle"
+    : hasCoords
+      ? "found"
+      : notFoundFor === data.address
+        ? "not_found"
+        : "loading";
   const showWarn   = canGeocode && !hasCoords && geoStatus === "not_found";
   const isValid    = canGeocode && hasCoords && geoStatus !== "loading";
 
@@ -102,32 +111,29 @@ export function StepLocation({ data, updateData, onNext, onBack }: Props) {
 
   // ── Forward geocode (debounced) when street + city are filled ──────────
   useEffect(() => {
-    if (!data.addressStreet || !data.addressCity) {
-      setGeoStatus("idle");
-      return;
-    }
-    if (data.lat !== null && data.lng !== null) return;
+    if (!canGeocode || hasCoords) return;
 
-    setGeoStatus("loading");
+    const address = data.address;
+    let cancelled = false;
 
     const timer = setTimeout(async () => {
       try {
-        const result = await forwardGeocode(data.address);
-        if (result) {
-          updateData({ lat: result.lat, lng: result.lng });
-          setGeoStatus("found");
-        } else {
-          setGeoStatus("not_found");
-        }
+        const result = await forwardGeocode(address);
+        if (cancelled) return;
+        if (result) updateData({ lat: result.lat, lng: result.lng });
+        else setNotFoundFor(address);
       } catch {
-        setGeoStatus("not_found");
+        if (!cancelled) setNotFoundFor(address);
       }
     }, 800);
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
     // updateData intentionally omitted
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.address, data.lat, data.lng]);
+  }, [canGeocode, hasCoords, data.address]);
 
   // ── Geolocation button ─────────────────────────────────────────────────
   async function useCurrentLocation() {
@@ -147,10 +153,8 @@ export function StepLocation({ data, updateData, onNext, onBack }: Props) {
             lat,
             lng,
           });
-          setGeoStatus("found");
         } catch {
           updateData({ lat, lng });
-          setGeoStatus("found");
         } finally {
           setLocating(false);
         }

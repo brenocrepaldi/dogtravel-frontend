@@ -122,7 +122,6 @@ function PetNotes({
 	useEffect(() => {
 		const el = textRef.current;
 		if (!el || !notes) {
-			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setCanExpand(false);
 			return;
 		}
@@ -373,14 +372,22 @@ export function PetsList() {
 	const { mutate: updateDog } = useUpdateDog();
 	const { mutate: removeDog } = useRemoveDog();
 
-	const [sheetOpen, setSheetOpen] = useState(false);
-	const [editingPet, setEditingPet] = useState<Pet | null>(null);
-	const [sheetVersion, setSheetVersion] = useState(0);
-
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
 	const list = pets;
+
+	// `?add=true` / `?edit=<id>` open the sheet on arrival. Resolved once, in the
+	// initial state, instead of calling the handlers from a mount effect.
+	const [initialSheet] = useState<{ pet: Pet | null } | null>(() => {
+		if (searchParams.get("add") === "true") return { pet: null };
+		const editId = searchParams.get("edit");
+		const pet = editId ? list.find((p) => p.id === editId) : undefined;
+		return pet ? { pet } : null;
+	});
+	const [sheetOpen, setSheetOpen] = useState(initialSheet !== null);
+	const [editingPet, setEditingPet] = useState<Pet | null>(initialSheet?.pet ?? null);
+	const [sheetVersion, setSheetVersion] = useState(initialSheet ? 1 : 0);
 
 	const handleEdit = (pet: Pet) => {
 		setEditingPet(pet);
@@ -393,19 +400,6 @@ export function PetsList() {
 		setSheetVersion((c) => c + 1);
 		setSheetOpen(true);
 	};
-
-	useEffect(() => {
-		const editId = searchParams.get("edit");
-		const shouldAdd = searchParams.get("add") === "true";
-
-		if (shouldAdd) {
-			handleAdd();
-		} else if (editId) {
-			const pet = list.find((p) => p.id === editId);
-			if (pet) handleEdit(pet);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	const handleRemove = (pet: Pet) => {
 		removeDog(pet.id, {

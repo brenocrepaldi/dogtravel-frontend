@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
@@ -25,7 +25,8 @@ import {
 } from '@/components/ui/dialog';
 import { useCompleteWalk } from '@/features/walks/hooks/use-walk-actions';
 import { useCountdown } from '@/features/tracking/hooks/use-countdown';
-import { haversineMeters } from '@/lib/geo';
+import { useWalkGps } from '@/features/walks/hooks/use-walk-gps';
+import { readCompleteWalkError } from '@/features/walks/lib/complete-walk-error';
 import type { WalkRecord } from '@/types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -40,11 +41,6 @@ const RADIUS_M = 300;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type GpsState =
-  | { status: 'loading' }
-  | { status: 'ok'; lat: number; lng: number; distanceM: number }
-  | { status: 'far'; lat: number; lng: number; distanceM: number }
-  | { status: 'unavailable' };
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -58,30 +54,7 @@ export function WalkInProgressPanel({ walk }: { walk: WalkRecord }) {
   );
 
   // ── GPS ─────────────────────────────────────────────────────────────────────
-  const [gps, setGps] = useState<GpsState>({ status: 'loading' });
-  const gpsRef = useRef<{ lat: number; lng: number } | null>(null);
-
-  useEffect(() => {
-    if (!navigator.geolocation) { setGps({ status: 'unavailable' }); return; }
-
-    const watchId = navigator.geolocation.watchPosition(
-      (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        gpsRef.current = { lat, lng };
-        if (walk.startLat == null || walk.startLng == null) {
-          setGps({ status: 'ok', lat, lng, distanceM: 0 });
-          return;
-        }
-        const distanceM = Math.round(haversineMeters(walk.startLat, walk.startLng, lat, lng));
-        setGps(distanceM <= RADIUS_M
-          ? { status: 'ok', lat, lng, distanceM }
-          : { status: 'far', lat, lng, distanceM });
-      },
-      () => setGps({ status: 'unavailable' }),
-      { enableHighAccuracy: true, maximumAge: 10_000 },
-    );
-    return () => navigator.geolocation.clearWatch(watchId);
-  }, [walk.startLat, walk.startLng]);
+  const { gps, gpsRef } = useWalkGps(walk.startLat, walk.startLng, RADIUS_M);
 
   // ── Confirm dialog ──────────────────────────────────────────────────────────
   const [showConfirm, setShowConfirm] = useState(false);
@@ -92,10 +65,8 @@ export function WalkInProgressPanel({ walk }: { walk: WalkRecord }) {
     completeWalk(
       { walkId: walk.id, coords },
       {
-        onError: (err: any) => {
-          const code = err?.response?.data?.error;
-          const remaining = err?.response?.data?.remainingSeconds as number | undefined;
-          const distM = err?.response?.data?.distanceMeters as number | undefined;
+        onError: (err) => {
+          const { code, remainingSeconds: remaining, distanceMeters: distM } = readCompleteWalkError(err);
           if (code === 'WALK_DURATION_NOT_REACHED') {
             toast.error('Tempo insuficiente', {
               description: `Aguarde mais ${formatCountdown(remaining ?? 60)} para concluir.`,
