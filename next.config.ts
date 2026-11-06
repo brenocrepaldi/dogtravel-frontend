@@ -75,6 +75,9 @@ if (process.env.NEXT_PUBLIC_APP_URL) {
 }
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle (.next/standalone) used by the Docker image.
+  output: "standalone",
+
   /**
    * Allow external image domains (used for user avatars, pet photos, map tiles, etc.)
    */
