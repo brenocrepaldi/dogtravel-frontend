@@ -76,6 +76,42 @@ export const WalksApi = {
   },
 
   getRequestById: async (id: string): Promise<WalkRequestDetail> => {
+    if (!isApiConfigured) {
+      const req = (await getWalkRequestsStore()).find((r) => r.id === id);
+      if (!req) throw new Error(`Walk request ${id} not found`);
+      const { pets } = await import("@/lib/mock-data");
+      const dogs = req.petNames.map((name, i) => {
+        const pet = pets.find((p) => p.name === name);
+        return {
+          id: req.petIds[i] ?? name,
+          name,
+          breed: pet?.breed ?? "SRD",
+          age: pet?.age ?? 2,
+          size: pet?.size ?? "medium",
+          gender: pet?.gender ?? "male",
+          photoUrl: req.petPhotos?.[i]?.photoUrl ?? null,
+          notes: pet?.notes ?? null,
+        };
+      });
+      return {
+        id: req.id,
+        clientId: req.clientId,
+        clientName: req.clientName,
+        clientAvatarUrl: req.clientAvatarUrl,
+        clientMemberSince: "2025-03-10T00:00:00-03:00",
+        petNames: req.petNames,
+        petIds: req.petIds,
+        dogs,
+        durationMinutes: req.durationMinutes,
+        price: req.price,
+        scheduledAt: req.scheduledAt,
+        scheduledLabel: req.scheduledLabel,
+        startAddress: req.startAddress,
+        startLat: -23.5614,
+        startLng: -46.6559,
+        receivedMinutes: req.receivedMinutes,
+      };
+    }
     return api.get<WalkRequestDetail>(`/walk-requests/${id}`).then((r) => r.data);
   },
 
