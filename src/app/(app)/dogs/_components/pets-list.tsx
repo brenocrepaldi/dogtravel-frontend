@@ -23,7 +23,7 @@ import { useDogs, useAddDog, useUpdateDog, useRemoveDog } from "@/features/dogs/
 import { toast } from "sonner";
 import { DOG_SIZE_LABEL } from "@/lib/pets";
 import type { Pet } from "@/types";
-import { Button } from "@/components/ui/button";
+import { Button, TOUCH_TARGET } from "@/components/ui/button";
 import { PetFormSheet, type PetDraft } from "./pet-form-sheet";
 import { cn } from "@/lib/utils";
 
@@ -346,14 +346,14 @@ function PetCard({
 					<div className="flex items-center justify-between">
 						<button
 							onClick={() => setConfirmingDelete(true)}
-							className="flex items-center gap-1 text-[11px] text-muted-foreground/50 hover:text-destructive transition-colors font-medium cursor-pointer"
+							className={`relative flex items-center gap-1 text-[11px] text-muted-foreground/50 hover:text-destructive transition-colors font-medium cursor-pointer ${TOUCH_TARGET}`}
 						>
 							<Trash2 className="w-3 h-3" />
 							Remover
 						</button>
 						<button
 							onClick={() => onEdit(pet)}
-							className="flex items-center gap-1 text-[11px] text-primary/70 hover:text-primary transition-colors font-medium cursor-pointer"
+							className={`relative flex items-center gap-1 text-[11px] text-primary/70 hover:text-primary transition-colors font-medium cursor-pointer ${TOUCH_TARGET}`}
 						>
 							Editar dados
 							<ChevronRight className="w-3 h-3" />
