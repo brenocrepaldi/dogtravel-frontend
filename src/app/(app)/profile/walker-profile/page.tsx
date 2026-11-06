@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -203,8 +203,11 @@ export default function WalkerProfilePage() {
     behaviorExpertise: [],
   });
 
-  useEffect(() => {
-    if (!profile) return;
+  // Seed the form whenever a (new) profile arrives. Adjusting state while
+  // rendering, guarded by the profile reference, avoids a setState-in-effect.
+  const [seededFrom, setSeededFrom] = useState<typeof profile>(undefined);
+  if (profile && profile !== seededFrom) {
+    setSeededFrom(profile);
     setForm({
       description:       profile.description,
       location:          profile.location,
@@ -214,7 +217,7 @@ export default function WalkerProfilePage() {
       supportedSizes:    [...profile.supportedSizes],
       behaviorExpertise: [...profile.behaviorExpertise],
     });
-  }, [profile]);
+  }
 
   function handleSave() {
     updateProfile(form, {
