@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+coverage
+.git
+.github
+.vscode
+docs
+Dockerfile
+.dockerignore
+.env*
+*.tsbuildinfo
+npm-debug.log*
+.DS_Store
