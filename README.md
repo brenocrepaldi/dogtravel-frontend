@@ -165,6 +165,12 @@ Crie um arquivo `.env.local` na raiz do projeto:
 # URL pública do backend REST
 NEXT_PUBLIC_API_URL=http://localhost:3001/api
 
+# (Opcional) Usa os dados de exemplo (mock) em vez da API. Em desenvolvimento
+# isso já acontece quando NEXT_PUBLIC_API_URL não está definida; em produção só
+# com esta flag explícita, para nunca servir dados falsos por engano.
+# Como toda NEXT_PUBLIC_*, é fixada no build.
+# NEXT_PUBLIC_USE_MOCKS=true
+
 # URL da aplicação (usada em redirects e Open Graph)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
