@@ -26,6 +26,7 @@ import {
 import { useStartWalk } from '@/features/walks/hooks/use-walk-actions';
 import { isApiConfigured } from '@/services/api';
 import { haversineMeters } from '@/lib/geo';
+import { useNow } from '@/lib/use-now';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -175,33 +176,22 @@ export function WalkStartSection({ walkId, scheduledAt, startLat, startLng }: Pr
   const { mutate: startWalk, isPending } = useStartWalk();
 
   // ── Time ──────────────────────────────────────────────────────────────────
-  const [secsToWindow, setSecsToWindow] = useState(0);
-
-  useEffect(() => {
-    function tick() {
-      const windowStart = new Date(scheduledAt).getTime() - WINDOW_MINUTES * 60_000;
-      setSecsToWindow(Math.max(0, Math.ceil((windowStart - Date.now()) / 1000)));
-    }
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [scheduledAt]);
+  const now = useNow(1000);
+  const windowStart = new Date(scheduledAt).getTime() - WINDOW_MINUTES * 60_000;
+  const secsToWindow = Math.max(0, Math.ceil((windowStart - now) / 1000));
 
   const isTimeReady = secsToWindow === 0;
 
   // ── Geolocation ───────────────────────────────────────────────────────────
-  const [geoStatus, setGeoStatus] = useState<GeoStatus>('checking');
-  const withinRange = geoStatus !== 'far';
+  // Only the result of the position lookup is state; the other statuses are
+  // derived from props and the environment.
+  const [geoResult, setGeoResult] = useState<GeoStatus>('checking');
+  const canLocate =
+    !!startLat && !!startLng && typeof navigator !== 'undefined' && !!navigator.geolocation;
+  const geoStatus: GeoStatus = !isApiConfigured ? 'simulated' : !canLocate ? 'unavailable' : geoResult;
 
   useEffect(() => {
-    if (!isApiConfigured) {
-      setGeoStatus('simulated');
-      return;
-    }
-    if (!startLat || !startLng || !navigator.geolocation) {
-      setGeoStatus('unavailable');
-      return;
-    }
+    if (!isApiConfigured || !startLat || !startLng || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const dist = haversineMeters(
@@ -210,33 +200,32 @@ export function WalkStartSection({ walkId, scheduledAt, startLat, startLng }: Pr
           startLat,
           startLng,
         );
-        setGeoStatus(dist <= RADIUS_METERS ? 'near' : 'far');
+        setGeoResult(dist <= RADIUS_METERS ? 'near' : 'far');
       },
-      () => setGeoStatus('unavailable'),
+      () => setGeoResult('unavailable'),
       { timeout: 10_000, enableHighAccuracy: true },
     );
   }, [startLat, startLng]);
 
-  const canStart = isTimeReady && withinRange;
 
   // ── Lockout ───────────────────────────────────────────────────────────────
   const [lockedUntil,  setLockedUntil]  = useState<number | null>(null);
   const [lockSecsLeft, setLockSecsLeft] = useState(0);
   const [attempts,     setAttempts]     = useState(0);
 
+  // The seconds left are set when the lock starts (event handler) and refreshed
+  // from the interval callback only, never synchronously inside the effect.
   useEffect(() => {
     if (!lockedUntil) return;
-    function tick() {
-      const left = Math.max(0, Math.ceil((lockedUntil! - Date.now()) / 1000));
+    const id = setInterval(() => {
+      const left = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
       setLockSecsLeft(left);
       if (left === 0) { setLockedUntil(null); setAttempts(0); }
-    }
-    tick();
-    const id = setInterval(tick, 1000);
+    }, 1000);
     return () => clearInterval(id);
   }, [lockedUntil]);
 
-  const isLocked = !!lockedUntil && Date.now() < lockedUntil;
+  const isLocked = lockedUntil !== null;
 
   // ── Modal ─────────────────────────────────────────────────────────────────
   const [showModal, setShowModal] = useState(false);
@@ -274,6 +263,7 @@ export function WalkStartSection({ walkId, scheduledAt, startLat, startLng }: Pr
         setCode('');
         if (next >= MAX_ATTEMPTS) {
           setLockedUntil(Date.now() + LOCKOUT_MS);
+          setLockSecsLeft(LOCKOUT_MS / 1000);
           setShowModal(false);
           toast.error('Muitas tentativas incorretas', {
             description: 'Aguarde 2 minutos para tentar novamente.',
