@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
-import { refreshTokenIfNeeded } from "@/lib/auth-refresh";
+import { refreshTokenIfNeeded } from "./auth-refresh";
 import { isApiConfigured } from "@/lib/api-mode";
 
 const loginSchema = z.object({

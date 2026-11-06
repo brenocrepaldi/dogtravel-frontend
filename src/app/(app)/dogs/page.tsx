@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import { PetsList } from "./_components/pets-list";
 import { Separator } from "@/components/ui/separator";

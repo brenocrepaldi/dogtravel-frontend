@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import WalkerDashboardPage from "./_walker/page";
 import ClientDashboardPage from "./_client/page";
 

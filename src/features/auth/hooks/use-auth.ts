@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { getSession, signOut } from "next-auth/react";
 import { AuthApi } from "../api/auth.api";
-import { REFRESH_ERROR } from "@/lib/auth-refresh";
+import { REFRESH_ERROR } from "@/lib/auth/auth-refresh";
 import type { RegisterDto } from "@/types";
 
 export function useLogout() {

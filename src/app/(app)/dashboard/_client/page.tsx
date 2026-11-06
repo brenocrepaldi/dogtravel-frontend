@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus, ClipboardList, Dog, CreditCard } from "lucide-react";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { getGreeting } from "@/lib/format";
 import { DashboardHero } from "../_components/dashboard-hero";
 import { QuickActions, type QuickActionItem } from "../_components/quick-actions";

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { Sidebar } from "@/components/common/sidebar";
 import { MobileTopBar } from "@/components/common/mobile-top-bar";
 import { BottomNav } from "@/components/common/bottom-nav";
