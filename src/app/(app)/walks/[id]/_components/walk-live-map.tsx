@@ -4,7 +4,7 @@ import Map, { Marker } from 'react-map-gl/mapbox';
 import { useSession } from 'next-auth/react';
 import { MapPin } from 'lucide-react';
 import { useWalkLocation, useLocationBroadcast } from '@/features/tracking/hooks/use-tracking';
-import { DogMarker } from '@/components/common/dog-marker';
+import { DogMarker } from '@/app/(app)/walks/_components/dog-marker';
 
 type Pet = { name: string; photoUrl?: string | null };
 

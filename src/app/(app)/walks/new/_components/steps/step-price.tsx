@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { FlowActions } from "@/components/common/flow-actions";
+import { FlowActions } from "@/app/(app)/walks/_components/flow-actions";
 import { useWalkEstimate } from "@/features/walks/hooks/use-walks";
 import type { WalkFormData } from "../walk-request-form";
 
