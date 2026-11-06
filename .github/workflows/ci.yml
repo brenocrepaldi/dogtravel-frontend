@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Dummy values only; NEXT_PUBLIC_* are inlined into the bundle at build time.
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api
+      NEXT_PUBLIC_MAPBOX_TOKEN: pk.ci-dummy-token
+      AUTH_SECRET: ci-dummy-auth-secret
+      NEXTAUTH_SECRET: ci-dummy-auth-secret
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        # Non-blocking for now: develop still has ESLint errors (react-hooks rules)
+        # being cleaned up on fix/lint-cleanup. Remove continue-on-error once merged.
+        continue-on-error: true
+        run: npx eslint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npx vitest run
+
+      - name: Build
+        # next/font/google downloads Inter at build time, so this step needs network access.
+        run: npm run build
