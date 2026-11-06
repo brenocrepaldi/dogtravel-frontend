@@ -22,7 +22,7 @@ let walkRequestsStore: WalkRequest[] | null = null;
 
 async function getWalksStore(): Promise<WalkRecord[]> {
   if (!walksStore) {
-    const { walks: seedWalks } = await import("@/lib/mock-data");
+    const { walks: seedWalks } = await import("@/lib/mock/mock-data");
     walksStore = [...seedWalks];
   }
   return walksStore;
@@ -30,7 +30,7 @@ async function getWalksStore(): Promise<WalkRecord[]> {
 
 async function getWalkRequestsStore(): Promise<WalkRequest[]> {
   if (!walkRequestsStore) {
-    const { walkRequests: seedWalkRequests } = await import("@/lib/mock-data");
+    const { walkRequests: seedWalkRequests } = await import("@/lib/mock/mock-data");
     walkRequestsStore = [...seedWalkRequests];
   }
   return walkRequestsStore;
@@ -79,7 +79,7 @@ export const WalksApi = {
     if (!isApiConfigured) {
       const req = (await getWalkRequestsStore()).find((r) => r.id === id);
       if (!req) throw new Error(`Walk request ${id} not found`);
-      const { pets } = await import("@/lib/mock-data");
+      const { pets } = await import("@/lib/mock/mock-data");
       const dogs = req.petNames.map((name, i) => {
         const pet = pets.find((p) => p.name === name);
         return {

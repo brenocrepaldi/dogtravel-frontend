@@ -8,7 +8,7 @@ let dogsStore: Pet[] | null = null;
 
 async function getDogsStore(): Promise<Pet[]> {
   if (!dogsStore) {
-    const { pets } = await import("@/lib/mock-data");
+    const { pets } = await import("@/lib/mock/mock-data");
     dogsStore = [...pets];
   }
   return dogsStore;

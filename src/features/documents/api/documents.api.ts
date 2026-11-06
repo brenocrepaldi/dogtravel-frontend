@@ -7,7 +7,7 @@ let statusStore: DocumentsStatus | null = null;
 
 async function getStatusStore(): Promise<DocumentsStatus> {
   if (!statusStore) {
-    const { documentStatus: seedStatus, walkerCertificates } = await import("@/lib/mock-data");
+    const { documentStatus: seedStatus, walkerCertificates } = await import("@/lib/mock/mock-data");
     statusStore = { ...seedStatus, certificates: [...walkerCertificates] };
   }
   return statusStore;

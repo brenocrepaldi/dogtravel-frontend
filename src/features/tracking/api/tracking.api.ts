@@ -7,7 +7,7 @@ let locationStore: Record<string, WalkLocation> | null = null;
 
 async function getLocationStore(): Promise<Record<string, WalkLocation>> {
   if (!locationStore) {
-    const { walkLocations } = await import("@/lib/mock-data");
+    const { walkLocations } = await import("@/lib/mock/mock-data");
     locationStore = { ...walkLocations };
   }
   return locationStore;
@@ -38,7 +38,7 @@ export const TrackingApi = {
   // Returns the full recorded GPS trail for a completed walk
   getRoute: async (walkId: string): Promise<[number, number][]> => {
     if (!isApiConfigured) {
-      const { walkRoutes, liveTrackingRoute } = await import("@/lib/mock-data");
+      const { walkRoutes, liveTrackingRoute } = await import("@/lib/mock/mock-data");
       return walkRoutes[walkId] ?? liveTrackingRoute;
     }
     return api

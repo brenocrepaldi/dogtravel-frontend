@@ -9,7 +9,7 @@ let myBankAccountStore: WalkerBankAccount | null = null;
 
 async function getAvailabilityStore(): Promise<Record<string, boolean>> {
   if (!availabilityStore) {
-    const { walkerAvailability } = await import("@/lib/mock-data");
+    const { walkerAvailability } = await import("@/lib/mock/mock-data");
     availabilityStore = { ...walkerAvailability };
   }
   return availabilityStore;
@@ -17,7 +17,7 @@ async function getAvailabilityStore(): Promise<Record<string, boolean>> {
 
 async function getBankAccountStore(): Promise<WalkerBankAccount> {
   if (!myBankAccountStore) {
-    const { walkerBankAccountDefault } = await import("@/lib/mock-data");
+    const { walkerBankAccountDefault } = await import("@/lib/mock/mock-data");
     myBankAccountStore = { ...walkerBankAccountDefault };
   }
   return myBankAccountStore;
@@ -37,7 +37,7 @@ export interface WalkerAvailabilityFilters {
 export const WalkersApi = {
   list: async (filters?: WalkerFilters): Promise<WalkerProfile[]> => {
     if (!isApiConfigured) {
-      const { walkers } = await import("@/lib/mock-data");
+      const { walkers } = await import("@/lib/mock/mock-data");
       if (!filters) return walkers;
 
       const { query = "", size = "" } = filters;
@@ -56,7 +56,7 @@ export const WalkersApi = {
 
   getReviews: async (walkerId: string): Promise<WalkerPublicReview[]> => {
     if (!isApiConfigured) {
-      const { walkerPublicReviews } = await import("@/lib/mock-data");
+      const { walkerPublicReviews } = await import("@/lib/mock/mock-data");
       return walkerPublicReviews[walkerId] ?? [];
     }
     return api
@@ -66,7 +66,7 @@ export const WalkersApi = {
 
   getById: async (id: string): Promise<WalkerProfile | undefined> => {
     if (!isApiConfigured) {
-      const { walkers } = await import("@/lib/mock-data");
+      const { walkers } = await import("@/lib/mock/mock-data");
       return walkers.find((w) => w.id === id);
     }
     return api.get<WalkerProfile>(`/walkers/${id}`).then((r) => r.data);
@@ -75,7 +75,7 @@ export const WalkersApi = {
   getMe: async (): Promise<WalkerProfile | null> => {
     if (!isApiConfigured) {
       if (myWalkerProfileStore) return myWalkerProfileStore;
-      const { walkers } = await import("@/lib/mock-data");
+      const { walkers } = await import("@/lib/mock/mock-data");
       return walkers[0] ? { ...walkers[0] } : null;
     }
     return api.get<WalkerProfile>("/walkers/me").then((r) => r.data);
@@ -83,7 +83,7 @@ export const WalkersApi = {
 
   updateMe: async (data: WalkerProfileUpdate): Promise<void> => {
     if (!isApiConfigured) {
-      const { walkers } = await import("@/lib/mock-data");
+      const { walkers } = await import("@/lib/mock/mock-data");
       const base = myWalkerProfileStore ?? walkers[0];
       if (base) myWalkerProfileStore = { ...base, ...data };
       return;
@@ -99,7 +99,7 @@ export const WalkersApi = {
 
   getEarnings: async (params?: EarningsParams): Promise<PaymentHistoryItem[]> => {
     if (!isApiConfigured) {
-      const { walkerEarningsHistory } = await import("@/lib/mock-data");
+      const { walkerEarningsHistory } = await import("@/lib/mock/mock-data");
       return [...walkerEarningsHistory];
     }
     return api
@@ -144,7 +144,7 @@ export const WalkersApi = {
   getAvailable: async (filters: WalkerAvailabilityFilters): Promise<WalkerProfile[]> => {
     if (!isApiConfigured) {
       const [{ walkers }, store] = await Promise.all([
-        import("@/lib/mock-data"),
+        import("@/lib/mock/mock-data"),
         getAvailabilityStore(),
       ]);
       return walkers.filter((w) => store[w.id] === true);

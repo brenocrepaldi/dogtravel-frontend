@@ -7,7 +7,7 @@ let reviewsStore: WalkReview[] | null = null;
 
 async function getReviewsStore(): Promise<WalkReview[]> {
   if (!reviewsStore) {
-    const { walkReviews } = await import("@/lib/mock-data");
+    const { walkReviews } = await import("@/lib/mock/mock-data");
     reviewsStore = [...walkReviews];
   }
   return reviewsStore;

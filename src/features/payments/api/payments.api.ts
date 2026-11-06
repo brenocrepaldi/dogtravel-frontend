@@ -7,7 +7,7 @@ let methodsStore: ManagedPaymentMethod[] | null = null;
 
 async function getMethodsStore(): Promise<ManagedPaymentMethod[]> {
   if (!methodsStore) {
-    const { managedPaymentMethods } = await import("@/lib/mock-data");
+    const { managedPaymentMethods } = await import("@/lib/mock/mock-data");
     methodsStore = [...managedPaymentMethods];
   }
   return methodsStore;
@@ -23,7 +23,7 @@ export const PaymentsApi = {
 
   getHistory: async (params?: EarningsParams): Promise<PaymentHistoryItem[]> => {
     if (!isApiConfigured) {
-      const { paymentHistory } = await import("@/lib/mock-data");
+      const { paymentHistory } = await import("@/lib/mock/mock-data");
       return [...paymentHistory];
     }
     return api.get<PaymentHistoryItem[]>("/payment-history", { params }).then((r) => r.data);

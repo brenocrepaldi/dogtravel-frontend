@@ -15,7 +15,7 @@ let chatStore: Record<string, ChatMsg[]> | null = null;
 
 async function getChatStore(): Promise<Record<string, ChatMsg[]>> {
   if (!chatStore) {
-    const { chatMessagesByWalk } = await import("@/lib/mock-data");
+    const { chatMessagesByWalk } = await import("@/lib/mock/mock-data");
     chatStore = Object.fromEntries(
       Object.entries(chatMessagesByWalk).map(([k, v]) => [k, [...v]])
     );
