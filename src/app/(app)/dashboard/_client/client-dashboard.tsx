@@ -20,7 +20,7 @@ const quickActions: QuickActionItem[] = [
   { href: "/profile/payments", icon: CreditCard,    label: "Pagamentos",        bg: "bg-emerald-500/10", fg: "text-emerald-600 dark:text-emerald-400" },
 ];
 
-export default async function ClientDashboardPage() {
+export default async function ClientDashboard() {
   const session = await auth();
   const firstName = session?.user?.name?.split(" ")[0] ?? "Cliente";
 
