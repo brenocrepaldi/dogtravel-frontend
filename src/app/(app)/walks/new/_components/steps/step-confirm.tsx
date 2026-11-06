@@ -20,7 +20,7 @@ import {
   User,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { FlowActions } from "@/components/common/flow-actions";
+import { FlowActions } from "@/app/(app)/walks/_components/flow-actions";
 import { PIX_INSTANT_ID } from "@/config/pricing";
 import { useDogs } from "@/features/dogs/hooks/use-dogs";
 import { usePaymentMethods } from "@/features/payments/hooks/use-payments";

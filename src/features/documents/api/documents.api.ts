@@ -1,33 +1,21 @@
-import type { DocumentsStatus, WalkerCertDocument, DocStatus } from "@/types";
+import type { DocumentsStatus, WalkerCertDocument } from "@/types";
 import api, { isApiConfigured } from "@/services/api";
 
-// Module-level mutable store — lazily populated via dynamic import so
-// mock-data.ts never reaches the client bundle when a real API is configured.
-let statusStore: DocumentsStatus | null = null;
-
-async function getStatusStore(): Promise<DocumentsStatus> {
-  if (!statusStore) {
-    const { documentStatus: seedStatus, walkerCertificates } = await import("@/lib/mock-data");
-    statusStore = { ...seedStatus, certificates: [...walkerCertificates] };
-  }
-  return statusStore;
-}
-
+// The in-memory mock lives in documents.mock.ts and is loaded dynamically so it
+// (and mock-data) never reaches the client bundle when a real API is configured.
 export const DocumentsApi = {
   getStatus: async (): Promise<DocumentsStatus> => {
     if (!isApiConfigured) {
-      const store = await getStatusStore();
-      return { ...store, certificates: [...store.certificates] };
+      const { documentsMock } = await import("./documents.mock");
+      return documentsMock.getStatus();
     }
     return api.get<DocumentsStatus>("/profile/documents").then((r) => r.data);
   },
 
   uploadIdentity: async (doc: File, selfie: File): Promise<void> => {
     if (!isApiConfigured) {
-      const store = await getStatusStore();
-      await new Promise((r) => setTimeout(r, 600));
-      statusStore = { ...store, identity: "pending" };
-      return;
+      const { documentsMock } = await import("./documents.mock");
+      return documentsMock.uploadIdentity();
     }
     const form = new FormData();
     form.append("document", doc);
@@ -39,10 +27,8 @@ export const DocumentsApi = {
 
   uploadBackground: async (doc: File): Promise<void> => {
     if (!isApiConfigured) {
-      const store = await getStatusStore();
-      await new Promise((r) => setTimeout(r, 600));
-      statusStore = { ...store, background: "pending" };
-      return;
+      const { documentsMock } = await import("./documents.mock");
+      return documentsMock.uploadBackground();
     }
     const form = new FormData();
     form.append("document", doc);
@@ -53,19 +39,8 @@ export const DocumentsApi = {
 
   addCertificate: async (title: string, file: File): Promise<WalkerCertDocument> => {
     if (!isApiConfigured) {
-      const store = await getStatusStore();
-      await new Promise((r) => setTimeout(r, 400));
-      const entry: WalkerCertDocument = {
-        id: crypto.randomUUID(),
-        title,
-        fileName: file.name,
-        status: "pending" as DocStatus,
-      };
-      statusStore = {
-        ...store,
-        certificates: [...store.certificates, entry],
-      };
-      return entry;
+      const { documentsMock } = await import("./documents.mock");
+      return documentsMock.addCertificate(title, file);
     }
     const form = new FormData();
     form.append("title", title);
@@ -79,12 +54,8 @@ export const DocumentsApi = {
 
   removeCertificate: async (id: string): Promise<void> => {
     if (!isApiConfigured) {
-      const store = await getStatusStore();
-      statusStore = {
-        ...store,
-        certificates: store.certificates.filter((c) => c.id !== id),
-      };
-      return;
+      const { documentsMock } = await import("./documents.mock");
+      return documentsMock.removeCertificate(id);
     }
     await api.delete(`/profile/documents/certificates/${id}`);
   },

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
-import { ClientPayments } from "@/app/(app)/payments/_components/client-payments";
-import { WalkerPayments } from "@/app/(app)/payments/_components/walker-payments";
+import { ClientPayments } from "./_components/client-payments";
+import { WalkerPayments } from "./_components/walker-payments";
 
 export const metadata: Metadata = {
   title: "Pagamentos | DogTravel",

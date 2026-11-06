@@ -6,7 +6,7 @@ import { ArrowRight, Check, PawPrint } from "lucide-react";
 import { useDogs } from "@/features/dogs/hooks/use-dogs";
 import { DOG_SIZE_LABEL } from "@/lib/pets";
 import { cn } from "@/lib/utils";
-import { FlowActions } from "@/components/common/flow-actions";
+import { FlowActions } from "@/app/(app)/walks/_components/flow-actions";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { WalkFormData } from "../walk-request-form";

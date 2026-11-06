@@ -2655,7 +2655,7 @@ All fields optional — send only those that changed.
 - `pending` — walk completed but payout not yet processed
 - `failed` — payout failed (see walk record for reason)
 
-**Source:** `src/features/walkers/api/walkers.api.ts` — `WalkersApi.getEarnings()` · `src/features/walkers/hooks/use-walkers.ts` — `useWalkerEarnings()` · `src/app/payments/_components/walker-payments.tsx`
+**Source:** `src/features/walkers/api/walkers.api.ts` — `WalkersApi.getEarnings()` · `src/features/walkers/hooks/use-walkers.ts` — `useWalkerEarnings()` · `src/app/(app)/profile/payments/_components/walker-payments.tsx`
 
 ---
 

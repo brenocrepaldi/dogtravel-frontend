@@ -5,7 +5,7 @@ import { Search } from 'lucide-react';
 import { useDogs } from '@/features/dogs/hooks/use-dogs';
 import { useWalkers } from '@/features/walkers/hooks/use-walkers';
 import type { DogSize } from '@/types';
-import { EmptyState } from '@/components/common/empty-state';
+import { EmptyState } from '@/app/(app)/walkers/_components/empty-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { trackMetricEvent } from '@/lib/metrics';
 import { WalkerCard } from './walker-card';
