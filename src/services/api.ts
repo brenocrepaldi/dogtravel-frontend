@@ -3,6 +3,7 @@ import { getSession, signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { REFRESH_ERROR } from "@/lib/auth-refresh";
 import { SESSION_EXPIRED_MESSAGE, SESSION_EXPIRED_PARAM } from "@/lib/session-expiry";
+import { isApiConfigured } from "@/lib/api-mode";
 
 const REDIRECT_DELAY_MS = 1500;
 
@@ -68,6 +69,6 @@ api.interceptors.response.use(
   }
 );
 
-export const isApiConfigured = !!process.env.NEXT_PUBLIC_API_URL;
+export { isApiConfigured };
 
 export default api;

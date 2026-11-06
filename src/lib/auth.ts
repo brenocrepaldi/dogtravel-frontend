@@ -2,13 +2,13 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 import { refreshTokenIfNeeded } from "@/lib/auth-refresh";
+import { isApiConfigured } from "@/lib/api-mode";
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
 
-const isApiConfigured = !!process.env.NEXT_PUBLIC_API_URL;
 
 // ─── NextAuth config ──────────────────────────────────────────────────────────
 // Built per call: NextAuth passes the request to the /api/auth/* route
