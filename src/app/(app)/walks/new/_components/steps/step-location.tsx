@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowRight, Loader2, LocateFixed, MapPin, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { FlowActions } from "@/components/common/flow-actions";
 import { Button } from "@/components/ui/button";
@@ -131,7 +132,12 @@ export function StepLocation({ data, updateData, onNext, onBack }: Props) {
 
   // ── Geolocation button ─────────────────────────────────────────────────
   async function useCurrentLocation() {
-    if (!navigator.geolocation) return;
+    // Browsers only expose geolocation on HTTPS (or localhost) — on plain
+    // http, e.g. a phone opening the dev server by LAN host, it always fails.
+    if (!window.isSecureContext || !navigator.geolocation) {
+      toast.error("A localização só funciona em conexão segura (HTTPS). Digite o endereço.");
+      return;
+    }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -155,7 +161,15 @@ export function StepLocation({ data, updateData, onNext, onBack }: Props) {
           setLocating(false);
         }
       },
-      () => setLocating(false)
+      (err) => {
+        setLocating(false);
+        toast.error(
+          err.code === err.PERMISSION_DENIED
+            ? "Permita o acesso à localização nas configurações do navegador."
+            : "Não foi possível obter sua localização. Tente novamente ou digite o endereço."
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10_000 }
     );
   }
 
