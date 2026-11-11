@@ -138,7 +138,7 @@ export function StepPixPayment({ data, onDone }: Props) {
       {/* CTA */}
       <Button
         type="button"
-        className="w-full cursor-pointer"
+        className="w-full cursor-pointer max-sm:h-12"
         size="lg"
         onClick={onDone}
       >
