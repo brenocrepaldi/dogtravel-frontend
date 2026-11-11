@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -163,12 +163,13 @@ export function WalkRequestForm() {
 	const [submitted, setSubmitted] = useState(false);
 	const [showSuccess, setShowSuccess] = useState(false);
 	const [pixPayment, setPixPayment] = useState(false);
-	const hasPrefilledRepeat = useRef(false);
+	const [prefilledWalkId, setPrefilledWalkId] = useState<string | null>(null);
 
-	useEffect(() => {
-		if (hasPrefilledRepeat.current) return;
-		if (!repeatWalkId || !walkToRepeat) return;
-		hasPrefilledRepeat.current = true;
+	// Prefill from the walk being repeated once it has loaded. This is state derived
+	// from fetched data, so it is adjusted while rendering (guarded by the walk id)
+	// rather than from an effect; only the toast/metric side effects live in one.
+	if (repeatWalkId && walkToRepeat && prefilledWalkId !== walkToRepeat.id) {
+		setPrefilledWalkId(walkToRepeat.id);
 		const { date, time } = toDateAndTime(walkToRepeat.scheduledAt);
 
 		// Prefer petIds from the walk record (reliable); fall back to name matching
@@ -190,14 +191,18 @@ export function WalkRequestForm() {
 			isFirstRide: false,
 			estimatedPrice: null,
 		}));
+	}
+
+	useEffect(() => {
+		if (!prefilledWalkId) return;
 		toast('Dados do ultimo passeio carregados', {
 			description: 'Revise os detalhes e confirme quando quiser.',
 		});
 		trackMetricEvent({
 			name: 'walk_repeat_prefill_used',
-			payload: { walkId: walkToRepeat.id },
+			payload: { walkId: prefilledWalkId },
 		});
-	}, [walkToRepeat, pets, repeatWalkId]);
+	}, [prefilledWalkId]);
 
 	function updateData(partial: Partial<WalkFormData>) {
 		setData((prev) => ({ ...prev, ...partial }));

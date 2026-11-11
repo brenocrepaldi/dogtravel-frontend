@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -21,7 +21,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useWalkerProfile, useUpdateWalkerProfile } from "@/features/walkers/hooks/use-walkers";
@@ -204,8 +203,11 @@ export default function WalkerProfilePage() {
     behaviorExpertise: [],
   });
 
-  useEffect(() => {
-    if (!profile) return;
+  // Seed the form whenever a (new) profile arrives. Adjusting state while
+  // rendering, guarded by the profile reference, avoids a setState-in-effect.
+  const [seededFrom, setSeededFrom] = useState<typeof profile>(undefined);
+  if (profile && profile !== seededFrom) {
+    setSeededFrom(profile);
     setForm({
       description:       profile.description,
       location:          profile.location,
@@ -215,7 +217,7 @@ export default function WalkerProfilePage() {
       supportedSizes:    [...profile.supportedSizes],
       behaviorExpertise: [...profile.behaviorExpertise],
     });
-  }, [profile]);
+  }
 
   function handleSave() {
     updateProfile(form, {

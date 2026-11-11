@@ -165,6 +165,12 @@ Crie um arquivo `.env.local` na raiz do projeto:
 # URL pública do backend REST
 NEXT_PUBLIC_API_URL=http://localhost:3001/api
 
+# (Opcional) Usa os dados de exemplo (mock) em vez da API. Em desenvolvimento
+# isso já acontece quando NEXT_PUBLIC_API_URL não está definida; em produção só
+# com esta flag explícita, para nunca servir dados falsos por engano.
+# Como toda NEXT_PUBLIC_*, é fixada no build.
+# NEXT_PUBLIC_USE_MOCKS=true
+
 # URL da aplicação (usada em redirects e Open Graph)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
@@ -185,6 +191,33 @@ NEXT_PUBLIC_MEDIA_URL=http://localhost:9000
 # Token de acesso público do Mapbox
 NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1...
 ```
+
+---
+
+## Docker
+
+A imagem de produção (multi-stage, Next.js `standalone`, usuário não-root, porta 3000) é construída com o `Dockerfile` da raiz.
+
+As variáveis `NEXT_PUBLIC_*` são embutidas no bundle **em tempo de build**: passe-as com `--build-arg` (alterá-las no `docker run` não tem efeito no código do navegador). Segredos (`AUTH_SECRET`/`NEXTAUTH_SECRET`, `NEXTAUTH_URL`) são lidos apenas em runtime. O build precisa de acesso à internet (a fonte Inter é baixada via `next/font/google`).
+
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_API_URL=https://api.exemplo.com/api \
+  --build-arg NEXT_PUBLIC_WS_URL=wss://api.exemplo.com \
+  --build-arg NEXT_PUBLIC_APP_URL=https://app.exemplo.com \
+  --build-arg NEXT_PUBLIC_MEDIA_URL=https://media.exemplo.com \
+  --build-arg NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1... \
+  -t dogtravel-frontend .
+
+SECRET="$(openssl rand -base64 32)"
+docker run -p 3000:3000 \
+  -e AUTH_SECRET="$SECRET" \
+  -e NEXTAUTH_SECRET="$SECRET" \
+  -e NEXTAUTH_URL=https://app.exemplo.com \
+  dogtravel-frontend
+```
+
+A imagem já inclui um `HEALTHCHECK` (HTTP em `/`); o status aparece em `docker ps`.
 
 ---
 
