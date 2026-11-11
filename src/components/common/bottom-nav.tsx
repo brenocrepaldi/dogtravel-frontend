@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   Bell,
+  CalendarClock,
   CreditCard,
+  Navigation,
   ClipboardList,
   Dog,
   LayoutDashboard,
@@ -14,6 +16,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePendingRequestCount } from "@/features/walks/hooks/use-pending-request-count";
+import { useWalks } from "@/features/walks/hooks/use-walks";
+import { walkerCenterAction } from "@/lib/walker-center-action";
 import { CountBadge } from "./count-badge";
 
 const clientBottomNav = [
@@ -38,6 +42,8 @@ function matches(pathname: string, href: string) {
 
 // Only the most specific matching item is active, so /walks/new lights up
 // "Solicitar" and not "Passeios" too (same for /profile/payments vs /profile).
+const centerIcons = { live: Navigation, today: CalendarClock, requests: Bell } as const;
+
 function activeHref(pathname: string, items: readonly { href: string }[]) {
   return items
     .filter((item) => matches(pathname, item.href))
@@ -49,10 +55,21 @@ export function BottomNav() {
   const { data: session } = useSession();
 
   const role = session?.user?.role ?? "client";
-  const items = role === "walker" ? walkerBottomNav : clientBottomNav;
+  const isWalker = role === "walker";
+  const pendingRequests = usePendingRequestCount();
+  const { data: walkerWalks = [] } = useWalks("walker", session?.user?.id ?? "", {
+    enabled: isWalker && !!session?.user?.id,
+  });
+
+  // The walker's center button follows their moment: live walk, today's walk, or requests.
+  const center = isWalker ? walkerCenterAction(walkerWalks, new Date()) : null;
+  const items = isWalker
+    ? walkerBottomNav.map((item, i) =>
+        i === 2 && center ? { href: center.href, icon: centerIcons[center.kind], label: center.label } : item,
+      )
+    : clientBottomNav;
   const primaryIndex = 2;
   const current = activeHref(pathname, items);
-  const pendingRequests = usePendingRequestCount();
 
   return (
     <nav
@@ -91,6 +108,7 @@ export function BottomNav() {
         const primary = items[primaryIndex];
         const active = primary.href === current;
         const badge = primary.href === "/walk-requests" ? pendingRequests : 0;
+        const live = center?.kind === "live";
 
         return (
           <Link
@@ -98,11 +116,16 @@ export function BottomNav() {
             aria-label={primary.label}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "absolute -top-3 left-1/2 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full text-primary-foreground shadow-sm shadow-primary/30 transition-colors",
-              active ? "bg-[oklch(0.45_0.22_262)]" : "bg-primary",
+              "absolute -top-3 left-1/2 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full text-primary-foreground shadow-sm transition-colors",
+              live
+                ? cn("shadow-emerald-600/30", active ? "bg-emerald-700" : "bg-emerald-600")
+                : cn("shadow-primary/30", active ? "bg-[oklch(0.45_0.22_262)]" : "bg-primary"),
             )}
           >
-            <primary.icon className="h-5 w-5" />
+            {live && (
+              <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500/40 motion-reduce:hidden" />
+            )}
+            <primary.icon className="relative h-5 w-5" />
             {badge > 0 && (
               <CountBadge
                 count={badge}
