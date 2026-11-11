@@ -205,7 +205,7 @@ export function StepPayment({ data, updateData, onNext, onBack }: Props) {
       <Button
         variant="outline"
         type="button"
-        className="gap-2 cursor-pointer"
+        className="gap-2 cursor-pointer w-full sm:w-auto max-sm:h-11"
         onClick={() => setShowAddDialog(true)}
       >
         <Plus className="h-4 w-4" />
@@ -270,6 +270,9 @@ export function StepPayment({ data, updateData, onNext, onBack }: Props) {
                     value={form.value}
                     placeholder="4242"
                     maxLength={4}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="off"
                     onChange={(e) => setForm((c) => ({ ...c, value: e.target.value }))}
                   />
                 </div>
@@ -295,6 +298,7 @@ export function StepPayment({ data, updateData, onNext, onBack }: Props) {
                 <Input
                   value={form.holderName}
                   placeholder={isCard ? "Nome no cartão" : "Nome completo"}
+                  autoComplete={isCard ? "cc-name" : "name"}
                   onChange={(e) => setForm((c) => ({ ...c, holderName: e.target.value }))}
                 />
               </div>
@@ -304,6 +308,8 @@ export function StepPayment({ data, updateData, onNext, onBack }: Props) {
                   <Input
                     value={form.expiresAt}
                     placeholder="12/29"
+                    inputMode="numeric"
+                    autoComplete="cc-exp"
                     onChange={(e) => setForm((c) => ({ ...c, expiresAt: e.target.value }))}
                   />
                 </div>

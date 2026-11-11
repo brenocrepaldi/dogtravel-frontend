@@ -215,6 +215,8 @@ export function StepLocation({ data, updateData, onNext, onBack }: Props) {
               id="street"
               className="pl-9"
               placeholder="Rua das Flores, 120"
+              autoComplete="address-line1"
+              enterKeyHint="next"
               value={data.addressStreet ?? ""}
               onChange={(e) => updateField("addressStreet", e.target.value)}
             />
@@ -230,6 +232,8 @@ export function StepLocation({ data, updateData, onNext, onBack }: Props) {
             <Input
               id="complement"
               placeholder="Apto 42, Bloco B"
+              autoComplete="address-line2"
+              enterKeyHint="next"
               value={data.addressComplement ?? ""}
               onChange={(e) => updateField("addressComplement", e.target.value)}
             />
@@ -241,6 +245,8 @@ export function StepLocation({ data, updateData, onNext, onBack }: Props) {
             <Input
               id="neighborhood"
               placeholder="Moema"
+              autoComplete="address-level3"
+              enterKeyHint="next"
               value={data.addressNeighborhood ?? ""}
               onChange={(e) => updateField("addressNeighborhood", e.target.value)}
             />
@@ -256,6 +262,8 @@ export function StepLocation({ data, updateData, onNext, onBack }: Props) {
             <Input
               id="city"
               placeholder="São Paulo"
+              autoComplete="address-level2"
+              enterKeyHint="done"
               value={data.addressCity ?? ""}
               onChange={(e) => updateField("addressCity", e.target.value)}
             />
@@ -282,7 +290,7 @@ export function StepLocation({ data, updateData, onNext, onBack }: Props) {
         type="button"
         onClick={useCurrentLocation}
         disabled={locating}
-        className={cn("gap-2 w-full sm:w-auto cursor-pointer", locating && "opacity-70")}
+        className={cn("gap-2 w-full sm:w-auto max-sm:h-11 cursor-pointer", locating && "opacity-70")}
       >
         <LocateFixed className={locating ? "h-4 w-4 animate-pulse" : "h-4 w-4"} />
         {locating ? "Obtendo localização..." : "Usar minha localização atual"}
