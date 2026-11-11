@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -11,7 +12,8 @@ export function useWalkRequestActions(walkerProfileId: string) {
   const router = useRouter();
   const { data: session } = useSession();
   const { mutate: acceptWalk, isPending: isAccepting } = useAcceptWalk();
-  const { mutate: declineWalk, isPending: isDeclining } = useDeclineWalk();
+  const { mutate: declineWalk, mutateAsync: declineWalkAsync, isPending: isDeclining } = useDeclineWalk();
+  const [isDecliningAll, setIsDecliningAll] = useState(false);
 
   function accept(request: WalkRequest) {
     const walkerName = session?.user?.name ?? "Passeador";
@@ -41,5 +43,23 @@ export function useWalkRequestActions(walkerProfileId: string) {
     });
   }
 
-  return { accept, decline, isAccepting, isDeclining };
+  /** Declines every request in the list ("limpar todos"); each goes back to the queue for other walkers. */
+  async function declineAll(requests: readonly WalkRequest[]) {
+    if (requests.length === 0) return;
+    setIsDecliningAll(true);
+    const results = await Promise.allSettled(requests.map((r) => declineWalkAsync(r.id)));
+    setIsDecliningAll(false);
+    const failed = results.filter((r) => r.status === "rejected").length;
+    if (failed === 0) {
+      toast("Pedidos limpos", {
+        description: `${requests.length} pedido${requests.length > 1 ? "s" : ""} devolvido${requests.length > 1 ? "s" : ""} para a fila.`,
+      });
+    } else {
+      toast.error("Não foi possível limpar todos os pedidos.", {
+        description: `${failed} de ${requests.length} continuam na lista. Tente novamente.`,
+      });
+    }
+  }
+
+  return { accept, decline, declineAll, isAccepting, isDeclining, isDecliningAll };
 }

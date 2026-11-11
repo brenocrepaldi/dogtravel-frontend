@@ -1,9 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Lock, RotateCw } from "lucide-react";
+import { AlertCircle, Lock, RotateCw, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
@@ -15,7 +24,11 @@ import { WalkRequestCard } from "./_components/walk-request-card";
 
 function subtitle(canToggle: boolean, available: boolean, count: number): string {
   if (!canToggle) return "Conclua seu perfil para receber pedidos.";
-  if (!available) return "Você está indisponível.";
+  if (!available) {
+    return count > 0
+      ? `Você está offline · ${count} pedido${count > 1 ? "s" : ""} recebido${count > 1 ? "s" : ""}.`
+      : "Você está offline.";
+  }
   if (count === 0) return "Nenhum pedido aguardando.";
   return `${count} pedido${count > 1 ? "s" : ""} aguardando sua resposta.`;
 }
@@ -32,7 +45,8 @@ export default function WalkRequestsPage() {
     toggle,
   } = useAvailabilityToggle();
   const { data: requests = [], isLoading, isError, refetch, isRefetching } = useWalkRequests();
-  const { accept, decline, isAccepting } = useWalkRequestActions(walkerProfileId);
+  const { accept, decline, declineAll, isAccepting, isDecliningAll } = useWalkRequestActions(walkerProfileId);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   // Soonest walk first: that's the one the walker has to decide on now.
   const sorted = [...requests].sort(
@@ -110,8 +124,6 @@ export default function WalkRequestsPage() {
             <Skeleton key={i} className="h-56 rounded-2xl" />
           ))}
         </div>
-      ) : !online ? (
-        <RequestsOfflineState canToggle={canToggle} onActivate={toggle} explainWhenLocked />
       ) : isError ? (
         <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/[0.04] p-4">
           <AlertCircle className="h-5 w-5 shrink-0 text-destructive" />
@@ -121,22 +133,76 @@ export default function WalkRequestsPage() {
             Tentar de novo
           </Button>
         </div>
-      ) : sorted.length === 0 ? (
-        <RequestsWaitingState />
       ) : (
-        <div className="grid gap-3 lg:grid-cols-2">
-          {sorted.map((req) => (
-            <WalkRequestCard
-              key={req.id}
-              request={req}
-              onOpen={() => router.push(`/walk-requests/${req.id}`)}
-              onAccept={() => accept(req)}
-              onDecline={() => decline(req)}
-              isAccepting={isAccepting}
-            />
-          ))}
+        <div className="space-y-4">
+          {/* Offline (or locked): say so, but keep the requests already received below. */}
+          {!online && <RequestsOfflineState canToggle={canToggle} onActivate={toggle} explainWhenLocked />}
+
+          {online && sorted.length === 0 && <RequestsWaitingState />}
+
+          {canToggle && sorted.length > 0 && (
+            <>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-sm font-semibold text-foreground">
+                  {online ? "Aguardando sua resposta" : "Recebidos enquanto online"}
+                </h2>
+                <Button
+                  variant="ghost"
+                  className="-mr-2 h-11 shrink-0 text-muted-foreground hover:text-destructive sm:h-9"
+                  onClick={() => setConfirmClear(true)}
+                  disabled={isDecliningAll}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Limpar todos
+                </Button>
+              </div>
+              <div className="grid gap-3 lg:grid-cols-2">
+                {sorted.map((req) => (
+                  <WalkRequestCard
+                    key={req.id}
+                    request={req}
+                    onOpen={() => router.push(`/walk-requests/${req.id}`)}
+                    onAccept={() => accept(req)}
+                    onDecline={() => decline(req)}
+                    isAccepting={isAccepting}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
+
+      <Dialog open={confirmClear} onOpenChange={setConfirmClear}>
+        <DialogContent showCloseButton={false} className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Limpar todos os pedidos?</DialogTitle>
+            <DialogDescription>
+              {sorted.length === 1
+                ? "O pedido será recusado e voltará para a fila de outros passeadores."
+                : `Os ${sorted.length} pedidos serão recusados e voltarão para a fila de outros passeadores.`}{" "}
+              Não dá para desfazer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" className="h-11 sm:h-10" onClick={() => setConfirmClear(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              className="h-11 sm:h-10"
+              disabled={isDecliningAll}
+              onClick={async () => {
+                setConfirmClear(false);
+                await declineAll(sorted);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+              Limpar todos
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
