@@ -232,13 +232,13 @@ export function RequestDetailClient({ requestId }: { requestId: string }) {
         <div className="space-y-1">
           <Link
             href="/dashboard"
-            className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), '-ml-2 text-muted-foreground hover:text-foreground')}
+            className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), '-ml-2 text-muted-foreground hover:text-foreground max-sm:h-10')}
           >
             <ArrowLeft className="mr-1.5 h-4 w-4" />
             Pedidos recebidos
           </Link>
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
               Passeio com{' '}
               <span className="text-emerald-600 dark:text-emerald-400">
                 {req.petNames.length > 1
@@ -254,7 +254,7 @@ export function RequestDetailClient({ requestId }: { requestId: string }) {
         </div>
 
         {/* Earnings highlight in header */}
-        <div className="shrink-0 text-right">
+        <div className="shrink-0 sm:text-right">
           <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 leading-none">
             {toMoney(req.price)}
           </p>
@@ -292,7 +292,7 @@ export function RequestDetailClient({ requestId }: { requestId: string }) {
                   </span>
                 </div>
               </div>
-              <div className="relative h-[300px] sm:h-[340px]">
+              <div className="relative h-[220px] sm:h-[340px]">
                 {walkerPos && (
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&origin=${walkerPos.lat},${walkerPos.lng}&destination=${req.startLat},${req.startLng}&travelmode=walking`}
@@ -300,7 +300,7 @@ export function RequestDetailClient({ requestId }: { requestId: string }) {
                     rel="noopener noreferrer"
                     className="absolute bottom-3 right-3 z-10"
                   >
-                    <Button size="sm" className="gap-1.5 rounded-lg text-xs h-8 bg-white text-foreground border border-border/60 shadow-md hover:bg-muted">
+                    <Button size="sm" className="gap-1.5 rounded-lg text-xs h-10 sm:h-8 bg-white text-foreground border border-border/60 shadow-md hover:bg-muted">
                       <Navigation className="h-3.5 w-3.5 text-emerald-600" />
                       Como chegar
                     </Button>
@@ -369,7 +369,7 @@ export function RequestDetailClient({ requestId }: { requestId: string }) {
               <Separator className="opacity-60" />
               <Link
                 href={`/clients/${req.clientId}`}
-                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full gap-1.5')}
+                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full gap-1.5 max-sm:h-11')}
               >
                 <User className="h-3.5 w-3.5" />
                 Ver perfil do cliente
@@ -425,15 +425,15 @@ export function RequestDetailClient({ requestId }: { requestId: string }) {
       </div>
 
       {/* ── Action bar ─────────────────────────────────────────────────────── */}
-      <div className="sticky bottom-0 rounded-2xl border border-border/60 bg-card shadow-lg shadow-black/5 px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+      <div className="sticky bottom-0 rounded-2xl border border-border/60 bg-card shadow-lg shadow-black/5 px-4 sm:px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         <div className="flex items-center justify-between gap-4">
           <p className="hidden sm:block text-sm text-muted-foreground">
             Responda ao pedido de <span className="font-medium text-foreground">{req.clientName}</span>
           </p>
-          <div className="flex items-center gap-3 ml-auto">
+          <div className="flex w-full items-center gap-3 sm:ml-auto sm:w-auto">
             <Button
               variant="outline"
-              className="gap-2 rounded-lg border-destructive/30 text-destructive hover:border-destructive hover:bg-destructive/10"
+              className="h-12 flex-1 sm:h-10 sm:flex-none gap-2 rounded-lg border-destructive/30 text-destructive hover:border-destructive hover:bg-destructive/10"
               onClick={handleDecline}
               disabled={isDeclining || isAccepting}
             >
@@ -441,7 +441,7 @@ export function RequestDetailClient({ requestId }: { requestId: string }) {
               Recusar
             </Button>
             <Button
-              className="gap-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-500/25 px-6"
+              className="h-12 flex-1 sm:h-10 sm:flex-none gap-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-500/25 px-6"
               onClick={handleAccept}
               disabled={isAccepting || isDeclining}
             >
