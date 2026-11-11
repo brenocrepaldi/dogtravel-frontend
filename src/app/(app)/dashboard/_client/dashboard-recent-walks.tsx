@@ -1,13 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { formatBRL, getInitials } from "@/lib/format";
+import { formatBRL } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWalks } from "@/features/walks/hooks/use-walks";
 import type { WalkStatus } from "@/types";
+import { WalkListAvatar } from "../_components/walk-list-avatar";
 
 const statusConfig: Record<WalkStatus, { label: string; className: string }> = {
   pending:     { label: "Aguardando",   className: "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-400" },
@@ -53,15 +53,10 @@ export function DashboardRecentWalks() {
           return (
             <Link key={walk.id} href={`/walks/${walk.id}`}>
               <div className="group flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-muted/30 sm:gap-4 sm:px-5 sm:py-4">
-                {walk.walkerAvatarUrl ? (
-                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-border/30 transition-transform duration-150 group-hover:scale-105">
-                    <Image src={walk.walkerAvatarUrl} alt={walkerName} fill sizes="40px" className="object-cover" />
-                  </div>
-                ) : (
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary transition-transform duration-150 group-hover:scale-105">
-                    {getInitials(walkerName)}
-                  </div>
-                )}
+                <WalkListAvatar
+                  main={{ name: walkerName, photoUrl: walk.walkerAvatarUrl, kind: "person" }}
+                  corner={walk.pets?.[0] ? { ...walk.pets[0], kind: "dog" } : undefined}
+                />
                 <div className="flex-1 min-w-0">
                   <p className="truncate text-sm font-semibold text-foreground">
                     {walkerName}
