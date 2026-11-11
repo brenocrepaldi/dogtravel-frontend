@@ -1,25 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
-  ClipboardList, FileCheck2, Lock, Star, TrendingUp, Wallet, User,
+  ChevronRight, ClipboardList, FileCheck2, Lock, Star, TrendingUp, Wallet, User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatBRL, getGreeting, getInitials } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWalkRequests, useWalks } from "@/features/walks/hooks/use-walks";
-import { useWalkRequestActions } from "@/features/walks/hooks/use-walk-request-actions";
 import { useWalkerStats } from "@/features/stats/hooks/use-stats";
 import { useAvailabilityToggle } from "@/features/walkers/hooks/use-availability-toggle";
 import { DashboardHero } from "../_components/dashboard-hero";
 import { QuickActions, type QuickActionItem } from "../_components/quick-actions";
 import { ActiveWalkBanner } from "../_components/active-walk-banner";
 import { SectionHeader } from "../_components/section-header";
-import { RequestsOfflineState, RequestsWaitingState } from "../../walk-requests/_components/requests-states";
-import { WalkRequestCard } from "../../walk-requests/_components/walk-request-card";
 
 const quickActions: QuickActionItem[] = [
   { href: "/walks",             icon: ClipboardList, label: "Meus passeios", bg: "bg-primary/10",     fg: "text-primary" },
@@ -38,21 +34,14 @@ function getHeroSubtitle(canToggle: boolean, available: boolean, requestCount: n
 export default function WalkerDashboardPage() {
   const { data: session, status: sessionStatus } = useSession();
   const firstName = session?.user?.name?.split(" ")[0] ?? "Passeador";
-  const router    = useRouter();
 
   const { data: walkerRequests = [] } = useWalkRequests();
   const {
-    walkerProfileId,
     available,
     canToggle,
     toggle: handleAvailabilityClick,
     isUpdating: updatingAvailability,
   } = useAvailabilityToggle();
-  const {
-    accept: handleAccept,
-    decline: handleDecline,
-    isAccepting,
-  } = useWalkRequestActions(walkerProfileId);
 
   const { data: allWalks = [], isLoading: walksLoading } = useWalks("walker", session?.user?.id ?? "", {
     enabled: !!session?.user?.id,
@@ -94,9 +83,19 @@ export default function WalkerDashboardPage() {
           <div>
             <p className="text-sm font-medium text-primary-foreground/65">{getGreeting()}</p>
             <h1 className="mt-0.5 text-2xl font-bold tracking-tight lg:text-3xl">{firstName}!</h1>
-            <p className="mt-1 text-sm text-primary-foreground/70 lg:mt-1.5">
-              {getHeroSubtitle(canToggle, available, walkerRequests.length)}
-            </p>
+            {available && canToggle && walkerRequests.length > 0 ? (
+              <Link
+                href="/walk-requests"
+                className="mt-1 inline-flex min-h-6 items-center gap-1 text-sm font-medium text-primary-foreground underline-offset-4 hover:underline lg:mt-1.5"
+              >
+                {getHeroSubtitle(canToggle, available, walkerRequests.length)}
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <p className="mt-1 text-sm text-primary-foreground/70 lg:mt-1.5">
+                {getHeroSubtitle(canToggle, available, walkerRequests.length)}
+              </p>
+            )}
 
             {/* Availability toggle */}
             <button
@@ -167,40 +166,6 @@ export default function WalkerDashboardPage() {
 
       {/* ── Active walk banner (API-driven) ── */}
       <ActiveWalkBanner walk={activeWalk} />
-
-      {/* ── Incoming requests ── */}
-      <section className="space-y-3.5">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-foreground">Pedidos recebidos</h2>
-          {available && walkerRequests.length > 0 && (
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-bold text-primary-foreground">
-              {walkerRequests.length}
-            </span>
-          )}
-        </div>
-
-        {/* State 1: offline or profile incomplete */}
-        {!available && <RequestsOfflineState canToggle={canToggle} onActivate={handleAvailabilityClick} />}
-
-        {/* State 2: online, no requests yet */}
-        {available && walkerRequests.length === 0 && <RequestsWaitingState />}
-
-        {/* State 3: has pending requests */}
-        {available && walkerRequests.length > 0 && (
-          <div className="space-y-3">
-            {walkerRequests.map((req) => (
-              <WalkRequestCard
-                key={req.id}
-                request={req}
-                onOpen={() => router.push(`/walk-requests/${req.id}`)}
-                onAccept={() => handleAccept(req)}
-                onDecline={() => handleDecline(req)}
-                isAccepting={isAccepting}
-              />
-            ))}
-          </div>
-        )}
-      </section>
 
       {/* ── Quick actions ── */}
       <QuickActions items={quickActions} />
