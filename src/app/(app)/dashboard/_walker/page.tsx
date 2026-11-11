@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useWalkRequests, useWalks } from "@/features/walks/hooks/use-walks";
 import { useWalkerStats } from "@/features/stats/hooks/use-stats";
 import { useAvailabilityToggle } from "@/features/walkers/hooks/use-availability-toggle";
+import DashboardLoading from "../loading";
 import { DashboardHero } from "../_components/dashboard-hero";
 import { QuickActions, type QuickActionItem } from "../_components/quick-actions";
 import { ActiveWalkBanner } from "../_components/active-walk-banner";
@@ -51,7 +52,7 @@ export default function WalkerDashboardPage() {
   });
   const { data: stats } = useWalkerStats();
 
-  if (sessionStatus === "loading") return null;
+  if (sessionStatus === "loading") return <DashboardLoading />;
 
   const completedWalks = allWalks.filter((w) => w.status === "completed");
   const activeWalk = allWalks.find((w) => w.status === "in_progress");
@@ -244,7 +245,7 @@ export default function WalkerDashboardPage() {
                 {completedWalks.slice(0, 3).map((walk) => (
                   <div
                     key={walk.id}
-                    className="group flex items-center gap-4 px-5 py-4 transition-colors duration-150 hover:bg-muted/30"
+                    className="group flex items-center gap-4 px-5 py-4 transition-colors duration-150 hover:bg-muted/30 max-md:gap-3 max-md:px-4 max-md:py-3.5"
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary transition-transform duration-150 group-hover:scale-105">
                       {getInitials(walk.clientName)}
