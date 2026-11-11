@@ -9,7 +9,6 @@ import {
   ClipboardList,
   Dog,
   LayoutDashboard,
-  PawPrint,
   Plus,
   User,
 } from "lucide-react";
@@ -17,7 +16,7 @@ import { cn } from "@/lib/utils";
 
 const clientBottomNav = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Início" },
-  { href: "/walkers", icon: PawPrint, label: "Passeadores" },
+  { href: "/walks", icon: ClipboardList, label: "Passeios" },
   { href: "/walks/new", icon: Plus, label: "Solicitar" },
   { href: "/dogs", icon: Dog, label: "Meus cães" },
   { href: "/profile", icon: User, label: "Perfil" },
@@ -31,8 +30,16 @@ const walkerBottomNav = [
   { href: "/profile", icon: User, label: "Perfil" },
 ] as const;
 
-function isActive(pathname: string, href: string) {
+function matches(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
+}
+
+// Only the most specific matching item is active, so /walks/new lights up
+// "Solicitar" and not "Passeios" too (same for /profile/payments vs /profile).
+function activeHref(pathname: string, items: readonly { href: string }[]) {
+  return items
+    .filter((item) => matches(pathname, item.href))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 }
 
 export function BottomNav() {
@@ -42,6 +49,7 @@ export function BottomNav() {
   const role = session?.user?.role ?? "client";
   const items = role === "walker" ? walkerBottomNav : clientBottomNav;
   const primaryIndex = 2;
+  const current = activeHref(pathname, items);
 
   return (
     <nav
@@ -53,7 +61,7 @@ export function BottomNav() {
           return <span key={item.href} aria-hidden="true" className="w-12" />;
         }
 
-        const active = isActive(pathname, item.href);
+        const active = item.href === current;
 
         return (
           <Link
@@ -78,7 +86,7 @@ export function BottomNav() {
 
       {(() => {
         const primary = items[primaryIndex];
-        const active = isActive(pathname, primary.href);
+        const active = primary.href === current;
 
         return (
           <Link

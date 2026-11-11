@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus, ClipboardList, Dog, CreditCard } from "lucide-react";
+import { Plus, PawPrint, Dog, CreditCard } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getGreeting } from "@/lib/format";
 import { DashboardHero } from "../_components/dashboard-hero";
@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "Dashboard | DogTravel" };
 
 const quickActions: QuickActionItem[] = [
   { href: "/walks/new",        icon: Plus,          label: "Solicitar passeio", bg: "bg-primary/10",     fg: "text-primary",                           primary: true },
-  { href: "/walks",            icon: ClipboardList, label: "Meus passeios",     bg: "bg-blue-500/10",    fg: "text-blue-600 dark:text-blue-400" },
+  { href: "/walkers",          icon: PawPrint,      label: "Passeadores",       bg: "bg-blue-500/10",    fg: "text-blue-600 dark:text-blue-400" },
   { href: "/dogs",             icon: Dog,           label: "Meus cães",         bg: "bg-amber-500/10",   fg: "text-amber-600 dark:text-amber-400" },
   { href: "/profile/payments", icon: CreditCard,    label: "Pagamentos",        bg: "bg-emerald-500/10", fg: "text-emerald-600 dark:text-emerald-400" },
 ];
