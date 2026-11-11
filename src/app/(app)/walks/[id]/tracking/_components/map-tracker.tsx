@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react';
 import {
   ArrowLeft,
   CheckCircle2,
+  Clock,
   Loader2,
   MapPin,
   MessageSquare,
@@ -32,6 +33,7 @@ import { useCompleteWalk } from '@/features/walks/hooks/use-walk-actions';
 import { useCountdown } from '@/features/tracking/hooks/use-countdown';
 import { haversineMeters } from '@/lib/geo';
 import { DogMarker } from '@/components/common/dog-marker';
+import { MapBottomSheet } from '@/components/common/map-bottom-sheet';
 import { TrackingLoader } from './tracking-loader';
 import { TRACKING_STATUS } from './tracking-status';
 
@@ -151,6 +153,121 @@ function ProgressSection({ startAddress, startedAt, remaining, progress, timeDon
   );
 }
 
+// ─── Mobile sheet pieces ─────────────────────────────────────────────────────
+
+function PetStack({ pets }: { pets: Pet[] }) {
+  return (
+    <div className="flex shrink-0 items-center">
+      {pets.slice(0, 3).map((pet, i) => (
+        <div
+          key={`${pet.name}-${i}`}
+          className={cn(
+            'relative h-11 w-11 overflow-hidden rounded-full bg-amber-50 ring-2 ring-background',
+            i > 0 && '-ml-3',
+          )}
+          style={{ zIndex: 3 - i }}
+        >
+          {pet.photoUrl ? (
+            <Image src={pet.photoUrl} alt={pet.name} fill sizes="44px" className="object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <PawPrint className="h-4 w-4 text-amber-500" />
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RoundAction({
+  href,
+  label,
+  icon,
+  primary,
+}: {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  primary?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-label={label}
+      className={cn(
+        'flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors',
+        primary
+          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+          : 'bg-muted text-foreground hover:bg-muted/70',
+      )}
+    >
+      {icon}
+    </Link>
+  );
+}
+
+function SheetProgress({
+  startedAt,
+  durationMinutes,
+  remaining,
+  progress,
+  timeDone,
+}: {
+  startedAt?: string | null;
+  durationMinutes?: number;
+  remaining: number;
+  progress: number;
+  timeDone: boolean;
+}) {
+  if (!startedAt) return null;
+  return (
+    <div className="space-y-1.5">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className={cn(
+            'h-full rounded-full transition-all duration-1000 ease-linear',
+            timeDone ? 'bg-emerald-500' : 'bg-primary',
+          )}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <div className="flex items-center justify-between text-xs">
+        {timeDone ? (
+          <span className="flex items-center gap-1 font-medium text-emerald-600">
+            <CheckCircle2 className="h-3 w-3" />
+            Tempo cumprido
+          </span>
+        ) : (
+          <span className="font-medium tabular-nums text-foreground">
+            {formatCountdown(remaining)} restantes
+          </span>
+        )}
+        {durationMinutes ? <span className="text-muted-foreground">{durationMinutes} min</span> : null}
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 py-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <div className="mt-0.5 text-sm font-medium leading-snug text-foreground">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function formatClock(iso?: string | null) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function MapTracker({ walkId }: { walkId: string }) {
@@ -236,7 +353,7 @@ export default function MapTracker({ walkId }: { walkId: string }) {
   // On mobile the bottom card covers the lower half of the map: centre the
   // marker in the visible area above it. Client-only component, so window is safe.
   const isMobile = window.matchMedia('(max-width: 767px)').matches;
-  const mapPadding = { top: 0, left: 0, right: 0, bottom: isMobile ? 300 : 0 };
+  const mapPadding = { top: 0, left: 0, right: 0, bottom: isMobile ? 280 : 0 };
 
   return (
     <>
@@ -351,8 +468,113 @@ export default function MapTracker({ walkId }: { walkId: string }) {
           </div>
         </div>
 
-        {/* ── Bottom card ─────────────────────────────────────────── */}
-        <div className="pointer-events-none absolute bottom-[calc(2.25rem+env(safe-area-inset-bottom))] left-3 right-3 z-[1000] flex justify-center md:bottom-[calc(1rem+env(safe-area-inset-bottom))] md:left-4 md:right-4">
+        {/* ── Mobile: draggable bottom sheet ──────────────────────── */}
+        {/* Sits just above the floating bottom nav; the map runs behind both. */}
+        <MapBottomSheet
+          className="absolute inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-[1000] sm:bottom-3 md:hidden"
+          peek={
+            <div className="space-y-3.5 px-4 pb-4">
+              <div className="flex items-center gap-3">
+                {isWalker ? (
+                  <PetStack pets={pets} />
+                ) : walk?.walkerAvatarUrl ? (
+                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-2 ring-primary/15">
+                    <Image src={walk.walkerAvatarUrl} alt={walkerName} fill sizes="44px" className="object-cover" />
+                  </div>
+                ) : (
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                    {initials(walkerName)}
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-base font-semibold text-foreground">
+                    {isWalker ? walk?.petNames?.join(' & ') : walkerName}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {isWalker
+                      ? `Tutor: ${clientParticipant?.name ?? walk?.clientName ?? '…'}`
+                      : `Passeando com ${walk?.petNames?.join(' & ') ?? '…'}`}
+                  </p>
+                </div>
+                {(isWalker ? clientPhone : walkerPhone) && (
+                  <RoundAction
+                    href={`tel:${isWalker ? clientPhone : walkerPhone}`}
+                    label={isWalker ? 'Ligar para o tutor' : 'Ligar para o passeador'}
+                    icon={<Phone className="h-[18px] w-[18px]" />}
+                  />
+                )}
+                <RoundAction
+                  href={`/walks/${walkId}/chat`}
+                  label="Abrir chat"
+                  icon={<MessageSquare className="h-[18px] w-[18px]" />}
+                  primary={!isWalker}
+                />
+              </div>
+
+              <SheetProgress
+                startedAt={walk?.startedAt}
+                durationMinutes={walk?.durationMinutes}
+                remaining={remaining}
+                progress={progress}
+                timeDone={timeDone}
+              />
+
+              {isWalker && (
+                <Button
+                  className={cn(
+                    'h-12 w-full gap-2 rounded-xl text-base font-semibold transition-all',
+                    timeDone
+                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-700'
+                      : 'bg-muted text-muted-foreground hover:bg-muted',
+                  )}
+                  disabled={completing || !timeDone}
+                  onClick={handleCompleteClick}
+                >
+                  {completing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : timeDone ? (
+                    <CheckCircle2 className="h-4 w-4" />
+                  ) : (
+                    <Timer className="h-4 w-4" />
+                  )}
+                  {completing
+                    ? 'Concluindo…'
+                    : timeDone
+                      ? 'Concluir passeio'
+                      : 'Disponível no final do passeio'}
+                </Button>
+              )}
+            </div>
+          }
+        >
+          <div className="divide-y divide-border/50 border-t border-border/50 px-4 pb-2">
+            {walk?.startAddress && (
+              <DetailRow icon={<MapPin className="h-4 w-4 text-emerald-600" />} label="Partida e chegada">
+                {walk.startAddress}
+              </DetailRow>
+            )}
+            {walk?.startedAt && (
+              <DetailRow icon={<Clock className="h-4 w-4" />} label="Início">
+                {formatClock(walk.startedAt)} · {walk.durationMinutes} min de passeio
+              </DetailRow>
+            )}
+            {!isWalker && pets.length > 0 && (
+              <DetailRow icon={<PawPrint className="h-4 w-4 text-amber-500" />} label={pets.length > 1 ? 'Cães' : 'Cão'}>
+                <div className="mt-1 flex flex-wrap items-center gap-3">
+                  {pets.map((pet, i) => (
+                    <span key={`${pet.name}-${i}`} className="flex items-center gap-2">
+                      <PetStack pets={[pet]} />
+                      {pet.name}
+                    </span>
+                  ))}
+                </div>
+              </DetailRow>
+            )}
+          </div>
+        </MapBottomSheet>
+
+        {/* ── Bottom card (md and up) ─────────────────────────────── */}
+        <div className="pointer-events-none absolute bottom-[calc(2.25rem+env(safe-area-inset-bottom))] left-3 right-3 z-[1000] flex justify-center max-md:hidden md:bottom-[calc(1rem+env(safe-area-inset-bottom))] md:left-4 md:right-4">
           {isWalker ? (
 
             /* ── Walker card ─────────────────────────────────────── */
