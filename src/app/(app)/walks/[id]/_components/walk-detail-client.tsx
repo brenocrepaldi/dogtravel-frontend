@@ -24,6 +24,7 @@ import { useReview } from '@/features/reviews/hooks/use-reviews';
 import { usePaymentMethods } from '@/features/payments/hooks/use-payments';
 import { WalkRouteMapClient } from './walk-route-map-client';
 import { WalkPets } from './walk-pets';
+import { WalkPartyAvatars } from './walk-party-avatars';
 import { WalkStartSection } from './walk-start-section';
 import { ClientCodeBanner } from './client-code-banner';
 import { WalkInProgressPanel } from './walk-inprogress-panel';
@@ -101,6 +102,7 @@ export function WalkDetailClient({ walkId }: { walkId: string }) {
   const isCancelled = walk.status === 'cancelled';
   const isAccepted = walk.status === 'accepted';
   const hasRoute = walk.distanceKm > 0;
+  const walkerName = walk.participants.find((p) => p.role === 'walker')?.name ?? walker?.name ?? null;
 
   return (
     <div className="space-y-6 pb-8">
@@ -118,22 +120,31 @@ export function WalkDetailClient({ walkId }: { walkId: string }) {
             <ArrowLeft className="mr-1.5 h-4 w-4" />
             Meus passeios
           </Link>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-2xl font-bold text-foreground">
-              Passeio com{' '}
-              <span className="text-primary">
-                {walk.petNames.length > 1
-                  ? `${walk.petNames.slice(0, -1).join(', ')} & ${walk.petNames[walk.petNames.length - 1]}`
-                  : walk.petNames[0] ?? '…'}
-              </span>
-            </h1>
-            <Badge variant={statusCfg.variant}>{statusCfg.label}</Badge>
+          <div className="flex items-center gap-4 pt-1">
+            <WalkPartyAvatars
+              pets={walk.pets ?? walk.petNames.map((name) => ({ name }))}
+              walkerName={walkerName}
+              walkerAvatarUrl={walk.walkerAvatarUrl}
+            />
+            <div className="min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                <h1 className="text-xl font-bold text-foreground sm:text-2xl">
+                  Passeio com{' '}
+                  <span className="text-primary">
+                    {walk.petNames.length > 1
+                      ? `${walk.petNames.slice(0, -1).join(', ')} & ${walk.petNames[walk.petNames.length - 1]}`
+                      : walk.petNames[0] ?? '…'}
+                  </span>
+                </h1>
+                <Badge variant={statusCfg.variant}>{statusCfg.label}</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {isWalker
+                  ? `${walk.clientName} · ${walk.dateLabel}`
+                  : `${walkerName ?? walk.petNames.join(' & ')} · ${walk.dateLabel}`}
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {isWalker
-              ? `${walk.clientName} · ${walk.dateLabel}`
-              : `${walk.petNames.join(' & ')} · ${walk.dateLabel}`}
-          </p>
         </div>
 
         <div className="flex shrink-0 flex-wrap gap-2">
