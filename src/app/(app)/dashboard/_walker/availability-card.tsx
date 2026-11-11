@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, ChevronRight, PawPrint, Power, ShieldAlert } from "lucide-react";
+import { Bell, ChevronRight, Moon, PawPrint, ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -54,43 +54,43 @@ export function AvailabilityCard({
     );
   }
 
-  if (!available) {
-    return (
-      <div className={cn("space-y-3.5 rounded-2xl border border-border/60 bg-card p-4", className)}>
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted">
-            <Power className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">Você está offline</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">Fique online para receber pedidos de passeio.</p>
-          </div>
-        </div>
-        <Button className="h-12 w-full text-sm font-semibold" onClick={onToggle} disabled={isUpdating}>
-          <Power className="h-4 w-4" />
-          Ficar online
-        </Button>
-      </div>
-    );
-  }
-
+  // One layout for both states, so the switch slides and the colours fade
+  // instead of the card being swapped out.
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-2xl border border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.08] via-card to-card",
+        "overflow-hidden rounded-2xl border transition-colors duration-300",
+        available
+          ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.08] via-card to-card"
+          : "border-border/60 bg-card",
         className,
       )}
     >
       <div className="flex items-center gap-3 p-4">
         <div className="relative flex h-11 w-11 shrink-0 items-center justify-center">
-          <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500/20 motion-reduce:hidden" />
-          <div className="relative flex h-full w-full items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-500/30">
-            <PawPrint className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+          {available && (
+            <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500/20 motion-reduce:hidden" />
+          )}
+          <div
+            className={cn(
+              "relative flex h-full w-full items-center justify-center rounded-full transition-colors duration-300",
+              available ? "bg-emerald-500/15 ring-1 ring-emerald-500/30" : "bg-muted",
+            )}
+          >
+            {available ? (
+              <PawPrint className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            ) : (
+              <Moon className="h-5 w-5 text-muted-foreground" />
+            )}
           </div>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-foreground">Você está online</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">Recebendo pedidos de passeio.</p>
+          <p className="text-sm font-semibold text-foreground">
+            {available ? "Você está online" : "Você está offline"}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {available ? "Recebendo pedidos de passeio." : "Ative para receber pedidos."}
+          </p>
         </div>
         {/* 44px hit area around a large switch. */}
         <button
@@ -102,13 +102,23 @@ export function AvailabilityCard({
           disabled={isUpdating}
           className="-mr-1.5 flex h-11 shrink-0 cursor-pointer items-center px-1.5 disabled:opacity-60"
         >
-          <span className="relative h-7 w-12 rounded-full bg-emerald-500 transition-colors">
-            <span className="absolute left-[calc(100%-1.625rem)] top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-all" />
+          <span
+            className={cn(
+              "relative h-7 w-12 rounded-full transition-colors duration-300",
+              available ? "bg-emerald-500" : "bg-muted-foreground/25",
+            )}
+          >
+            <span
+              className={cn(
+                "absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-[left] duration-300 motion-reduce:transition-none",
+                available ? "left-[calc(100%-1.625rem)]" : "left-0.5",
+              )}
+            />
           </span>
         </button>
       </div>
 
-      {requestCount > 0 && (
+      {available && requestCount > 0 && (
         <Link
           href="/walk-requests"
           className="flex min-h-11 items-center gap-2 border-t border-emerald-500/15 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-500/[0.06] dark:text-emerald-400"
