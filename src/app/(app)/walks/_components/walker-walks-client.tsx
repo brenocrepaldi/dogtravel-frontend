@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useSession } from 'next-auth/react';
 import { useWalks } from '@/features/walks/hooks/use-walks';
 import { cn } from '@/lib/utils';
+import { PetChip } from './pet-chip';
 import { WalkStartButton } from './walk-start-button';
 import type { WalkRecord } from '@/types';
 import {
@@ -17,7 +18,6 @@ import {
 	ArrowRight,
 	CalendarDays,
 	Clock,
-	Dog,
 	MapPin,
 	Search,
 } from 'lucide-react';
@@ -62,15 +62,6 @@ function StatusPill({ status }: { status: WalkRecord['status'] }) {
 		>
 			<span className={cn('w-1.5 h-1.5 rounded-full shrink-0', cfg.dot)} />
 			{cfg.label}
-		</span>
-	);
-}
-
-function PetBadge({ name }: { name: string }) {
-	return (
-		<span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary tracking-wide">
-			<Dog className="w-3 h-3 shrink-0" />
-			<span className="truncate max-w-[6rem]">{name}</span>
 		</span>
 	);
 }
@@ -164,7 +155,7 @@ function WalkerWalkCard({ walk }: { walk: WalkRecord }) {
 				<div className="flex items-center justify-between gap-2">
 					<div className="flex flex-wrap items-center gap-1.5 min-w-0">
 						{walk.petNames.map((name, i) => (
-							<PetBadge key={`${name}-${i}`} name={name} />
+							<PetChip key={`${name}-${i}`} name={name} photoUrl={walk.pets?.[i]?.photoUrl} />
 						))}
 					</div>
 					<div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0 md:text-[11px] md:leading-normal">
@@ -210,7 +201,9 @@ function WalkerWalkCard({ walk }: { walk: WalkRecord }) {
 
 				{isAccepted && (
 					isStartReady ? (
-						<div className="grid grid-cols-2 gap-2">
+						// Flex, not a 2-col grid: WalkStartButton renders nothing until the walker is
+						// within range of the start point, and "Ver detalhes" must then fill the row.
+						<div className="flex gap-2 *:flex-1">
 							<WalkStartButton
 								walkId={walk.id}
 								scheduledAt={walk.scheduledAt}

@@ -7,7 +7,8 @@ import { buttonVariants } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import type { WalkRecord } from '@/types';
-import { AlertCircle, CalendarDays, Clock, Dog, MapPin, Star, X } from 'lucide-react';
+import { AlertCircle, CalendarDays, Clock, MapPin, Star, X } from 'lucide-react';
+import { PetChip } from './pet-chip';
 
 // ── Status config ──────────────────────────────────────────────────────────
 const statusMap: Record<WalkRecord['status'], { label: string; dot: string; pill: string }> = {
@@ -56,15 +57,6 @@ function StatusPill({ status }: { status: WalkRecord['status'] }) {
 				<span className={cn('w-1.5 h-1.5 rounded-full shrink-0', cfg.dot)} />
 			)}
 			{cfg.label}
-		</span>
-	);
-}
-
-function PetBadge({ name }: { name: string }) {
-	return (
-		<span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary tracking-wide">
-			<Dog className="w-3 h-3 shrink-0" />
-			<span className="truncate max-w-[6rem]">{name}</span>
 		</span>
 	);
 }
@@ -167,7 +159,7 @@ export function WalkCard({
 				<div className="flex items-center justify-between gap-2">
 					<div className="flex flex-wrap items-center gap-1.5 min-w-0">
 						{walk.petNames.map((name, i) => (
-							<PetBadge key={`${name}-${i}`} name={name} />
+							<PetChip key={`${name}-${i}`} name={name} photoUrl={walk.pets?.[i]?.photoUrl} />
 						))}
 					</div>
 					<div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0 md:text-[11px] md:leading-normal">
