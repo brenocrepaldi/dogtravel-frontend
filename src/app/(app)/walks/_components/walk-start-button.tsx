@@ -24,7 +24,7 @@ import {
 import { useStartWalk } from '@/features/walks/hooks/use-walk-actions';
 import { isApiConfigured } from '@/services/api';
 import { haversineMeters } from '@/lib/geo';
-import { useNow } from '@/lib/use-now';
+import { useNow } from '@/hooks/use-now';
 
 const MAX_ATTEMPTS   = 3;
 const LOCKOUT_MS     = 2 * 60 * 1000;

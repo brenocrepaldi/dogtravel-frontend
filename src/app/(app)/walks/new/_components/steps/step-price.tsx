@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { AlertTriangle, ArrowRight, Loader2 } from "lucide-react";
-import { FlowActions } from "@/components/common/flow-actions";
+import { FlowActions } from "@/app/(app)/walks/_components/flow-actions";
 import { Button } from "@/components/ui/button";
 import { useWalkEstimate } from "@/features/walks/hooks/use-walks";
 import { cn } from "@/lib/utils";

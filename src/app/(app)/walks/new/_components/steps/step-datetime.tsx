@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, ArrowRight, CalendarClock } from "lucide-react";
-import { FlowActions } from "@/components/common/flow-actions";
+import { FlowActions } from "@/app/(app)/walks/_components/flow-actions";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";

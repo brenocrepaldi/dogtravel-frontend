@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowRight, Loader2, LocateFixed, MapPin, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { FlowActions } from "@/components/common/flow-actions";
+import { FlowActions } from "@/app/(app)/walks/_components/flow-actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";

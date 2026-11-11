@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { SESSION_EXPIRED_MESSAGE, SESSION_EXPIRED_PARAM } from "@/lib/session-expiry";
+import { SESSION_EXPIRED_MESSAGE, SESSION_EXPIRED_PARAM } from "@/lib/auth/session-expiry";
 
 // The expiry toast is lost in the reload to /login, so the login page repeats it
 export function SessionExpiredNotice() {

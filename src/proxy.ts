@@ -1,7 +1,7 @@
 import { getToken, type JWT } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SESSION_EXPIRED_PARAM } from "@/lib/session-expiry";
+import { SESSION_EXPIRED_PARAM } from "@/lib/auth/session-expiry";
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
 const CLIENT_ONLY_PREFIXES = ["/dogs", "/walkers", "/walks/new"];

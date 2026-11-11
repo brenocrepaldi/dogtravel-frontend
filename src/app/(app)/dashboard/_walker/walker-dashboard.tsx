@@ -36,7 +36,7 @@ function getHeroSubtitle(canToggle: boolean, available: boolean, requestCount: n
   return "Você está online. Aguardando novos pedidos.";
 }
 
-export default function WalkerDashboardPage() {
+export default function WalkerDashboard() {
   const { data: session, status: sessionStatus } = useSession();
   const firstName = session?.user?.name?.split(" ")[0] ?? "Passeador";
 

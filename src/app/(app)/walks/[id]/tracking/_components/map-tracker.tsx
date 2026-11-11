@@ -32,8 +32,8 @@ import { useWalkById } from '@/features/walks/hooks/use-walks';
 import { useCompleteWalk } from '@/features/walks/hooks/use-walk-actions';
 import { useCountdown } from '@/features/tracking/hooks/use-countdown';
 import { haversineMeters } from '@/lib/geo';
-import { DogMarker } from '@/components/common/dog-marker';
-import { MapBottomSheet } from '@/components/common/map-bottom-sheet';
+import { DogMarker } from '@/app/(app)/walks/_components/dog-marker';
+import { MapBottomSheet } from './map-bottom-sheet';
 import { TrackingLoader } from './tracking-loader';
 import { TRACKING_STATUS } from './tracking-status';
 

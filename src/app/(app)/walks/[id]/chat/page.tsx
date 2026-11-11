@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import { ChatInterface } from "./_components/chat-interface";
 

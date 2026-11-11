@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
-import { Sidebar } from "@/components/common/sidebar";
-import { MobileTopBar } from "@/components/common/mobile-top-bar";
-import { BottomNav } from "@/components/common/bottom-nav";
+import { auth } from "@/lib/auth/auth";
+import { Sidebar } from "./_components/sidebar";
+import { MobileTopBar } from "./_components/mobile-top-bar";
+import { BottomNav } from "./_components/bottom-nav";
 
 /**
  * Shared authenticated app shell — mounted once for every route under this

@@ -6,7 +6,7 @@ import { useDogs } from "@/features/dogs/hooks/use-dogs";
 import { DOG_SIZE_LABEL } from "@/lib/pets";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/common/empty-state";
-import { FlowActions } from "@/components/common/flow-actions";
+import { FlowActions } from "@/app/(app)/walks/_components/flow-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";

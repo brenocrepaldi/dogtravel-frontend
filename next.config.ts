@@ -100,6 +100,23 @@ const nextConfig: NextConfig = {
    * Empty object signals we're aware and opted in.
    */
   turbopack: {},
+
+  // Legacy payment URLs (the old /payments route tree) still resolve.
+  async redirects() {
+    return [
+      { source: "/payments", destination: "/profile/payments", permanent: false },
+      {
+        source: "/payments/methods",
+        destination: "/profile/payment-methods",
+        permanent: false,
+      },
+      {
+        source: "/payments/methods/new",
+        destination: "/profile/payment-methods?action=add",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

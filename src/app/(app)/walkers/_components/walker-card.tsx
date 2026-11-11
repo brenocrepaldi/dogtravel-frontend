@@ -8,7 +8,7 @@ import { DOG_SIZE_LABEL } from '@/lib/pets';
 import type { WalkerProfile } from '@/types';
 import { buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { WalkerAvatar } from '@/components/walkers/walker-avatar';
+import { WalkerAvatar } from './walker-avatar';
 
 // Tags beyond this count collapse into a "+n" badge on mobile
 const MOBILE_TAG_LIMIT = 3;

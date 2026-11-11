@@ -26,7 +26,7 @@ import {
 import { useStartWalk } from '@/features/walks/hooks/use-walk-actions';
 import { isApiConfigured } from '@/services/api';
 import { haversineMeters } from '@/lib/geo';
-import { useNow } from '@/lib/use-now';
+import { useNow } from '@/hooks/use-now';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

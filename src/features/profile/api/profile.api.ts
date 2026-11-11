@@ -1,43 +1,29 @@
 import type { User } from "@/types";
 import api, { isApiConfigured } from "@/services/api";
 
-// Module-level mutable store — used only when API is not configured
-let myProfileStore: Partial<User> = {
-  id: "1",
-  name: "Breno Crepaldi",
-  email: "client@example.com",
-  role: "client",
-  createdAt: "2024-01-01T00:00:00Z",
-};
-
+// The in-memory mock lives in profile.mock.ts and is loaded dynamically so it
+// never reaches the client bundle when a real API is configured.
 export const ProfileApi = {
   get: async (): Promise<Partial<User>> => {
     if (!isApiConfigured) {
-      return { ...myProfileStore };
+      const { profileMock } = await import("./profile.mock");
+      return profileMock.get();
     }
     return api.get<Partial<User>>("/profile").then((r) => r.data);
   },
 
   update: async (data: Partial<Omit<User, "id" | "role" | "createdAt">>): Promise<void> => {
     if (!isApiConfigured) {
-      myProfileStore = { ...myProfileStore, ...data };
-      return;
+      const { profileMock } = await import("./profile.mock");
+      return profileMock.update(data);
     }
     await api.patch("/profile", data);
   },
 
   uploadAvatar: async (file: File): Promise<{ avatarUrl: string }> => {
     if (!isApiConfigured) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const avatarUrl = reader.result as string;
-          myProfileStore = { ...myProfileStore, avatarUrl };
-          resolve({ avatarUrl });
-        };
-        reader.onerror = () => reject(new Error("Failed to read file"));
-        reader.readAsDataURL(file);
-      });
+      const { profileMock } = await import("./profile.mock");
+      return profileMock.uploadAvatar(file);
     }
     const form = new FormData();
     form.append("avatar", file);
@@ -50,8 +36,8 @@ export const ProfileApi = {
 
   deleteAvatar: async (): Promise<void> => {
     if (!isApiConfigured) {
-      myProfileStore = { ...myProfileStore, avatarUrl: undefined };
-      return;
+      const { profileMock } = await import("./profile.mock");
+      return profileMock.deleteAvatar();
     }
     await api.delete("/profile/avatar");
   },
