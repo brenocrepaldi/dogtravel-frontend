@@ -118,16 +118,30 @@ export function AvailabilityCard({
         </button>
       </div>
 
-      {available && requestCount > 0 && (
+      {/* Requests keep showing while offline, muted, so the walker knows there is work waiting. */}
+      {requestCount > 0 && (
         <Link
           href="/walk-requests"
-          className="flex min-h-11 items-center gap-2 border-t border-emerald-500/15 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-500/[0.06] dark:text-emerald-400"
+          className={cn(
+            "flex min-h-11 items-center gap-2 border-t px-4 py-2.5 text-sm transition-colors duration-300",
+            available
+              ? "border-emerald-500/15 font-semibold text-emerald-700 hover:bg-emerald-500/[0.06] dark:text-emerald-400"
+              : "border-border/60 bg-muted/30 text-muted-foreground hover:bg-muted/50",
+          )}
         >
-          <Bell className="h-4 w-4" />
-          <span className="flex-1">
-            {requestCount} pedido{requestCount > 1 ? "s" : ""} aguardando sua resposta
+          <span className="relative flex shrink-0">
+            <Bell className="h-4 w-4" />
+            {!available && (
+              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-500 ring-2 ring-card" />
+            )}
           </span>
-          <ChevronRight className="h-4 w-4" />
+          <span className="min-w-0 flex-1 truncate">
+            <span className={cn(!available && "font-semibold text-foreground")}>
+              {requestCount} pedido{requestCount > 1 ? "s" : ""}
+            </span>{" "}
+            {available ? "aguardando sua resposta" : "esperando por você"}
+          </span>
+          <ChevronRight className="h-4 w-4 shrink-0" />
         </Link>
       )}
     </div>
