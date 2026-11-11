@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { formatElapsed } from '@/lib/format';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -328,7 +329,7 @@ export function RequestDetailClient({ requestId }: { requestId: string }) {
               <InfoRow icon={Timer} label="Duração" value={`${req.durationMinutes} minutos`} />
               <InfoRow icon={MapPin} label="Local de partida" value={req.startAddress} />
               <InfoRow icon={Clock} label="Pedido recebido" value={
-                req.receivedMinutes < 2 ? 'Agora mesmo' : `Há ${req.receivedMinutes} min`
+                formatElapsed(req.receivedMinutes)
               } />
             </CardContent>
           </Card>

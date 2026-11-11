@@ -4,9 +4,12 @@ import { ClipboardList, PawPrint } from "lucide-react";
 export function RequestsOfflineState({
   canToggle,
   onActivate,
+  explainWhenLocked = false,
 }: {
   canToggle: boolean;
   onActivate: () => void;
+  /** While locked, offer a button that explains what is missing (onActivate shows it). */
+  explainWhenLocked?: boolean;
 }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-dashed border-border/60 p-4 lg:flex-col lg:py-10 lg:text-center">
@@ -23,14 +26,20 @@ export function RequestsOfflineState({
             : "Ative sua disponibilidade para começar a receber pedidos."}
         </p>
       </div>
-      {canToggle && (
+      {(canToggle || explainWhenLocked) && (
         <button
           type="button"
           onClick={onActivate}
           className="h-11 shrink-0 cursor-pointer rounded-lg border border-primary/20 bg-primary/8 px-4 text-xs font-semibold text-primary transition-colors hover:bg-primary/15 lg:mt-1 lg:h-auto lg:py-1.5"
         >
-          <span className="lg:hidden">Ativar</span>
-          <span className="hidden lg:inline">Ativar disponibilidade</span>
+          {canToggle ? (
+            <>
+              <span className="lg:hidden">Ativar</span>
+              <span className="hidden lg:inline">Ativar disponibilidade</span>
+            </>
+          ) : (
+            "Ver pendências"
+          )}
         </button>
       )}
     </div>

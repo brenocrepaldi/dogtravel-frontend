@@ -9,7 +9,7 @@ import {
   Timer,
   XCircle,
 } from "lucide-react";
-import { formatBRL, getInitials } from "@/lib/format";
+import { formatBRL, formatElapsed, getInitials } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import type { WalkRequest } from "@/types";
 
@@ -135,7 +135,7 @@ export function WalkRequestCard({
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
             {request.receivedMinutes < 2
               ? "Recebido agora"
-              : `Recebido há ${request.receivedMinutes} min`}
+              : `Recebido ${formatElapsed(request.receivedMinutes)}`}
           </span>
 
           <div className="grid grid-cols-2 gap-2 lg:flex lg:items-center">

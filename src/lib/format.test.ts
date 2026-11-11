@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatBRL, getGreeting, getInitials } from "./format";
+import { formatBRL, formatElapsed, getGreeting, getInitials } from "./format";
 
 describe("formatBRL", () => {
   it("formats with two decimals and a comma, matching the existing toFixed output", () => {
@@ -39,5 +39,20 @@ describe("getGreeting", () => {
   it("says Boa noite from 18h", () => {
     expect(getGreeting(at(18))).toBe("Boa noite");
     expect(getGreeting(at(23, 59))).toBe("Boa noite");
+  });
+});
+
+describe("formatElapsed", () => {
+  it("says 'agora mesmo' under two minutes", () => {
+    expect(formatElapsed(0)).toBe("agora mesmo");
+    expect(formatElapsed(1)).toBe("agora mesmo");
+  });
+
+  it("uses minutes, then hours, then days", () => {
+    expect(formatElapsed(24)).toBe("há 24 min");
+    expect(formatElapsed(60)).toBe("há 1 h");
+    expect(formatElapsed(185)).toBe("há 3 h");
+    expect(formatElapsed(1440)).toBe("há 1 dia");
+    expect(formatElapsed(232578)).toBe("há 161 dias");
   });
 });
