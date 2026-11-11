@@ -59,9 +59,11 @@ export function FlowActions({
       className={cn(
         "flex items-center gap-3 border-t border-border/70 pt-5 sm:justify-between",
         // The app's scroll container already pads for the fixed bottom nav, so
-        // bottom-0 lands right above it. -mx-4/px-4 match the mobile card padding.
+        // bottom-0 lands right above it. -mx-4/px-4 match the mobile card padding,
+        // and a card-coloured strip below fills that padding so the scrolled content
+        // doesn't peek out between the actions and the nav.
         stickyOnMobile &&
-          "max-sm:sticky max-sm:bottom-0 max-sm:z-10 max-sm:-mx-4 max-sm:bg-card max-sm:px-4 max-sm:py-3",
+          "max-sm:sticky max-sm:bottom-0 max-sm:z-10 max-sm:-mx-4 max-sm:bg-card max-sm:px-4 max-sm:py-3 max-sm:after:absolute max-sm:after:inset-x-0 max-sm:after:top-full max-sm:after:h-8 max-sm:after:rounded-b-xl max-sm:after:bg-card",
         className
       )}
     >
