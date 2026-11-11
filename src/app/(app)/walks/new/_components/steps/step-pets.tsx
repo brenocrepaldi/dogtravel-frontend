@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Check, PawPrint } from "lucide-react";
 import { useDogs } from "@/features/dogs/hooks/use-dogs";
 import { DOG_SIZE_LABEL } from "@/lib/pets";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/common/empty-state";
 import { FlowActions } from "@/components/common/flow-actions";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { WalkFormData } from "../walk-request-form";
@@ -20,7 +21,7 @@ interface Props {
 }
 
 export function StepPets({ data, updateData, onNext, onCancel }: Props) {
-  const { data: pets = [] } = useDogs();
+  const { data: pets = [], isLoading, isError, refetch } = useDogs();
 
   function togglePet(id: string) {
     const already = data.selectedPetIds.includes(id);
@@ -36,14 +37,27 @@ export function StepPets({ data, updateData, onNext, onCancel }: Props) {
         <p className="text-sm text-muted-foreground">Selecione os pets para validar compatibilidade com o passeador.</p>
       </div>
 
-      {pets.length === 0 ? (
-        <p className="text-muted-foreground text-sm py-6 text-center">
-          Nenhum cão cadastrado. Adicione um na aba{" "}
-          <Link href="/profile" className="text-primary underline">
-            Perfil
-          </Link>
-          .
-        </p>
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-busy="true">
+          <Skeleton className="h-28 rounded-xl" />
+          <Skeleton className="h-28 rounded-xl" />
+        </div>
+      ) : isError ? (
+        <EmptyState
+          icon={PawPrint}
+          title="Não foi possível carregar seus cães"
+          description="Verifique sua conexão e tente novamente."
+          actionLabel="Tentar novamente"
+          onAction={() => refetch()}
+        />
+      ) : pets.length === 0 ? (
+        <EmptyState
+          icon={PawPrint}
+          title="Nenhum cão cadastrado"
+          description="Cadastre seu cão para solicitar um passeio."
+          actionLabel="Cadastrar cão"
+          actionHref="/dogs"
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {pets.map((pet) => {
