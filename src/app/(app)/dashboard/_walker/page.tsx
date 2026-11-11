@@ -9,19 +9,15 @@ import {
   FileCheck2, Lock, MapPin, PawPrint, Star, Timer, TrendingUp,
   Wallet, User, XCircle,
 } from "lucide-react";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatBRL, getGreeting, getInitials } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWalkRequests, useWalks } from "@/features/walks/hooks/use-walks";
-import { useAcceptWalk, useDeclineWalk } from "@/features/walks/hooks/use-walk-actions";
+import { useWalkRequestActions } from "@/features/walks/hooks/use-walk-request-actions";
 import { useWalkerStats } from "@/features/stats/hooks/use-stats";
-import { useWalkerAvailability, useUpdateWalkerAvailability, useWalkerProfile } from "@/features/walkers/hooks/use-walkers";
-import { useDocuments } from "@/features/documents/hooks/use-documents";
-import { useProfile } from "@/features/profile/hooks/use-profile";
-import type { WalkRequest } from "@/types";
+import { useAvailabilityToggle } from "@/features/walkers/hooks/use-availability-toggle";
 import { DashboardHero } from "../_components/dashboard-hero";
 import { QuickActions, type QuickActionItem } from "../_components/quick-actions";
 import { ActiveWalkBanner } from "../_components/active-walk-banner";
@@ -47,92 +43,28 @@ export default function WalkerDashboardPage() {
   const router    = useRouter();
 
   const { data: walkerRequests = [] } = useWalkRequests();
-  const { mutate: acceptWalk, isPending: isAccepting } = useAcceptWalk();
-  const { mutate: declineWalk } = useDeclineWalk();
-
-  const { data: walkerProfile } = useWalkerProfile();
-  const walkerProfileId = walkerProfile?.id ?? "";
+  const {
+    walkerProfileId,
+    available,
+    canToggle,
+    toggle: handleAvailabilityClick,
+    isUpdating: updatingAvailability,
+  } = useAvailabilityToggle();
+  const {
+    accept: handleAccept,
+    decline: handleDecline,
+    isAccepting,
+  } = useWalkRequestActions(walkerProfileId);
 
   const { data: allWalks = [], isLoading: walksLoading } = useWalks("walker", session?.user?.id ?? "", {
     enabled: !!session?.user?.id,
   });
   const { data: stats } = useWalkerStats();
-  const { data: available = false } = useWalkerAvailability(walkerProfileId);
-  const { mutate: updateAvailability, isPending: updatingAvailability } = useUpdateWalkerAvailability(walkerProfileId);
-
-  const { data: documents, isLoading: documentsLoading } = useDocuments();
-  const { data: profile, isLoading: profileLoading } = useProfile();
-
-  const hasPhoto           = !!profile?.avatarUrl;
-  const identityVerified   = documents?.identity === "verified";
-  const backgroundVerified = documents?.background === "verified";
-  const isEligibilityLoading = documentsLoading || profileLoading;
-  const canToggle          = !isEligibilityLoading && hasPhoto && identityVerified && backgroundVerified;
 
   if (sessionStatus === "loading") return null;
 
   const completedWalks = allWalks.filter((w) => w.status === "completed");
   const activeWalk = allWalks.find((w) => w.status === "in_progress");
-
-  function handleAvailabilityClick() {
-    if (!hasPhoto) {
-      toast.warning("Foto de perfil necessária", {
-        description: "Adicione uma foto ao seu perfil antes de ativar sua disponibilidade.",
-        action: { label: "Atualizar perfil", onClick: () => router.push("/profile") },
-      });
-      return;
-    }
-    if (!canToggle) {
-      toast.warning("Verificação de identidade necessária", {
-        description: "Complete a verificação antes de ativar sua disponibilidade.",
-        action: { label: "Verificar agora", onClick: () => router.push("/profile/documents") },
-      });
-      return;
-    }
-    if (!backgroundVerified) {
-      toast.warning("Antecedentes criminais necessários", {
-        description: "Envie seu comprovante de antecedentes antes de ativar sua disponibilidade.",
-        action: { label: "Enviar agora", onClick: () => router.push("/profile/documents") },
-      });
-      return;
-    }
-    const next = !available;
-    updateAvailability(next, {
-      onSuccess: () => {
-        if (next) toast.success("Você está disponível para passeios");
-        else      toast.warning("Você ficou indisponível");
-      },
-      onError: () => toast.error("Erro ao atualizar disponibilidade."),
-    });
-  }
-
-  function handleAccept(request: WalkRequest) {
-    const walkerName = session?.user?.name ?? "Passeador";
-    acceptWalk(
-      { request, walkerName, walkerId: walkerProfileId },
-      {
-        onSuccess: () => {
-          toast.success("Passeio aceito!", {
-            description: `${request.clientName} foi notificado. Veja em Meus passeios.`,
-            action: { label: "Ver passeios", onClick: () => router.push("/walks") },
-          });
-        },
-        onError: () => {
-          toast.error("Erro ao aceitar o passeio.", {
-            description: "Tente novamente. Se o problema persistir, recarregue a página.",
-          });
-        },
-      },
-    );
-  }
-
-  function handleDecline(request: WalkRequest) {
-    declineWalk(request.id, {
-      onSuccess: () => {
-        toast("Passeio recusado", { description: `Pedido de ${request.clientName} devolvido para a fila.` });
-      },
-    });
-  }
 
   const statItems = [
     {
