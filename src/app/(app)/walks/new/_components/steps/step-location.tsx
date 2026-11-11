@@ -317,6 +317,7 @@ export function StepLocation({ data, updateData, onNext, onBack }: Props) {
       )}
 
       <FlowActions
+        stickyOnMobile
         showBack
         onBack={onBack}
         primaryLabel="Continuar"

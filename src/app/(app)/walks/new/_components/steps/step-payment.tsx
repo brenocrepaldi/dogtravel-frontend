@@ -336,6 +336,7 @@ export function StepPayment({ data, updateData, onNext, onBack }: Props) {
       </Dialog>
 
       <FlowActions
+        stickyOnMobile
         showBack
         onBack={onBack}
         primaryLabel="Continuar"

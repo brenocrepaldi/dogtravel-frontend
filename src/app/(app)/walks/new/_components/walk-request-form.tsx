@@ -416,9 +416,11 @@ export function WalkRequestForm() {
 					{/* Step card — key forces remount + animation on step change */}
 					<Card
 						key={step}
-						className="overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300"
+						// overflow-visible below sm: an overflow-hidden ancestor stops the
+						// sticky step actions from sticking.
+						className="overflow-hidden max-sm:overflow-visible animate-in fade-in slide-in-from-bottom-2 duration-300"
 					>
-						<div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/40" />
+						<div className="h-1 w-full max-sm:rounded-t-xl bg-gradient-to-r from-primary/60 via-primary to-primary/40" />
 						<CardContent className="p-4 sm:p-6">
 							{step === 0 && <StepPets {...stepProps} onCancel={() => setShowExitModal(true)} />}
 							{step === 1 && <StepDateTime {...stepProps} />}

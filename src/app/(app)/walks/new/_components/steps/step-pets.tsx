@@ -117,6 +117,7 @@ export function StepPets({ data, updateData, onNext, onCancel }: Props) {
       </div>
 
       <FlowActions
+        stickyOnMobile
         showBack={false}
         onCancel={onCancel}
         primaryLabel="Continuar"

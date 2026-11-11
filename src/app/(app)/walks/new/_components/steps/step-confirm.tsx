@@ -221,6 +221,7 @@ export function StepConfirm({ data, onBack, onSubmit, submitting }: Props) {
       </p>
 
       <FlowActions
+        stickyOnMobile
         showBack
         onBack={onBack}
         primaryLabel="Concluir solicitação"

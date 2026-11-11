@@ -20,6 +20,8 @@ interface FlowActionsProps {
   primaryLoading?: boolean;
   primaryVariant?: "default" | "success" | "secondary";
   primaryIcon?: React.ReactNode;
+  /** Below sm, pin the actions to the bottom of the scroll area while the step scrolls. */
+  stickyOnMobile?: boolean;
   className?: string;
 }
 
@@ -41,6 +43,7 @@ export function FlowActions({
   primaryLoading,
   primaryVariant = "default",
   primaryIcon,
+  stickyOnMobile = false,
   className,
 }: FlowActionsProps) {
   const hasCancel = Boolean(cancelHref ?? onCancel);
@@ -55,6 +58,10 @@ export function FlowActions({
     <div
       className={cn(
         "flex items-center gap-3 border-t border-border/70 pt-5 sm:justify-between",
+        // The app's scroll container already pads for the fixed bottom nav, so
+        // bottom-0 lands right above it. -mx-4/px-4 match the mobile card padding.
+        stickyOnMobile &&
+          "max-sm:sticky max-sm:bottom-0 max-sm:z-10 max-sm:-mx-4 max-sm:bg-card max-sm:px-4 max-sm:py-3",
         className
       )}
     >
