@@ -118,7 +118,7 @@ export function StepPixPayment({ data, onDone }: Props) {
             variant="outline"
             size="sm"
             type="button"
-            className="gap-1.5 shrink-0 cursor-pointer"
+            className="gap-1.5 shrink-0 cursor-pointer max-sm:h-11 max-sm:px-4"
             onClick={copyKey}
           >
             <Copy className="h-3.5 w-3.5" />
