@@ -16,6 +16,7 @@ import { DashboardHero } from "../_components/dashboard-hero";
 import { QuickActions, type QuickActionItem } from "../_components/quick-actions";
 import { ActiveWalkBanner } from "../_components/active-walk-banner";
 import { SectionHeader } from "../_components/section-header";
+import { AvailabilityCard } from "./availability-card";
 
 const quickActions: QuickActionItem[] = [
   { href: "/walks",             icon: ClipboardList, label: "Meus passeios", bg: "bg-primary/10",     fg: "text-primary" },
@@ -40,6 +41,7 @@ export default function WalkerDashboardPage() {
     available,
     canToggle,
     toggle: handleAvailabilityClick,
+    isLoading: availabilityLoading,
     isUpdating: updatingAvailability,
   } = useAvailabilityToggle();
 
@@ -184,6 +186,17 @@ export default function WalkerDashboardPage() {
           </div>
         </div>
       </DashboardHero>
+
+      {/* ── Availability (phones; md+ keeps the toggle in the hero) ── */}
+      <AvailabilityCard
+        className="md:hidden"
+        available={available}
+        canToggle={canToggle}
+        isLoading={availabilityLoading}
+        isUpdating={updatingAvailability}
+        requestCount={walkerRequests.length}
+        onToggle={handleAvailabilityClick}
+      />
 
       {/* ── Active walk banner (API-driven) ── */}
       <ActiveWalkBanner walk={activeWalk} />
