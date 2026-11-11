@@ -20,7 +20,9 @@ const statusConfig: Record<WalkStatus, { label: string; className: string }> = {
 
 export function DashboardRecentWalks() {
   const { data: walks = [], isLoading } = useWalks("client");
-  const recent = walks.slice(0, 3);
+  // Cancelled walks are history the client can see in /walks; the dashboard
+  // only shows walks that still mean something to them.
+  const recent = walks.filter((walk) => walk.status !== "cancelled").slice(0, 3);
 
   if (isLoading) {
     return (
@@ -44,7 +46,6 @@ export function DashboardRecentWalks() {
       <div className="divide-y divide-border/50">
         {recent.map((walk) => {
           const s = statusConfig[walk.status];
-          const isCancelled = walk.status === "cancelled";
           const walkerParticipant = walk.participants.find((p) => p.role === "walker");
           const awaitingWalker = walk.status === "pending" && !walkerParticipant;
           const walkerName = awaitingWalker ? "Aguardando passeador" : walkerParticipant?.name ?? "Passeador";
@@ -52,8 +53,7 @@ export function DashboardRecentWalks() {
           return (
             <Link key={walk.id} href={`/walks/${walk.id}`}>
               <div className={cn(
-                "group flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-muted/30 sm:gap-4 sm:px-5 sm:py-4",
-                isCancelled && "opacity-50"
+                "group flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-muted/30 sm:gap-4 sm:px-5 sm:py-4"
               )}>
                 {!awaitingWalker && walk.walkerAvatarUrl ? (
                   <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-border/30 transition-transform duration-150 group-hover:scale-105">
@@ -62,7 +62,7 @@ export function DashboardRecentWalks() {
                 ) : (
                   <div className={cn(
                     "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-transform duration-150 group-hover:scale-105",
-                    isCancelled || awaitingWalker ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"
+                    awaitingWalker ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"
                   )}>
                     {awaitingWalker ? <Clock className="h-4 w-4" /> : getInitials(walkerName)}
                   </div>
@@ -79,11 +79,9 @@ export function DashboardRecentWalks() {
                   </p>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3">
-                  {!isCancelled && (
-                    <span className="text-sm font-bold tabular-nums text-foreground">
-                      {formatBRL(walk.price)}
-                    </span>
-                  )}
+                  <span className="text-sm font-bold tabular-nums text-foreground">
+                    {formatBRL(walk.price)}
+                  </span>
                   <span className={cn(
                     "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium sm:order-first sm:px-2.5 sm:text-[11px]",
                     s.className
