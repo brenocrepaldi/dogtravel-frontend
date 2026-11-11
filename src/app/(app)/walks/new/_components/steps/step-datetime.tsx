@@ -58,7 +58,7 @@ export function StepDateTime({ data, updateData, onNext, onBack }: Props) {
       </div>
 
       {/* Date + Time side by side */}
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="date" className="text-sm font-medium">
             Data
@@ -96,14 +96,14 @@ export function StepDateTime({ data, updateData, onNext, onBack }: Props) {
       {/* Duration chips */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">Duração</Label>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-4 gap-2 sm:flex sm:flex-wrap">
           {DURATION_OPTIONS.map((min) => (
             <button
               key={min}
               type="button"
               onClick={() => updateData({ durationMinutes: min })}
               className={cn(
-                "px-5 py-2 rounded-lg border text-sm font-medium transition-all duration-150 cursor-pointer",
+                "h-11 px-2 sm:h-auto sm:px-5 sm:py-2 rounded-lg border text-sm font-medium transition-all duration-150 cursor-pointer",
                 data.durationMinutes === min
                   ? "bg-primary text-primary-foreground border-primary shadow-sm"
                   : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
@@ -122,7 +122,7 @@ export function StepDateTime({ data, updateData, onNext, onBack }: Props) {
             <CalendarClock className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground capitalize">{previewLabel}</p>
+            <p className="text-sm font-semibold text-foreground first-letter:uppercase">{previewLabel}</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {data.durationMinutes} minutos de duração
             </p>
