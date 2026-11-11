@@ -200,6 +200,12 @@ export default function WalkerDashboardPage() {
         </div>
       </DashboardHero>
 
+      {/* ── Active walk banner (API-driven) ── */}
+      <ActiveWalkBanner walk={activeWalk} />
+
+      {/* ── Quick actions ── */}
+      <QuickActions items={quickActions} />
+
       {/* ── Availability (phones; md+ keeps the toggle in the hero) ── */}
       <AvailabilityCard
         className="md:hidden"
@@ -211,17 +217,11 @@ export default function WalkerDashboardPage() {
         onToggle={handleAvailabilityClick}
       />
 
-      {/* ── Active walk banner (API-driven) ── */}
-      <ActiveWalkBanner walk={activeWalk} />
-
       {/* ── Next scheduled walk (phones) ── */}
       <section className="space-y-3.5 md:hidden">
         <SectionHeader title="Próximo passeio" href="/walks" linkLabel="Ver agenda" />
         <NextWalkCard walk={findNextWalk(allWalks, new Date())} isLoading={walksLoading} />
       </section>
-
-      {/* ── Quick actions ── */}
-      <QuickActions items={quickActions} />
 
       {/* ── Stats strip (md+; phones show rating and total in the hero) ── */}
       <div className="max-md:hidden grid grid-cols-3 divide-x divide-border/50 overflow-hidden rounded-xl border border-border/60 bg-card lg:gap-3 lg:divide-x-0 lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent">
