@@ -59,7 +59,7 @@ export function StepDateTime({ data, updateData, onNext, onBack }: Props) {
 
       {/* Date + Time side by side */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="space-y-1.5">
+        <div className="min-w-0 space-y-1.5">
           <Label htmlFor="date" className="text-sm font-medium">
             Data
           </Label>
@@ -72,11 +72,11 @@ export function StepDateTime({ data, updateData, onNext, onBack }: Props) {
             onChange={(e) => updateData({ date: e.target.value })}
             onFocus={(e) => { e.currentTarget.type = "date"; openPicker(e); }}
             onBlur={(e)  => { if (!data.date) e.currentTarget.type = "text"; }}
-            className="cursor-pointer"
+            className="min-w-0 cursor-pointer appearance-none [&::-webkit-date-and-time-value]:text-left"
           />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="min-w-0 space-y-1.5">
           <Label htmlFor="time" className="text-sm font-medium">
             Horário
           </Label>
@@ -88,7 +88,7 @@ export function StepDateTime({ data, updateData, onNext, onBack }: Props) {
             onChange={(e) => updateData({ time: e.target.value })}
             onFocus={(e) => { e.currentTarget.type = "time"; openPicker(e); }}
             onBlur={(e)  => { if (!data.time) e.currentTarget.type = "text"; }}
-            className="cursor-pointer"
+            className="min-w-0 cursor-pointer appearance-none [&::-webkit-date-and-time-value]:text-left"
           />
         </div>
       </div>
