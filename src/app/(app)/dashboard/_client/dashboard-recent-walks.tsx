@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatBRL, getInitials } from "@/lib/format";
 import { Card } from "@/components/ui/card";
@@ -20,9 +19,11 @@ const statusConfig: Record<WalkStatus, { label: string; className: string }> = {
 
 export function DashboardRecentWalks() {
   const { data: walks = [], isLoading } = useWalks("client");
-  // Cancelled walks are history the client can see in /walks; the dashboard
-  // only shows walks that still mean something to them.
-  const recent = walks.filter((walk) => walk.status !== "cancelled").slice(0, 3);
+  // Only walks that have a walker: cancelled ones and requests still looking
+  // for a walker stay in /walks, not on the dashboard.
+  const recent = walks
+    .filter((walk) => walk.status !== "cancelled" && walk.participants.some((p) => p.role === "walker"))
+    .slice(0, 3);
 
   if (isLoading) {
     return (
@@ -47,31 +48,22 @@ export function DashboardRecentWalks() {
         {recent.map((walk) => {
           const s = statusConfig[walk.status];
           const walkerParticipant = walk.participants.find((p) => p.role === "walker");
-          const awaitingWalker = walk.status === "pending" && !walkerParticipant;
-          const walkerName = awaitingWalker ? "Aguardando passeador" : walkerParticipant?.name ?? "Passeador";
+          const walkerName = walkerParticipant?.name ?? "Passeador";
 
           return (
             <Link key={walk.id} href={`/walks/${walk.id}`}>
-              <div className={cn(
-                "group flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-muted/30 sm:gap-4 sm:px-5 sm:py-4"
-              )}>
-                {!awaitingWalker && walk.walkerAvatarUrl ? (
+              <div className="group flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-muted/30 sm:gap-4 sm:px-5 sm:py-4">
+                {walk.walkerAvatarUrl ? (
                   <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-border/30 transition-transform duration-150 group-hover:scale-105">
                     <Image src={walk.walkerAvatarUrl} alt={walkerName} fill sizes="40px" className="object-cover" />
                   </div>
                 ) : (
-                  <div className={cn(
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-transform duration-150 group-hover:scale-105",
-                    awaitingWalker ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"
-                  )}>
-                    {awaitingWalker ? <Clock className="h-4 w-4" /> : getInitials(walkerName)}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary transition-transform duration-150 group-hover:scale-105">
+                    {getInitials(walkerName)}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className={cn(
-                    "truncate text-sm font-semibold",
-                    awaitingWalker ? "text-muted-foreground" : "text-foreground"
-                  )}>
+                  <p className="truncate text-sm font-semibold text-foreground">
                     {walkerName}
                   </p>
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">
