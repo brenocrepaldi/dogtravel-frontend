@@ -10,6 +10,7 @@ import { useCreateWalk } from '@/features/walks/hooks/use-walk-actions';
 import { useWalkById } from '@/features/walks/hooks/use-walks';
 import { useWalkerById } from '@/features/walkers/hooks/use-walkers';
 import { trackMetricEvent } from '@/lib/metrics';
+import { scrollToTopOf } from '@/lib/scroll';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -341,10 +342,22 @@ export function WalkRequestForm() {
 		setPendingUrl(null);
 	}
 
+	// Each step is a different screen: start it from the top instead of where
+	// the previous (often longer) step was scrolled to.
+	const rootRef = useRef<HTMLDivElement>(null);
+	const isFirstRender = useRef(true);
+	useEffect(() => {
+		if (isFirstRender.current) {
+			isFirstRender.current = false;
+			return;
+		}
+		scrollToTopOf(rootRef.current);
+	}, [step, pixPayment]);
+
 	const stepProps = { data, updateData, onNext: next, onBack: back };
 
 	return (
-		<div className="w-full max-w-2xl mx-auto space-y-6 pb-10">
+		<div ref={rootRef} className="w-full max-w-2xl mx-auto space-y-6 pb-10">
 			{/* Page header */}
 			<div>
 				<h1 className="text-2xl font-bold tracking-tight text-foreground">Solicitar passeio</h1>
