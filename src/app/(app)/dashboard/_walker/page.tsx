@@ -80,73 +80,94 @@ export default function WalkerDashboardPage() {
       {/* ── Hero ── */}
       <DashboardHero className={cn("transition-all duration-500", available && canToggle && "to-emerald-700/60")}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
-          <div>
-            <p className="text-sm font-medium text-primary-foreground/65">{getGreeting()}</p>
-            <h1 className="mt-0.5 text-2xl font-bold tracking-tight lg:text-3xl">{firstName}!</h1>
-            {available && canToggle && walkerRequests.length > 0 ? (
-              <Link
-                href="/walk-requests"
-                className="mt-1 inline-flex min-h-6 items-center gap-1 text-sm font-medium text-primary-foreground underline-offset-4 hover:underline lg:mt-1.5"
-              >
-                {getHeroSubtitle(canToggle, available, walkerRequests.length)}
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            ) : (
-              <p className="mt-1 text-sm text-primary-foreground/70 lg:mt-1.5">
-                {getHeroSubtitle(canToggle, available, walkerRequests.length)}
-              </p>
-            )}
-
-            {/* Availability toggle */}
-            <button
-              type="button"
-              onClick={handleAvailabilityClick}
-              disabled={updatingAvailability}
-              className={cn(
-                "mt-4 flex w-full cursor-pointer select-none items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 disabled:opacity-70 lg:mt-5 lg:w-52",
-                available && canToggle
-                  ? "bg-emerald-500/20 ring-1 ring-emerald-500/30 hover:bg-emerald-500/25"
-                  : "bg-white/10 hover:bg-white/[0.15]",
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <span className="relative flex h-2.5 w-2.5 shrink-0">
-                  {available && canToggle && (
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  )}
-                  <span className={cn(
-                    "relative inline-flex h-2.5 w-2.5 rounded-full transition-colors duration-300",
-                    available && canToggle ? "bg-emerald-400" : "bg-white/30",
-                  )} />
-                </span>
-                <div className="text-left">
-                  <p className="text-[11px] font-medium text-primary-foreground/60">
-                    {!canToggle ? "Disponibilidade" : "Status"}
-                  </p>
-                  <p className="text-sm font-semibold leading-tight text-primary-foreground">
-                    {!canToggle ? "Bloqueada" : available ? "Disponível" : "Indisponível"}
-                  </p>
-                </div>
-              </div>
-
-              {!canToggle ? (
-                <Lock className="h-4 w-4 shrink-0 text-white/40" />
+          <div className="max-md:flex max-md:items-center max-md:justify-between max-md:gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-primary-foreground/65">{getGreeting()}</p>
+              <h1 className="mt-0.5 text-2xl font-bold tracking-tight lg:text-3xl">{firstName}!</h1>
+              {/* Phones: status and requests live in AvailabilityCard, the hero just greets. */}
+              <p className="mt-1 text-sm text-primary-foreground/70 md:hidden">Pronto para o próximo passeio?</p>
+              {available && canToggle && walkerRequests.length > 0 ? (
+                <Link
+                  href="/walk-requests"
+                  className="max-md:hidden mt-1 inline-flex min-h-6 items-center gap-1 text-sm font-medium text-primary-foreground underline-offset-4 hover:underline lg:mt-1.5"
+                >
+                  {getHeroSubtitle(canToggle, available, walkerRequests.length)}
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
               ) : (
-                <div className={cn(
-                  "relative h-5 w-9 shrink-0 rounded-full transition-colors duration-300",
-                  available ? "bg-emerald-400" : "bg-white/25",
-                )}>
-                  <span className={cn(
-                    "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300",
-                    available ? "left-[calc(100%-1.125rem)]" : "left-0.5",
-                  )} />
-                </div>
+                <p className="max-md:hidden mt-1 text-sm text-primary-foreground/70 lg:mt-1.5">
+                  {getHeroSubtitle(canToggle, available, walkerRequests.length)}
+                </p>
               )}
-            </button>
+
+              {/* Availability toggle (md+; phones use AvailabilityCard below the hero) */}
+              <button
+                type="button"
+                onClick={handleAvailabilityClick}
+                disabled={updatingAvailability}
+                className={cn(
+                  "max-md:hidden mt-4 flex w-full cursor-pointer select-none items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 disabled:opacity-70 lg:mt-5 lg:w-52",
+                  available && canToggle
+                    ? "bg-emerald-500/20 ring-1 ring-emerald-500/30 hover:bg-emerald-500/25"
+                    : "bg-white/10 hover:bg-white/[0.15]",
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="relative flex h-2.5 w-2.5 shrink-0">
+                    {available && canToggle && (
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    )}
+                    <span className={cn(
+                      "relative inline-flex h-2.5 w-2.5 rounded-full transition-colors duration-300",
+                      available && canToggle ? "bg-emerald-400" : "bg-white/30",
+                    )} />
+                  </span>
+                  <div className="text-left">
+                    <p className="text-[11px] font-medium text-primary-foreground/60">
+                      {!canToggle ? "Disponibilidade" : "Status"}
+                    </p>
+                    <p className="text-sm font-semibold leading-tight text-primary-foreground">
+                      {!canToggle ? "Bloqueada" : available ? "Disponível" : "Indisponível"}
+                    </p>
+                  </div>
+                </div>
+
+                {!canToggle ? (
+                  <Lock className="h-4 w-4 shrink-0 text-white/40" />
+                ) : (
+                  <div className={cn(
+                    "relative h-5 w-9 shrink-0 rounded-full transition-colors duration-300",
+                    available ? "bg-emerald-400" : "bg-white/25",
+                  )}>
+                    <span className={cn(
+                      "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300",
+                      available ? "left-[calc(100%-1.125rem)]" : "left-0.5",
+                    )} />
+                  </div>
+                )}
+              </button>
+            </div>
+
+            {/* Earnings, compact like the client's hero stats (phones only) */}
+            <div className="flex shrink-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-white/10 md:hidden">
+              <div className="px-3.5 py-2 text-right">
+                <p className="text-lg font-bold leading-none tabular-nums text-emerald-300">
+                  {stats ? formatBRL(stats.earningsToday) : "—"}
+                </p>
+                <p className="mt-0.5 text-xs text-primary-foreground/60">hoje</p>
+              </div>
+              <div className="h-px bg-white/10" />
+              <div className="px-3.5 py-2 text-right">
+                <p className="text-lg font-bold leading-none tabular-nums">
+                  {stats ? formatBRL(stats.earningsMonth) : "—"}
+                </p>
+                <p className="mt-0.5 text-xs text-primary-foreground/60">este mês</p>
+              </div>
+            </div>
           </div>
 
           {/* Earnings stats (API-driven) */}
-          <div className="flex gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 lg:flex-col lg:gap-0">
+          <div className="max-md:hidden flex gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 lg:flex-col lg:gap-0">
             <div className="flex-1 px-4 py-2.5 text-center lg:px-5 lg:py-3 lg:text-right">
               <p className="text-xl font-bold leading-none text-emerald-300 lg:text-2xl">
                 {stats ? formatBRL(stats.earningsToday) : "—"}
