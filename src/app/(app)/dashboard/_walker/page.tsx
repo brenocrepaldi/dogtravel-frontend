@@ -17,6 +17,7 @@ import { QuickActions, type QuickActionItem } from "../_components/quick-actions
 import { ActiveWalkBanner } from "../_components/active-walk-banner";
 import { SectionHeader } from "../_components/section-header";
 import { AvailabilityCard } from "./availability-card";
+import { NextWalkCard, findNextWalk } from "./next-walk-card";
 
 const quickActions: QuickActionItem[] = [
   { href: "/walks",             icon: ClipboardList, label: "Meus passeios", bg: "bg-primary/10",     fg: "text-primary" },
@@ -200,6 +201,12 @@ export default function WalkerDashboardPage() {
 
       {/* ── Active walk banner (API-driven) ── */}
       <ActiveWalkBanner walk={activeWalk} />
+
+      {/* ── Next scheduled walk (phones) ── */}
+      <section className="space-y-3.5 md:hidden">
+        <SectionHeader title="Próximo passeio" href="/walks" linkLabel="Ver agenda" />
+        <NextWalkCard walk={findNextWalk(allWalks, new Date())} isLoading={walksLoading} />
+      </section>
 
       {/* ── Quick actions ── */}
       <QuickActions items={quickActions} />
