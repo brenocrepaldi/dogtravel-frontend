@@ -89,7 +89,18 @@ export default function WalkerDashboardPage() {
               <p className="text-sm font-medium text-primary-foreground/65">{getGreeting()}</p>
               <h1 className="mt-0.5 text-2xl font-bold tracking-tight lg:text-3xl">{firstName}!</h1>
               {/* Phones: status and requests live in AvailabilityCard, the hero just greets. */}
-              <p className="mt-1 text-sm text-primary-foreground/70 md:hidden">Pronto para o próximo passeio?</p>
+              {/* Phones: the walker's reputation at a glance, in place of the stats strip. */}
+              <Link
+                href="/profile"
+                className="mt-1.5 inline-flex min-h-6 items-center gap-1.5 text-sm text-primary-foreground/80 md:hidden"
+              >
+                <Star className="h-4 w-4 fill-amber-300 text-amber-300" />
+                <span className="font-semibold text-primary-foreground">
+                  {stats ? stats.rating.toFixed(1).replace(".", ",") : "—"}
+                </span>
+                <span className="text-primary-foreground/40">·</span>
+                {stats ? `${stats.totalWalks} passeio${stats.totalWalks === 1 ? "" : "s"}` : "—"}
+              </Link>
               {available && canToggle && walkerRequests.length > 0 ? (
                 <Link
                   href="/walk-requests"
@@ -212,8 +223,8 @@ export default function WalkerDashboardPage() {
       {/* ── Quick actions ── */}
       <QuickActions items={quickActions} />
 
-      {/* ── Stats strip (API-driven) ── */}
-      <div className="grid grid-cols-3 divide-x divide-border/50 overflow-hidden rounded-xl border border-border/60 bg-card lg:gap-3 lg:divide-x-0 lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent">
+      {/* ── Stats strip (md+; phones show rating and total in the hero) ── */}
+      <div className="max-md:hidden grid grid-cols-3 divide-x divide-border/50 overflow-hidden rounded-xl border border-border/60 bg-card lg:gap-3 lg:divide-x-0 lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent">
         {statItems.map(({ label, value, href, icon: Icon, color, bg }) => (
           <Link
             key={label}
