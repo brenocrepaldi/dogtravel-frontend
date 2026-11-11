@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import {
   PawPrint,
   LayoutDashboard,
+  Bell,
   ClipboardList,
   Dog,
   User,
@@ -30,6 +31,8 @@ import {
 import type { DocStatus } from "@/types";
 import { useDocuments } from "@/features/documents/hooks/use-documents";
 import { useProfile } from "@/features/profile/hooks/use-profile";
+import { usePendingRequestCount } from "@/features/walks/hooks/use-pending-request-count";
+import { CountBadge } from "./count-badge";
 
 // ─── Nav items per role ───────────────────────────────────────────────────────
 
@@ -44,6 +47,7 @@ export const clientNav = [
 export const walkerNav = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard"     },
   { href: "/walks",     icon: ClipboardList,   label: "Meus passeios" },
+  { href: "/walk-requests", icon: Bell,        label: "Pedidos"       },
   { href: "/profile",   icon: User,            label: "Perfil"        },
 ];
 
@@ -52,14 +56,18 @@ export const walkerNav = [
 export function SidebarNavLinks({
   navItems,
   pathname,
+  badges,
 }: {
   navItems: typeof clientNav;
   pathname: string;
+  /** Counts shown next to an item, keyed by its href (0 hides the badge). */
+  badges?: Partial<Record<string, number>>;
 }) {
   return (
     <div className="space-y-1">
       {navItems.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+        const badge = badges?.[item.href] ?? 0;
         return (
           <Link
             key={item.href}
@@ -76,6 +84,13 @@ export function SidebarNavLinks({
               isActive && "scale-110"
             )} />
             <span className="truncate">{item.label}</span>
+            {badge > 0 && (
+              <CountBadge
+                count={badge}
+                label={`${badge} pendente${badge > 1 ? "s" : ""}`}
+                className={cn("ml-auto", isActive && "bg-primary-foreground text-primary")}
+              />
+            )}
           </Link>
         );
       })}
@@ -312,6 +327,7 @@ export function Sidebar() {
 
   const role = session?.user?.role ?? "client";
   const navItems = role === "walker" ? walkerNav : clientNav;
+  const pendingRequests = usePendingRequestCount();
 
   const userName = session?.user?.name ?? "Usuário";
   const userInitials = session?.user?.name
@@ -335,7 +351,11 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 overflow-y-auto">
-        <SidebarNavLinks navItems={navItems} pathname={pathname} />
+        <SidebarNavLinks
+          navItems={navItems}
+          pathname={pathname}
+          badges={{ "/walk-requests": pendingRequests }}
+        />
       </nav>
 
       {/* Walker onboarding widget */}

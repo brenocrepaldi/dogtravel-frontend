@@ -13,6 +13,8 @@ import {
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePendingRequestCount } from "@/features/walks/hooks/use-pending-request-count";
+import { CountBadge } from "./count-badge";
 
 const clientBottomNav = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Início" },
@@ -50,6 +52,7 @@ export function BottomNav() {
   const items = role === "walker" ? walkerBottomNav : clientBottomNav;
   const primaryIndex = 2;
   const current = activeHref(pathname, items);
+  const pendingRequests = usePendingRequestCount();
 
   return (
     <nav
@@ -87,6 +90,7 @@ export function BottomNav() {
       {(() => {
         const primary = items[primaryIndex];
         const active = primary.href === current;
+        const badge = primary.href === "/walk-requests" ? pendingRequests : 0;
 
         return (
           <Link
@@ -99,6 +103,13 @@ export function BottomNav() {
             )}
           >
             <primary.icon className="h-5 w-5" />
+            {badge > 0 && (
+              <CountBadge
+                count={badge}
+                label={`${badge} pedido${badge > 1 ? "s" : ""} pendente${badge > 1 ? "s" : ""}`}
+                className="absolute -right-1 -top-1 bg-red-500 text-white ring-2 ring-background"
+              />
+            )}
           </Link>
         );
       })()}

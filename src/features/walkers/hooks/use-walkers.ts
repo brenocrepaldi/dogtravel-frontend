@@ -19,11 +19,12 @@ export function useWalkerById(id: string, options?: { enabled?: boolean }) {
   });
 }
 
-export function useWalkerProfile() {
+export function useWalkerProfile(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["walkers", "me"],
     queryFn: () => WalkersApi.getMe(),
     staleTime: 5 * 60 * 1000,
+    enabled: options?.enabled ?? true,
   });
 }
 

@@ -18,11 +18,12 @@ export function useWalkById(id: string) {
   });
 }
 
-export function useWalkRequests() {
+export function useWalkRequests(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["walk-requests"],
     queryFn: WalksApi.listRequests,
     refetchInterval: 15_000,
+    enabled: options?.enabled ?? true,
   });
 }
 
