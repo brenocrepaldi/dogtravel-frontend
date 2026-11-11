@@ -10,6 +10,7 @@ import { DashboardDogs } from "./dashboard-dogs";
 import { DashboardRecentWalks } from "./dashboard-recent-walks";
 import { DashboardHeroStats } from "./dashboard-hero-stats";
 import { DashboardActiveWalk } from "./dashboard-active-walk";
+import { DashboardHeroReputation } from "./dashboard-hero-reputation";
 
 export const metadata: Metadata = { title: "Dashboard | DogTravel" };
 
@@ -33,6 +34,7 @@ export default async function ClientDashboardPage() {
           <div className="min-w-0">
             <p className="text-sm font-medium text-primary-foreground/65">{getGreeting()}</p>
             <h1 className="mt-0.5 truncate text-2xl font-bold tracking-tight lg:text-3xl">{firstName}!</h1>
+            <DashboardHeroReputation className="mt-1.5 md:hidden" />
             <p className="mt-1 text-sm text-primary-foreground/70 lg:mt-1.5">Pronto para o próximo passeio?</p>
             <Link
               href="/walks/new"
@@ -42,7 +44,7 @@ export default async function ClientDashboardPage() {
               Solicitar passeio
             </Link>
           </div>
-          <DashboardHeroStats />
+          <DashboardHeroStats className="max-md:hidden" />
         </div>
       </DashboardHero>
 

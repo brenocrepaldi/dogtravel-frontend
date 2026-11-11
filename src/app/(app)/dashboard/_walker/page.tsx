@@ -6,7 +6,7 @@ import {
   ChevronRight, ClipboardList, FileCheck2, Lock, Star, TrendingUp, Wallet, User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatBRL, getGreeting, getInitials } from "@/lib/format";
+import { formatBRL, getGreeting } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWalkRequests, useWalks } from "@/features/walks/hooks/use-walks";
@@ -17,6 +17,8 @@ import { DashboardHero } from "../_components/dashboard-hero";
 import { QuickActions, type QuickActionItem } from "../_components/quick-actions";
 import { ActiveWalkBanner } from "../_components/active-walk-banner";
 import { SectionHeader } from "../_components/section-header";
+import { HeroReputation } from "../_components/hero-reputation";
+import { WalkListAvatar } from "../_components/walk-list-avatar";
 import { AvailabilityCard } from "./availability-card";
 import { NextWalkCard, findNextWalk } from "./next-walk-card";
 
@@ -90,17 +92,11 @@ export default function WalkerDashboardPage() {
               <h1 className="mt-0.5 text-2xl font-bold tracking-tight lg:text-3xl">{firstName}!</h1>
               {/* Phones: status and requests live in AvailabilityCard, the hero just greets. */}
               {/* Phones: the walker's reputation at a glance, in place of the stats strip. */}
-              <Link
-                href="/profile"
-                className="mt-1.5 inline-flex min-h-6 items-center gap-1.5 text-sm text-primary-foreground/80 md:hidden"
-              >
-                <Star className="h-4 w-4 fill-amber-300 text-amber-300" />
-                <span className="font-semibold text-primary-foreground">
-                  {stats ? stats.rating.toFixed(1).replace(".", ",") : "—"}
-                </span>
-                <span className="text-primary-foreground/40">·</span>
-                {stats ? `${stats.totalWalks} passeio${stats.totalWalks === 1 ? "" : "s"}` : "—"}
-              </Link>
+              <HeroReputation
+                rating={stats?.rating}
+                totalWalks={stats?.totalWalks}
+                className="mt-1.5 md:hidden"
+              />
               {available && canToggle && walkerRequests.length > 0 ? (
                 <Link
                   href="/walk-requests"
@@ -253,30 +249,33 @@ export default function WalkerDashboardPage() {
               </div>
             ) : (
               <div className="divide-y divide-border/50">
-                {completedWalks.slice(0, 3).map((walk) => (
-                  <div
-                    key={walk.id}
-                    className="group flex items-center gap-4 px-5 py-4 transition-colors duration-150 hover:bg-muted/30 max-md:gap-3 max-md:px-4 max-md:py-3.5"
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary transition-transform duration-150 group-hover:scale-105">
-                      {getInitials(walk.clientName)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-foreground">{walk.clientName}</p>
-                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                        {walk.petNames.join(" & ")} · {walk.dateLabel}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-3">
-                      <span className="hidden items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 sm:inline-flex">
-                        Concluído
-                      </span>
-                      <span className="text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
-                        +{formatBRL(walk.price)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                {completedWalks.slice(0, 3).map((walk) => {
+                  const firstPet = walk.pets?.[0] ?? { name: walk.petNames[0] ?? "Cão", photoUrl: null };
+                  return (
+                    <Link key={walk.id} href={`/walks/${walk.id}`}>
+                      <div className="group flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-muted/30 sm:gap-4 sm:px-5 sm:py-4">
+                        <WalkListAvatar
+                          main={{ ...firstPet, kind: "dog" }}
+                          corner={{ name: walk.clientName, photoUrl: walk.clientAvatarUrl, kind: "person" }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-foreground">{walk.petNames.join(" & ")}</p>
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                            {walk.clientName} · {walk.dateLabel}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3">
+                          <span className="text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
+                            +{formatBRL(walk.price)}
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 sm:order-first sm:px-2.5 sm:text-[11px] dark:text-emerald-400">
+                            Concluído
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </Card>
