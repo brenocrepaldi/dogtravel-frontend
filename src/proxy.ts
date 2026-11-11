@@ -29,6 +29,10 @@ export async function proxy(req: NextRequest) {
   const token = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET,
+    // Auth.js names the cookie __Secure-authjs.session-token when NEXTAUTH_URL
+    // is https. Behind an HTTPS proxy (e.g. Tailscale) req.url is still http,
+    // so getToken must be told, or it looks for the wrong cookie.
+    secureCookie: process.env.NEXTAUTH_URL?.startsWith("https://") ?? false,
   });
 
   // A token whose refresh failed can't be revived. Counting it as logged in
