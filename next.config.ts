@@ -49,14 +49,16 @@ if (process.env.NEXT_PUBLIC_MEDIA_URL !== "http://localhost:9000") {
 
 // Next.js 16's image optimizer refuses upstream hosts that resolve to a
 // private IP (SSRF guard). In local dev MinIO is served from this machine
-// (localhost / macbook.local / a LAN IP), so every stored photo would fail —
-// only lift the guard when the media host itself is local.
+// (localhost / macbook.local / a LAN IP / its Tailscale name, which resolves
+// to a 100.64.0.0/10 address), so every stored photo would fail — only lift
+// the guard when the media host itself is local.
 const isLocalMediaHost = (() => {
   if (!process.env.NEXT_PUBLIC_MEDIA_URL) return true;
   const { hostname } = new URL(process.env.NEXT_PUBLIC_MEDIA_URL);
   return (
     hostname === "localhost" ||
     hostname.endsWith(".local") ||
+    hostname.endsWith(".ts.net") ||
     /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(hostname)
   );
 })();
