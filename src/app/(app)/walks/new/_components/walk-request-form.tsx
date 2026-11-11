@@ -357,11 +357,11 @@ export function WalkRequestForm() {
 	const stepProps = { data, updateData, onNext: next, onBack: back };
 
 	return (
-		<div ref={rootRef} className="w-full max-w-2xl mx-auto space-y-6 pb-10">
+		<div ref={rootRef} className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-6 pb-10">
 			{/* Page header */}
 			<div>
-				<h1 className="text-2xl font-bold tracking-tight text-foreground">Solicitar passeio</h1>
-				<p className="text-sm text-muted-foreground mt-1">
+				<h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Solicitar passeio</h1>
+				<p className="hidden sm:block text-sm text-muted-foreground mt-1">
 					Preencha os detalhes para encontrar o passeador ideal.
 				</p>
 			</div>
@@ -404,7 +404,7 @@ export function WalkRequestForm() {
 				/* PIX payment screen — replaces step flow after submission */
 				<Card className="overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
 					<div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/40" />
-					<CardContent className="p-6">
+					<CardContent className="p-4 sm:p-6">
 						<StepPixPayment data={data} onDone={() => router.push('/walks')} />
 					</CardContent>
 				</Card>
@@ -419,7 +419,7 @@ export function WalkRequestForm() {
 						className="overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300"
 					>
 						<div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/40" />
-						<CardContent className="p-6">
+						<CardContent className="p-4 sm:p-6">
 							{step === 0 && <StepPets {...stepProps} onCancel={() => setShowExitModal(true)} />}
 							{step === 1 && <StepDateTime {...stepProps} />}
 							{step === 2 && <StepLocation {...stepProps} />}
