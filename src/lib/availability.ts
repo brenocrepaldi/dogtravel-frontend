@@ -39,3 +39,37 @@ export function formatAvailabilityLabel(slots: AvailabilitySlot[]): string {
   if (allSame) return `${dayList} · ${firstKey}`;
   return `${active.length} dia${active.length > 1 ? 's' : ''} configurado${active.length > 1 ? 's' : ''}`;
 }
+
+export interface AvailabilityGroup {
+  /** "Seg", "Seg e Ter" or "Seg a Sex". */
+  days: string;
+  /** "07:00–18:00", or null while the day's hours aren't complete. */
+  hours: string | null;
+}
+
+/**
+ * Week order summary of the active days: consecutive days with the same hours
+ * collapse into one group, so a typical week reads as one or two lines.
+ */
+export function groupAvailability(slots: AvailabilitySlot[]): AvailabilityGroup[] {
+  const runs: { first: number; last: number; hours: string | null }[] = [];
+
+  DAYS.forEach((day, index) => {
+    const slot = slots.find((s) => s.day === day.key);
+    if (!slot) return;
+    const hours = slot.start && slot.end ? `${slot.start}–${slot.end}` : null;
+    const prev = runs[runs.length - 1];
+    if (prev && hours && prev.hours === hours && prev.last === index - 1) {
+      prev.last = index;
+    } else {
+      runs.push({ first: index, last: index, hours });
+    }
+  });
+
+  return runs.map(({ first, last, hours }) => {
+    const from = DAYS[first]!.short;
+    const to = DAYS[last]!.short;
+    const days = first === last ? from : last === first + 1 ? `${from} e ${to}` : `${from} a ${to}`;
+    return { days, hours };
+  });
+}
