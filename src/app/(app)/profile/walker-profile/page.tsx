@@ -67,13 +67,13 @@ function Section({ icon: Icon, title, children }: {
 }) {
   return (
     <Card className="overflow-hidden py-0 gap-0">
-      <div className="flex items-center gap-2.5 border-b border-border/60 px-5 py-3.5">
+      <div className="flex items-center gap-2.5 border-b border-border/60 px-4 py-3.5 md:px-5">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 shrink-0">
           <Icon className="h-3.5 w-3.5 text-primary" />
         </div>
         <span className="text-sm font-semibold text-foreground">{title}</span>
       </div>
-      <CardContent className="p-5 space-y-4">{children}</CardContent>
+      <CardContent className="p-4 space-y-4 md:p-5">{children}</CardContent>
     </Card>
   );
 }
@@ -239,11 +239,17 @@ export default function WalkerProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6 pb-8">
+    <div className="max-w-2xl space-y-4 pb-8 md:space-y-6">
 
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon-sm" render={<Link href="/profile" />} aria-label="Voltar">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          render={<Link href="/profile" />}
+          aria-label="Voltar"
+          className="max-md:-ml-2 max-md:size-11"
+        >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
@@ -350,9 +356,16 @@ export default function WalkerProfilePage() {
         />
       </Section>
 
-      {/* Save */}
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving} className="gap-2 rounded-lg shadow-sm">
+      {/* Save. Phones: pinned above the bottom nav, so it's in reach from any section of
+          this long form. The app's scroll container already pads for the nav, so bottom-0
+          lands right above it, and a strip below fills that padding so the form doesn't
+          peek out between the bar and the nav (same technique as FlowActions). */}
+      <div className="flex justify-end max-md:sticky max-md:bottom-0 max-md:z-10 max-md:-mx-4 max-md:border-t max-md:border-border/60 max-md:bg-background max-md:px-4 max-md:py-3 max-md:after:absolute max-md:after:inset-x-0 max-md:after:top-full max-md:after:h-8 max-md:after:bg-background">
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="gap-2 rounded-lg shadow-sm max-md:h-12 max-md:w-full max-md:text-base"
+        >
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isSaving ? "Salvando..." : "Salvar perfil"}
         </Button>
