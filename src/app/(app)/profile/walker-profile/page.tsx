@@ -402,8 +402,9 @@ export default function WalkerProfilePage() {
       {/* Save. Phones: pinned above the bottom nav, so it's in reach from any section of
           this long form. The app's scroll container already pads for the nav, so bottom-0
           lands right above it, and a strip below fills that padding so the form doesn't
-          peek out between the bar and the nav (same technique as FlowActions). */}
-      <div className="flex justify-end max-md:sticky max-md:bottom-0 max-md:z-10 max-md:-mx-4 max-md:border-t max-md:border-border/60 max-md:bg-background max-md:px-4 max-md:py-3 max-md:after:absolute max-md:after:inset-x-0 max-md:after:top-full max-md:after:h-8 max-md:after:bg-background">
+          peek out between the bar and the nav or under the nav (same technique as FlowActions,
+          taller strip). */}
+      <div className="flex justify-end max-md:sticky max-md:bottom-0 max-md:z-10 max-md:-mx-4 max-md:border-t max-md:border-border/60 max-md:bg-background max-md:px-4 max-md:py-3 max-md:after:absolute max-md:after:inset-x-0 max-md:after:top-full max-md:after:h-36 max-md:after:bg-background">
         <Button
           onClick={handleSave}
           disabled={isSaving}
