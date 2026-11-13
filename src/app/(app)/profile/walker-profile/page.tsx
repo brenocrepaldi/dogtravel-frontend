@@ -16,7 +16,7 @@ import {
   Tag,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, TOUCH_TARGET } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -109,28 +109,30 @@ function TagsInput({
         <Input
           value={input}
           placeholder="Ex: Pontual, Experiente..."
+          enterKeyHint="done"
+          autoComplete="off"
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") { e.preventDefault(); addTag(); }
           }}
           className="rounded-lg"
         />
-        <Button type="button" variant="outline" size="sm" onClick={addTag} className="shrink-0 rounded-lg">
+        <Button type="button" variant="outline" size="sm" onClick={addTag} className="shrink-0 rounded-lg max-md:h-11 max-md:px-4 max-md:text-sm">
           Adicionar
         </Button>
       </div>
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 max-md:gap-2">
           {tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1 pr-1.5">
+            <Badge key={tag} variant="secondary" className="gap-1 pr-1.5 max-md:h-7 max-md:gap-1.5 max-md:px-2.5 max-md:text-sm">
               {tag}
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="ml-0.5 rounded-sm opacity-60 hover:opacity-100 cursor-pointer"
+                className={cn("relative ml-0.5 rounded-sm opacity-60 hover:opacity-100 cursor-pointer", TOUCH_TARGET)}
                 aria-label={`Remover ${tag}`}
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3 max-md:h-3.5 max-md:w-3.5" />
               </button>
             </Badge>
           ))}
@@ -168,14 +170,17 @@ function CheckboxGroup<T extends string>({
             key={value}
             type="button"
             onClick={() => toggle(value)}
+            aria-pressed={active}
             className={cn(
-              "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer",
+              "relative flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer max-md:h-10 max-md:px-3.5 max-md:text-sm",
+              TOUCH_TARGET,
               active
                 ? "border-primary bg-primary/10 text-primary"
                 : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground",
             )}
           >
-            <CheckSquare className={cn("h-3.5 w-3.5 shrink-0", active ? "opacity-100" : "opacity-30")} />
+            {/* A faded check reads as "checked" on a small screen, so phones show it only when active. */}
+            <CheckSquare className={cn("h-3.5 w-3.5 shrink-0", active ? "opacity-100" : "opacity-30 max-md:hidden")} />
             {label}
           </button>
         );
@@ -283,9 +288,10 @@ export default function WalkerProfilePage() {
           <Textarea
             value={form.description}
             rows={4}
+            autoCapitalize="sentences"
             placeholder="Descreva sua experiência, abordagem e diferenciais..."
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            className="rounded-lg resize-none"
+            className="rounded-lg resize-none max-md:min-h-40"
           />
         </div>
       </Section>
@@ -299,6 +305,7 @@ export default function WalkerProfilePage() {
           <Input
             value={form.location}
             placeholder="Ex: Pinheiros, São Paulo"
+            enterKeyHint="next"
             onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
             className="rounded-lg"
           />
@@ -310,6 +317,7 @@ export default function WalkerProfilePage() {
           <Input
             value={form.serviceArea}
             placeholder="Ex: Pinheiros, Vila Madalena e Perdizes"
+            enterKeyHint="next"
             onChange={(e) => setForm((f) => ({ ...f, serviceArea: e.target.value }))}
             className="rounded-lg"
           />
