@@ -67,9 +67,10 @@ function workDuration(start: string, end: string) {
 interface Props {
   value: AvailabilitySlot[];
   onChange: (v: AvailabilitySlot[]) => void;
+  className?: string;
 }
 
-export function AvailabilityPicker({ value, onChange }: Props) {
+export function AvailabilityPicker({ value, onChange, className }: Props) {
   function getEntry(day: DayKey) {
     return value.find((s) => s.day === day);
   }
@@ -102,7 +103,7 @@ export function AvailabilityPicker({ value, onChange }: Props) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className={cn('space-y-2', className)}>
       {DAYS.map((day) => {
         const active = isDayActive(day.key);
         const entry = getEntry(day.key);

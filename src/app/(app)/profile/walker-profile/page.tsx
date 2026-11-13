@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { useWalkerProfile, useUpdateWalkerProfile } from "@/features/walkers/hooks/use-walkers";
 import type { AvailabilitySlot, DogSize, WalkerProfileUpdate } from "@/types";
 import { AvailabilityPicker } from "./_components/availability-picker";
+import { AvailabilitySheetField } from "./_components/availability-sheet-field";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -361,10 +362,17 @@ export default function WalkerProfilePage() {
 
       {/* Disponibilidade */}
       <Section icon={Calendar} title="Disponibilidade semanal">
-        <p className="text-xs text-muted-foreground -mt-1">
+        <p className="text-xs text-muted-foreground -mt-1 max-md:hidden">
           Ative os dias em que você trabalha e selecione os horários disponíveis em cada um.
         </p>
+        {/* Phones: a summary that opens the days in a bottom sheet. md+: the seven days inline.
+            The picker stays last so the card's spacing on md+ is unchanged. */}
+        <AvailabilitySheetField
+          value={(form.availability as AvailabilitySlot[]) ?? []}
+          onChange={(v) => setForm((f) => ({ ...f, availability: v }))}
+        />
         <AvailabilityPicker
+          className="max-md:hidden"
           value={(form.availability as AvailabilitySlot[]) ?? []}
           onChange={(v) => setForm((f) => ({ ...f, availability: v }))}
         />
