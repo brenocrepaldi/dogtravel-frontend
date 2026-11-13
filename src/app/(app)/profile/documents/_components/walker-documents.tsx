@@ -47,6 +47,7 @@ import { UploadZone } from "./walker-documents-upload-zone";
 import { OnboardingProgressCard } from "./walker-documents-progress-card";
 import { CertRow } from "./walker-documents-cert-row";
 import { BACKGROUND_COPY, IDENTITY_COPY } from "./walker-documents-copy";
+import { WalkerDocumentsMobile } from "./walker-documents-mobile";
 
 // ─── Main component ─────────────────────────────────────────────────────────
 
@@ -172,7 +173,26 @@ export function WalkerDocuments() {
 
   return (
     <>
-      <div className="space-y-4 md:space-y-6">
+      {/* Phones get their own list-and-sheets layout; md+ keeps the cards below. */}
+      <WalkerDocumentsMobile
+        identityStatus={identityStatus}
+        bgStatus={bgStatus}
+        certs={certs}
+        identity={{
+          doc: identityDoc,
+          selfie: identitySelfie,
+          setDoc: setIdentityDoc,
+          setSelfie: setIdentitySelfie,
+          uploading: uploadingIdentity,
+          submit: submitIdentity,
+        }}
+        background={{ doc: bgDoc, setDoc: setBgDoc, uploading: uploadingBackground, submit: submitBackground }}
+        onAddCert={() => setDialogOpen(true)}
+        onRemoveCert={handleRemoveCert}
+        removingCert={removingCert}
+      />
+
+      <div className="space-y-4 max-md:hidden md:space-y-6">
 
         {/* ── Progresso do onboarding ──────────────────────────────────────── */}
         <OnboardingProgressCard identityStatus={identityStatus} bgStatus={bgStatus} />
