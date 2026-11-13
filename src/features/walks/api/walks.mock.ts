@@ -118,6 +118,7 @@ export const walksMock = {
     const newWalk: WalkRecord = {
       id: `local-${crypto.randomUUID()}`,
       walkerId: dto.walkerId ?? null,
+      requestMode: dto.walkerId ? "directed" : "open",
       clientName: "Cliente",
       petIds: dto.petIds,
       petNames: dto.petNames,
@@ -163,6 +164,14 @@ export const walksMock = {
       w.id === id ? { ...w, status: "cancelled" as const } : w
     );
     return;
+  },
+  open: async (id: string): Promise<WalkRecord> => {
+    const store = getWalksStore();
+    const walk = store.find((w) => w.id === id);
+    if (!walk) throw new Error("WALK_NOT_FOUND");
+    const opened: WalkRecord = { ...walk, walkerId: null, walkerName: null, requestMode: "open" };
+    walksStore = store.map((w) => (w.id === id ? opened : w));
+    return opened;
   },
   complete: async (walkId: string): Promise<WalkRecord> => {
     const store = getWalksStore();

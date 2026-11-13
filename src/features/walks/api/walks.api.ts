@@ -87,6 +87,15 @@ export const WalksApi = {
     await api.patch(`/walks/${id}/cancel`);
   },
 
+  /** Opens a request directed at one walker to every walker. */
+  open: async (id: string): Promise<WalkRecord> => {
+    if (!isApiConfigured) {
+      const { walksMock } = await import("./walks.mock");
+      return walksMock.open(id);
+    }
+    return api.patch<WalkRecord>(`/walks/${id}/open`).then((r) => r.data);
+  },
+
   complete: async (walkId: string, coords?: { lat: number; lng: number }): Promise<WalkRecord> => {
     if (!isApiConfigured) {
       const { walksMock } = await import("./walks.mock");

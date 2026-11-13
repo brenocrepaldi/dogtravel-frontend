@@ -61,6 +61,8 @@ export interface WalkTimelineEvent {
   note?: string;
 }
 
+export type WalkRequestMode = "open" | "directed" | "declined";
+
 export interface WalkRecord {
   id: string;
   walkerId: string | null;
@@ -68,6 +70,13 @@ export interface WalkRecord {
   clientName: string;
   clientAvatarUrl?: string | null;
   walkerAvatarUrl?: string | null;
+  /** Name of the assigned walker, or of the walker a PENDING request is directed at. */
+  walkerName?: string | null;
+  /**
+   * How a pending walk waits: `open` to every walker, `directed` at the walker the client
+   * chose, or `declined` by that walker. Null once it leaves pending.
+   */
+  requestMode?: WalkRequestMode | null;
   petIds?: string[];
   petNames: string[];
   pets?: { name: string; photoUrl?: string | null }[];

@@ -22,6 +22,16 @@ export function useCancelWalk() {
   });
 }
 
+export function useOpenWalk() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => WalksApi.open(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["walks"] });
+    },
+  });
+}
+
 export function useAcceptWalk() {
   const queryClient = useQueryClient();
   return useMutation({
