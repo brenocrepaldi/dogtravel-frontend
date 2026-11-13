@@ -343,7 +343,7 @@ export function WalkerDocuments() {
                     Adicione cursos e formações para fortalecer seu perfil e conquistar a confiança dos tutores.
                   </p>
                 </div>
-                <Button size="sm" variant="outline" className="mt-1 rounded-lg gap-1.5" onClick={() => setDialogOpen(true)}>
+                <Button size="sm" variant="outline" className="mt-1 rounded-lg gap-1.5 max-md:h-11 max-md:px-4 max-md:text-sm" onClick={() => setDialogOpen(true)}>
                   <Plus className="h-3.5 w-3.5" />
                   Adicionar certificação
                 </Button>
