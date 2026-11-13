@@ -26,10 +26,10 @@ export const STATUS: Record<DocStatus, { label: string; icon: React.ElementType;
   },
 };
 
-export function StatusBadge({ status }: { status: DocStatus }) {
+export function StatusBadge({ status, className }: { status: DocStatus; className?: string }) {
   const { label, cls, icon: Icon } = STATUS[status];
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold", cls)}>
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold", cls, className)}>
       <Icon className="h-3 w-3 shrink-0" />
       {label}
     </span>
@@ -89,9 +89,9 @@ export function DocCardHeader({
   return (
     <>
       <div className={cn("h-1 w-full bg-gradient-to-r", barClass)} />
-      <CardHeader className="pb-4 pt-5">
+      <CardHeader className="pb-4 pt-5 max-md:pb-3 max-md:pt-4">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
+          <div className="flex min-w-0 items-start gap-3">
             <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", iconBg)}>
               <Icon className={cn("h-4 w-4", iconColor)} />
             </div>
@@ -99,11 +99,13 @@ export function DocCardHeader({
               <div className="flex flex-wrap items-center gap-2">
                 <CardTitle className="text-sm font-semibold">{title}</CardTitle>
                 {required ? <RequiredBadge /> : <OptionalBadge />}
+                {/* Phones: the status joins this row, so the title gets the card's full width. */}
+                <StatusBadge status={status} className="md:hidden" />
               </div>
               <CardDescription className="mt-0.5 text-xs">{description}</CardDescription>
             </div>
           </div>
-          <StatusBadge status={status} />
+          <StatusBadge status={status} className="max-md:hidden" />
         </div>
       </CardHeader>
     </>

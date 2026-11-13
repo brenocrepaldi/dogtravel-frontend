@@ -18,7 +18,7 @@ export default async function WalkerDocumentsPage() {
   if (role !== "walker") redirect("/profile");
 
   return (
-    <div className="max-w-2xl space-y-6 pb-8">
+    <div className="max-w-2xl space-y-4 pb-8 md:space-y-6">
 
       {/* Header */}
       <div>
@@ -26,7 +26,7 @@ export default async function WalkerDocumentsPage() {
           <Link
             href="/profile"
             aria-label="Voltar ao perfil"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground max-md:-ml-2 max-md:size-11"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
@@ -39,7 +39,7 @@ export default async function WalkerDocumentsPage() {
             </p>
           </div>
         </div>
-        <Separator className="mt-6" />
+        <Separator className="mt-4 md:mt-6" />
       </div>
 
       <WalkerDocuments />

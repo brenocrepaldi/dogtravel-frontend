@@ -141,7 +141,7 @@ export function WalkerDocuments() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
 
         {/* ── Progresso do onboarding ──────────────────────────────────────── */}
         <OnboardingProgressCard identityStatus={identityStatus} bgStatus={bgStatus} />
@@ -159,7 +159,7 @@ export function WalkerDocuments() {
             required
           />
           <Separator />
-          <CardContent className="space-y-5 py-5">
+          <CardContent className="space-y-5 py-5 max-md:space-y-4 max-md:py-4">
             {identityStatus === "rejected" && (
               <RejectedBanner message="Seus documentos foram recusados. Verifique se a foto está nítida, o documento está visível e dentro da validade, e reenvie para nova análise." />
             )}
@@ -219,7 +219,7 @@ export function WalkerDocuments() {
             required
           />
           <Separator />
-          <CardContent className="space-y-5 py-5">
+          <CardContent className="space-y-5 py-5 max-md:space-y-4 max-md:py-4">
             <div className="flex items-start gap-3 rounded-xl border border-border/50 bg-muted/30 px-4 py-3.5">
               <FileCheck2 className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
               <div className="space-y-1.5 text-xs leading-relaxed text-muted-foreground">
@@ -276,7 +276,7 @@ export function WalkerDocuments() {
         {/* ── Certificações e credenciais — OPCIONAL ───────────────────────── */}
         <Card className="overflow-hidden py-0 gap-0">
           <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/40" />
-          <CardHeader className="pb-4 pt-5">
+          <CardHeader className="pb-4 pt-5 max-md:pb-3 max-md:pt-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
@@ -297,7 +297,7 @@ export function WalkerDocuments() {
             </div>
           </CardHeader>
           <Separator />
-          <CardContent className="space-y-5 py-5">
+          <CardContent className="space-y-5 py-5 max-md:space-y-4 max-md:py-4">
             <div className="rounded-xl border border-primary/15 bg-primary/[0.03] px-4 py-4 space-y-3">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 shrink-0 text-primary" />
