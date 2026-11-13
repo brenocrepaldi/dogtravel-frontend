@@ -68,7 +68,11 @@ function PeriodFilter({ value, onChange }: { value: PeriodPreset; onChange: (p: 
         <button
           key={preset}
           type="button"
-          onClick={() => onChange(preset)}
+          onClick={(e) => {
+            onChange(preset);
+            // Keep the chosen chip fully in view in the scrolling row.
+            e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+          }}
           aria-pressed={value === preset}
           className={cn(
             'relative h-9 shrink-0 px-3.5 rounded-lg text-sm font-medium transition-colors duration-150 md:h-auto md:px-3 md:py-1.5 md:text-xs',
@@ -274,15 +278,18 @@ export function WalkerPayments() {
 
   return (
     <div className="flex flex-col gap-5 pb-8 md:gap-8 lg:flex-row lg:items-start lg:gap-10">
+      {/* Phones: a plain tab title above the balance (no back arrow: this is a bottom-nav tab). */}
+      <h1 className="order-first -mb-1 text-2xl font-bold leading-tight tracking-tight text-foreground md:hidden">
+        Meus Ganhos
+      </h1>
       <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-8">
-        <header className="space-y-1.5">
+        <header className="space-y-1.5 max-md:hidden">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon-sm"
               render={<Link href="/profile" />}
               aria-label="Voltar ao perfil"
-              className="max-md:hidden"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -290,7 +297,7 @@ export function WalkerPayments() {
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
                 Meus Ganhos
               </h1>
-              <p className="hidden text-sm text-muted-foreground md:block">
+              <p className="text-sm text-muted-foreground">
                 Acompanhe seus repasses e histórico de serviços.
               </p>
             </div>
