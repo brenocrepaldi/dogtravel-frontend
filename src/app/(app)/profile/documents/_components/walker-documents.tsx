@@ -184,7 +184,7 @@ export function WalkerDocuments() {
                 </div>
                 <Button
                   size="sm"
-                  className="rounded-lg gap-1.5 shadow-sm"
+                  className="rounded-lg gap-1.5 shadow-sm max-md:h-11 max-md:w-full max-md:text-sm"
                   disabled={!identityDoc || !identitySelfie || uploadingIdentity}
                   onClick={submitIdentity}
                 >
@@ -251,7 +251,7 @@ export function WalkerDocuments() {
                 />
                 <Button
                   size="sm"
-                  className="rounded-lg gap-1.5 shadow-sm"
+                  className="rounded-lg gap-1.5 shadow-sm max-md:h-11 max-md:w-full max-md:text-sm"
                   disabled={!bgDoc || uploadingBackground}
                   onClick={submitBackground}
                 >
@@ -401,6 +401,9 @@ export function WalkerDocuments() {
               <Input
                 id="cert-title"
                 placeholder="Ex: Adestramento Positivo"
+                enterKeyHint="done"
+                autoCapitalize="words"
+                autoComplete="off"
                 value={certTitle}
                 onChange={(e) => setCertTitle(e.target.value)}
                 className="rounded-lg"
@@ -417,12 +420,12 @@ export function WalkerDocuments() {
           </div>
 
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="ghost" size="sm" className="rounded-lg" onClick={closeCertDialog}>
+            <Button variant="ghost" size="sm" className="rounded-lg max-md:h-11 max-md:text-sm" onClick={closeCertDialog}>
               Cancelar
             </Button>
             <Button
               size="sm"
-              className="rounded-lg gap-1.5 shadow-sm"
+              className="rounded-lg gap-1.5 shadow-sm max-md:h-11 max-md:text-sm"
               disabled={!certTitle.trim() || !certFile || addingCert}
               onClick={handleAddCert}
             >
