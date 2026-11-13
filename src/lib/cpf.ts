@@ -45,3 +45,28 @@ export const isValidCPF = (cpf: string): boolean => {
 
   return true;
 };
+
+/**
+ * Formata CPF (até 11 dígitos) ou CNPJ (12 a 14 dígitos) enquanto o usuário digita:
+ * 000.000.000-00 ou 00.000.000/0000-00.
+ */
+export const maskCpfCnpj = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 14);
+  if (digits.length <= 11) return maskCPF(digits);
+  return digits
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2");
+};
+
+/**
+ * Esconde o início e o fim de um CPF para exibição (•••.982.247-••). CNPJ, por ser público,
+ * aparece formatado por inteiro; qualquer outra coisa volta como veio.
+ */
+export const hideDocument = (value: string) => {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 11) return `•••.${digits.slice(3, 6)}.${digits.slice(6, 9)}-••`;
+  if (digits.length === 14) return maskCpfCnpj(digits);
+  return value;
+};
