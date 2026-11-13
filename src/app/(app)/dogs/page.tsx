@@ -13,6 +13,7 @@ import {
 import {
 	Dog,
 	Lightbulb,
+	Lock,
 	ShieldCheck,
 	Ruler,
 	StickyNote,
@@ -112,8 +113,9 @@ export default async function DogsPage() {
 
 	return (
 		<div className="flex flex-col gap-8 pb-8 lg:flex-row lg:items-start lg:gap-10">
-			<div className="flex min-w-0 flex-1 flex-col gap-8">
-				<header className="space-y-1.5">
+			<div className="flex min-w-0 flex-1 flex-col gap-8 max-md:gap-5">
+				{/* Phones: the title, count and add action sit in PetsList's own header. */}
+				<header className="space-y-1.5 max-md:hidden">
 					<div className="flex items-center gap-3">
 						<div>
 							<h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -132,10 +134,18 @@ export default async function DogsPage() {
 					</Suspense>
 				</section>
 
-				<ProtectedDataFooter />
+				<div className="max-md:hidden">
+					<ProtectedDataFooter />
+				</div>
+
+				{/* Phones: the privacy note as one line; the tips card stays md+ only. */}
+				<p className="flex items-start gap-2 px-1 text-xs leading-relaxed text-muted-foreground md:hidden">
+					<Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+					Os dados dos seus cães são usados só para encontrar passeadores compatíveis.
+				</p>
 			</div>
 
-			<aside className="w-full shrink-0 lg:w-72 lg:sticky lg:top-32 lg:self-start">
+			<aside className="w-full shrink-0 max-md:hidden lg:w-72 lg:sticky lg:top-32 lg:self-start">
 				<QuickTipsSidebar />
 			</aside>
 		</div>

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
 import {
 	Edit2,
@@ -10,7 +9,6 @@ import {
 	Plus,
 	Dog,
 	Heart,
-	PawPrint,
 	Shield,
 	Star,
 	ChevronRight,
@@ -21,10 +19,12 @@ import {
 } from "lucide-react";
 import { useDogs, useAddDog, useUpdateDog, useRemoveDog } from "@/features/dogs/hooks/use-dogs";
 import { toast } from "sonner";
-import { DOG_SIZE_LABEL } from "@/lib/pets";
 import type { Pet } from "@/types";
 import { Button, TOUCH_TARGET } from "@/components/ui/button";
 import { PetFormSheet, type PetDraft } from "./pet-form-sheet";
+import { PetAvatar } from "./pet-avatar";
+import { SizeBadge } from "./size-badge";
+import { PetCardMobile } from "./pet-card-mobile";
 import { cn } from "@/lib/utils";
 
 function toDraft(pet: Pet): PetDraft {
@@ -37,63 +37,6 @@ function toDraft(pet: Pet): PetDraft {
 		behavior: pet.notes ?? "",
 		photoUrl: pet.photoUrl,
 	};
-}
-
-// Avatar do pet — imagem real ou patinha âmbar como fallback
-function PetAvatar({ pet, size = "md" }: { pet: Pet; size?: "md" | "lg" }) {
-	const sizeClass    = size === "lg" ? "w-20 h-20" : "w-16 h-16";
-	const iconSizeClass = size === "lg" ? "h-8 w-8"  : "h-6 w-6";
-
-	if (pet.photoUrl) {
-		return (
-			<div className={cn("relative rounded-2xl overflow-hidden shrink-0 ring-2 ring-border/30", sizeClass)}>
-				<Image src={pet.photoUrl} alt={pet.name} fill sizes="80px" className="object-cover" />
-			</div>
-		);
-	}
-
-	return (
-		<div className={cn("rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0 ring-2 ring-border/30", sizeClass)}>
-			<PawPrint className={cn(iconSizeClass, "text-amber-600 dark:text-amber-400")} />
-		</div>
-	);
-}
-
-// Badge de porte estilizado
-const SIZE_CONFIG: Record<string, { label: string; color: string }> = {
-	small: {
-		label: "Pequeno",
-		color: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
-	},
-	medium: {
-		label: "Médio",
-		color: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
-	},
-	large: {
-		label: "Grande",
-		color: "bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-500/20",
-	},
-	giant: {
-		label: "Gigante",
-		color: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
-	},
-};
-
-function SizeBadge({ size }: { size: string }) {
-	const config = SIZE_CONFIG[size] ?? {
-		label: DOG_SIZE_LABEL[size as keyof typeof DOG_SIZE_LABEL] ?? size,
-		color: "bg-muted text-muted-foreground border-border",
-	};
-	return (
-		<span
-			className={cn(
-				"inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide",
-				config.color
-			)}
-		>
-			{config.label}
-		</span>
-	);
 }
 
 const PET_CARD_HEIGHT = "h-[252px]";
@@ -187,8 +130,9 @@ function SkeletonCard() {
 	return (
 		<div
 			className={cn(
-				"rounded-2xl border border-border/50 bg-card p-5 animate-pulse",
-				PET_CARD_HEIGHT
+				"rounded-2xl border border-border/50 bg-card p-5 animate-pulse max-md:p-4",
+				PET_CARD_HEIGHT,
+				"max-md:h-[168px]"
 			)}
 		>
 			<div className="flex gap-4">
@@ -206,7 +150,7 @@ function SkeletonCard() {
 // Empty state elegante
 function EmptyState({ onAdd }: { onAdd: () => void }) {
 	return (
-		<div className="col-span-full flex flex-col items-center justify-center py-20 px-8 text-center">
+		<div className="col-span-full flex flex-col items-center justify-center py-20 px-8 text-center max-md:px-4 max-md:py-12">
 			{/* Ícone decorativo */}
 			<div className="relative mb-6">
 				<div className="w-24 h-24 rounded-3xl bg-primary/5 ring-1 ring-primary/10 flex items-center justify-center text-5xl">
@@ -224,13 +168,13 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
 				Adicione seus cães para encontrar passeadores compatíveis e gerenciar tudo em um só lugar.
 			</p>
 
-			<Button onClick={onAdd} size="lg" className="gap-2 shadow-sm">
+			<Button onClick={onAdd} size="lg" className="gap-2 shadow-sm max-md:h-12 max-md:w-full max-md:text-base">
 				<Plus className="w-4 h-4" />
 				Adicionar meu primeiro cão
 			</Button>
 
 			{/* Benefícios rápidos */}
-			<div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-6 text-center">
+			<div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-6 text-center max-md:hidden">
 				{[
 					{ icon: <Heart className="w-4 h-4" />, text: "Cuidado personalizado" },
 					{ icon: <Shield className="w-4 h-4" />, text: "Passeadores verificados" },
@@ -442,9 +386,27 @@ export function PetsList() {
 	};
 
 	return (
-		<div className="space-y-5">
+		<div className="space-y-5 max-md:space-y-4">
+			{/* Phones: the page title lives here, next to the count and the add action. */}
+			<div className="flex items-center justify-between gap-3 md:hidden">
+				<div className="min-w-0">
+					<h1 className="text-xl font-bold tracking-tight text-foreground">Meus cães</h1>
+					<p className="text-sm text-muted-foreground">
+						{isLoading
+							? "Carregando..."
+							: list.length === 0
+								? "Nenhum cão cadastrado"
+								: `${list.length} ${list.length === 1 ? "cão cadastrado" : "cães cadastrados"}`}
+					</p>
+				</div>
+				<Button onClick={handleAdd} className="h-11 shrink-0 gap-1.5 rounded-xl px-4 text-sm">
+					<Plus className="h-4 w-4" />
+					Adicionar
+				</Button>
+			</div>
+
 			{/* Header da seção com contador e ação */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between max-md:hidden">
 				<div className="flex items-center gap-3">
 					{list.length > 0 && (
 						<div className="flex items-center gap-2">
@@ -467,7 +429,7 @@ export function PetsList() {
 			{/* Grid de cards — duas colunas quando há espaço na área principal */}
 			<div
 				className={cn(
-					"grid gap-4",
+					"grid gap-4 max-md:gap-3",
 					list.length > 0 && !isLoading
 						? "grid-cols-1 xl:grid-cols-2"
 						: "grid-cols-1"
@@ -487,7 +449,10 @@ export function PetsList() {
 							style={{ animationDelay: `${index * 60}ms` }}
 							className="animate-in fade-in slide-in-from-bottom-2 duration-400 min-w-0"
 						>
-							<PetCard pet={pet} onEdit={handleEdit} onRemove={handleRemove} />
+							<PetCardMobile pet={pet} onOpen={handleEdit} />
+							<div className="max-md:hidden">
+								<PetCard pet={pet} onEdit={handleEdit} onRemove={handleRemove} />
+							</div>
 						</div>
 					))
 				)}
@@ -499,6 +464,7 @@ export function PetsList() {
 				onOpenChange={handleSheetOpenChange}
 				petToEdit={editingPet ? toDraft(editingPet) : null}
 				onSave={handleSavePet}
+				onRemove={editingPet ? () => handleRemove(editingPet) : undefined}
 			/>
 		</div>
 	);
