@@ -27,6 +27,7 @@ import { WalkPets } from './walk-pets';
 import { WalkPartyAvatars } from './walk-party-avatars';
 import { WalkStartSection } from './walk-start-section';
 import { ClientCodeBanner } from './client-code-banner';
+import { WalkRequestStatusBanner } from './walk-request-status-banner';
 import { WalkInProgressPanel } from './walk-inprogress-panel';
 import { WalkClientInProgressPanel } from './walk-client-inprogress-panel';
 import { WalkLiveMapPreview } from './walk-live-map-preview';
@@ -308,6 +309,10 @@ export function WalkDetailClient({ walkId }: { walkId: string }) {
 
       {!isWalker && isAccepted && walk.startCode && (
         <ClientCodeBanner code={walk.startCode} />
+      )}
+
+      {!isWalker && (
+        <WalkRequestStatusBanner walk={walk} walkerName={walk.walkerName ?? walkerName} />
       )}
 
       {/* ── Layout A — com trajeto GPS ──────────────────────────────────── */}
