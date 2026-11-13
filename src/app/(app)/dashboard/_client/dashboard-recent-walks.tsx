@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWalks } from "@/features/walks/hooks/use-walks";
 import type { WalkStatus } from "@/types";
-import { WalkListAvatar } from "../_components/walk-list-avatar";
+import { WalkListAvatar } from "@/components/common/walk-list-avatar";
 
 const statusConfig: Record<WalkStatus, { label: string; className: string }> = {
   pending:     { label: "Aguardando",   className: "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-400" },
