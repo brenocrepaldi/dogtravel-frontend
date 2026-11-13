@@ -22,6 +22,7 @@ import {
   WalletCards,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useWalkerEarnings } from '@/features/walkers/hooks/use-walkers';
 import { useWalkerStats } from '@/features/stats/hooks/use-stats';
 import { useWalks } from '@/features/walks/hooks/use-walks';
@@ -319,8 +320,23 @@ export function WalkerPayments() {
 
           <PeriodFilter value={period} onChange={setPeriod} />
 
+          {/* Phones: rows shaped like the list that's coming, not a spinner. */}
           {isLoading && (
-            <div className="flex items-center justify-center gap-3 py-16 rounded-2xl border border-border/60 bg-card text-muted-foreground">
+            <div className="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-card md:hidden">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-3 px-4 py-3.5">
+                  <Skeleton className="h-10 w-10 rounded-xl" />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-3.5 w-28" />
+                    <Skeleton className="h-3 w-40" />
+                  </div>
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              ))}
+            </div>
+          )}
+          {isLoading && (
+            <div className="flex items-center justify-center gap-3 py-16 max-md:hidden rounded-2xl border border-border/60 bg-card text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" />
               <span className="text-sm">Carregando ganhos...</span>
             </div>
@@ -337,7 +353,7 @@ export function WalkerPayments() {
                   Não foi possível buscar o histórico de ganhos.
                 </p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
+              <Button variant="outline" size="sm" className="max-md:h-11 max-md:px-5" onClick={() => refetch()}>
                 Tentar novamente
               </Button>
             </div>
@@ -348,12 +364,28 @@ export function WalkerPayments() {
               <div className="w-10 h-10 rounded-2xl bg-muted flex items-center justify-center">
                 <WalletCards className="h-5 w-5 text-muted-foreground" />
               </div>
-              <div>
+              <div className="max-md:hidden">
                 <p className="text-sm font-semibold text-foreground">Nenhum ganho ainda</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Seus ganhos aparecerão aqui após concluir passeios.
                 </p>
               </div>
+              {/* Phones: say whether it's this period or ever, and offer the way out. */}
+              <div className="px-6 md:hidden">
+                <p className="text-sm font-semibold text-foreground">
+                  {period === 'all' ? 'Nenhum ganho ainda' : 'Nenhum ganho neste período'}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {period === 'all'
+                    ? 'Seus ganhos aparecerão aqui após concluir passeios.'
+                    : 'Os passeios concluídos no período escolhido aparecem aqui.'}
+                </p>
+              </div>
+              {period !== 'all' && (
+                <Button variant="outline" className="h-11 px-5 md:hidden" onClick={() => setPeriod('all')}>
+                  Ver todo o histórico
+                </Button>
+              )}
             </div>
           )}
 
