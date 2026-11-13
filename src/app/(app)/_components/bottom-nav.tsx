@@ -122,7 +122,8 @@ export function BottomNav() {
                 : cn("shadow-primary/30", active ? "bg-[oklch(0.45_0.22_262)]" : "bg-primary"),
             )}
           >
-            {live && (
+            {/* The pulse calls the walker back to the live walk, so it stops once they're on it. */}
+            {live && !active && (
               <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500/40 motion-reduce:hidden" />
             )}
             <primary.icon className="relative h-5 w-5" />
