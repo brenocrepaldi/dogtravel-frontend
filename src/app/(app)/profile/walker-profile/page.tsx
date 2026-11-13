@@ -294,7 +294,7 @@ export default function WalkerProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-4 pb-8 md:space-y-6">
+    <div className="group/form max-w-2xl space-y-4 pb-8 max-md:pb-20 md:space-y-6">
 
       <PageHeader />
 
@@ -399,16 +399,16 @@ export default function WalkerProfilePage() {
         />
       </Section>
 
-      {/* Save. Phones: pinned above the bottom nav, so it's in reach from any section of
-          this long form. The app's scroll container already pads for the nav, so bottom-0
-          lands right above it, and a strip below fills that padding so the form doesn't
-          peek out between the bar and the nav or under the nav (same technique as FlowActions,
-          taller strip). */}
-      <div className="flex justify-end max-md:sticky max-md:bottom-0 max-md:z-10 max-md:-mx-4 max-md:border-t max-md:border-border/60 max-md:bg-background max-md:px-4 max-md:py-3 max-md:after:absolute max-md:after:inset-x-0 max-md:after:top-full max-md:after:h-36 max-md:after:bg-background">
+      {/* Save. Phones: floats just above the bottom nav, so it's in reach from any section of
+          this long form. It is position: fixed like the nav itself — a sticky bar inside the
+          scroll container got stuck mid-screen on iOS after the keyboard closed. The page pads
+          its bottom (pb-20) so the last section can scroll clear of it, and it hides while a
+          text field is focused so it never covers what's being typed. */}
+      <div className="flex justify-end max-md:fixed max-md:inset-x-0 max-md:bottom-[calc(5.75rem+env(safe-area-inset-bottom))] max-md:z-30 max-md:px-4 max-md:group-has-[:is(input,textarea):focus]/form:hidden">
         <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="gap-2 rounded-lg shadow-sm max-md:h-12 max-md:w-full max-md:text-base"
+          className="gap-2 rounded-lg shadow-sm max-md:h-12 max-md:w-full max-md:text-base max-md:shadow-lg max-md:shadow-primary/25"
         >
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isSaving ? "Salvando..." : "Salvar perfil"}
