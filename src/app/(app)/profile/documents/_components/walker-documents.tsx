@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  AlertCircle,
   Award,
   CheckCircle2,
   ExternalLink,
@@ -34,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/common/empty-state";
 import {
   DocCardHeader,
   OptionalBadge,
@@ -54,7 +56,7 @@ const CERT_SUGGESTIONS = [
 ];
 
 export function WalkerDocuments() {
-  const { data: docStatus, isLoading } = useDocuments();
+  const { data: docStatus, isLoading, isError, refetch, isRefetching } = useDocuments();
   const { mutate: uploadIdentity, isPending: uploadingIdentity } = useUploadIdentity();
   const { mutate: uploadBackground, isPending: uploadingBackground } = useUploadBackground();
   const { mutate: addCert, isPending: addingCert } = useAddCertificate();
@@ -129,19 +131,47 @@ export function WalkerDocuments() {
   }
 
   if (isLoading) {
+    // Shaped like the cards below (color bar, icon + title header, body), so the page
+    // doesn't jump when the statuses arrive.
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-44 w-full rounded-2xl" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
-        <Skeleton className="h-48 w-full rounded-2xl" />
-        <Skeleton className="h-48 w-full rounded-2xl" />
+      <div className="space-y-4 md:space-y-6" aria-hidden="true">
+        {["h-24", "h-40", "h-28", "h-28"].map((body, i) => (
+          <Card key={i} className="overflow-hidden py-0 gap-0">
+            <div className="h-1 w-full bg-muted" />
+            <div className="flex items-start gap-3 px-4 pb-3 pt-4 md:pb-4 md:pt-5">
+              <Skeleton className="h-9 w-9 shrink-0 rounded-xl" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-44" />
+                <Skeleton className="h-3 w-28" />
+              </div>
+            </div>
+            <Separator />
+            <div className="p-4">
+              <Skeleton className={`w-full rounded-xl ${body}`} />
+            </div>
+          </Card>
+        ))}
       </div>
+    );
+  }
+
+  // Without the real statuses every requirement would read "Não enviado" with upload
+  // boxes, telling an already verified walker to send everything again.
+  if (isError && !docStatus) {
+    return (
+      <EmptyState
+        icon={AlertCircle}
+        title="Não foi possível carregar seus documentos"
+        description="Verifique sua conexão e tente de novo. Os documentos que você já enviou continuam salvos."
+        actionLabel={isRefetching ? "Carregando..." : "Tentar novamente"}
+        onAction={() => refetch()}
+      />
     );
   }
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
 
         {/* ── Progresso do onboarding ──────────────────────────────────────── */}
         <OnboardingProgressCard identityStatus={identityStatus} bgStatus={bgStatus} />
@@ -159,7 +189,7 @@ export function WalkerDocuments() {
             required
           />
           <Separator />
-          <CardContent className="space-y-5 py-5">
+          <CardContent className="space-y-5 py-5 max-md:space-y-4 max-md:py-4">
             {identityStatus === "rejected" && (
               <RejectedBanner message="Seus documentos foram recusados. Verifique se a foto está nítida, o documento está visível e dentro da validade, e reenvie para nova análise." />
             )}
@@ -184,7 +214,7 @@ export function WalkerDocuments() {
                 </div>
                 <Button
                   size="sm"
-                  className="rounded-lg gap-1.5 shadow-sm"
+                  className="rounded-lg gap-1.5 shadow-sm max-md:h-11 max-md:w-full max-md:text-sm"
                   disabled={!identityDoc || !identitySelfie || uploadingIdentity}
                   onClick={submitIdentity}
                 >
@@ -219,7 +249,7 @@ export function WalkerDocuments() {
             required
           />
           <Separator />
-          <CardContent className="space-y-5 py-5">
+          <CardContent className="space-y-5 py-5 max-md:space-y-4 max-md:py-4">
             <div className="flex items-start gap-3 rounded-xl border border-border/50 bg-muted/30 px-4 py-3.5">
               <FileCheck2 className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
               <div className="space-y-1.5 text-xs leading-relaxed text-muted-foreground">
@@ -251,7 +281,7 @@ export function WalkerDocuments() {
                 />
                 <Button
                   size="sm"
-                  className="rounded-lg gap-1.5 shadow-sm"
+                  className="rounded-lg gap-1.5 shadow-sm max-md:h-11 max-md:w-full max-md:text-sm"
                   disabled={!bgDoc || uploadingBackground}
                   onClick={submitBackground}
                 >
@@ -276,7 +306,7 @@ export function WalkerDocuments() {
         {/* ── Certificações e credenciais — OPCIONAL ───────────────────────── */}
         <Card className="overflow-hidden py-0 gap-0">
           <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/40" />
-          <CardHeader className="pb-4 pt-5">
+          <CardHeader className="pb-4 pt-5 max-md:pb-3 max-md:pt-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
@@ -297,7 +327,7 @@ export function WalkerDocuments() {
             </div>
           </CardHeader>
           <Separator />
-          <CardContent className="space-y-5 py-5">
+          <CardContent className="space-y-5 py-5 max-md:space-y-4 max-md:py-4">
             <div className="rounded-xl border border-primary/15 bg-primary/[0.03] px-4 py-4 space-y-3">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 shrink-0 text-primary" />
@@ -343,7 +373,7 @@ export function WalkerDocuments() {
                     Adicione cursos e formações para fortalecer seu perfil e conquistar a confiança dos tutores.
                   </p>
                 </div>
-                <Button size="sm" variant="outline" className="mt-1 rounded-lg gap-1.5" onClick={() => setDialogOpen(true)}>
+                <Button size="sm" variant="outline" className="mt-1 rounded-lg gap-1.5 max-md:h-11 max-md:px-4 max-md:text-sm" onClick={() => setDialogOpen(true)}>
                   <Plus className="h-3.5 w-3.5" />
                   Adicionar certificação
                 </Button>
@@ -401,6 +431,9 @@ export function WalkerDocuments() {
               <Input
                 id="cert-title"
                 placeholder="Ex: Adestramento Positivo"
+                enterKeyHint="done"
+                autoCapitalize="words"
+                autoComplete="off"
                 value={certTitle}
                 onChange={(e) => setCertTitle(e.target.value)}
                 className="rounded-lg"
@@ -417,12 +450,12 @@ export function WalkerDocuments() {
           </div>
 
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="ghost" size="sm" className="rounded-lg" onClick={closeCertDialog}>
+            <Button variant="ghost" size="sm" className="rounded-lg max-md:h-11 max-md:text-sm" onClick={closeCertDialog}>
               Cancelar
             </Button>
             <Button
               size="sm"
-              className="rounded-lg gap-1.5 shadow-sm"
+              className="rounded-lg gap-1.5 shadow-sm max-md:h-11 max-md:text-sm"
               disabled={!certTitle.trim() || !certFile || addingCert}
               onClick={handleAddCert}
             >

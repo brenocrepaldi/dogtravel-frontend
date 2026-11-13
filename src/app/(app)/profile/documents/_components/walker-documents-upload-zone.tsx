@@ -66,17 +66,18 @@ export function UploadZone({
           disabled={disabled}
           onClick={() => ref.current?.click()}
           className={cn(
-            "flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-all",
+            // Phones: a compact row (icon, then text) instead of the tall centered drop box.
+            "flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-all max-md:flex-row max-md:py-4 max-md:text-left",
             disabled
               ? "cursor-not-allowed border-border/30 opacity-50"
               : "cursor-pointer border-border/60 hover:border-primary/40 hover:bg-primary/[0.02]",
           )}
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted">
             <Upload className="h-4 w-4 text-muted-foreground" />
           </div>
-          <div>
-            <p className="text-xs font-semibold text-foreground">Selecionar arquivo</p>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-foreground max-md:text-sm">Selecionar arquivo</p>
             <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p>
           </div>
         </button>

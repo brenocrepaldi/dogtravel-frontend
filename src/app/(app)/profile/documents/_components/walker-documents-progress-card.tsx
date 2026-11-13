@@ -47,7 +47,7 @@ export function OnboardingProgressCard({
             : "from-amber-400/60 via-amber-500 to-amber-400/40",
         )}
       />
-      <CardContent className="space-y-4 py-5">
+      <CardContent className="space-y-4 py-5 max-md:py-4">
         <div className="flex items-start gap-3">
           <div
             className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",

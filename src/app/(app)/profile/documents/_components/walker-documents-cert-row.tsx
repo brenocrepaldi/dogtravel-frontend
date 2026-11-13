@@ -10,19 +10,21 @@ export function CertRow({ cert, onRemove, isRemoving }: {
   isRemoving: boolean;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-border/60 bg-card px-4 py-3.5 transition-colors hover:bg-accent/20">
+    <div className="flex items-center gap-4 rounded-xl border border-border/60 bg-card px-4 py-3.5 transition-colors hover:bg-accent/20 max-md:gap-3">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
         <Award className="h-4 w-4 text-primary" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-foreground">{cert.title}</p>
+        <p className="truncate text-sm font-semibold text-foreground max-md:line-clamp-2 max-md:whitespace-normal">{cert.title}</p>
         <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-muted-foreground">
           <FileText className="h-3 w-3 shrink-0" />
           {cert.fileName}
         </p>
+        {/* Phones: the status sits under the name, so long titles aren't squeezed by badge + trash. */}
+        <StatusBadge status={cert.status} className="mt-1.5 md:hidden" />
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <StatusBadge status={cert.status} />
+        <StatusBadge status={cert.status} className="max-md:hidden" />
         {cert.status !== "verified" && (
           <button
             type="button"
