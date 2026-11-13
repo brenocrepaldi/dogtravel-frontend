@@ -55,7 +55,7 @@ export function DashboardRecentWalks() {
               <div className="group flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-muted/30 sm:gap-4 sm:px-5 sm:py-4">
                 <WalkListAvatar
                   main={{ name: walkerName, photoUrl: walk.walkerAvatarUrl, kind: "person" }}
-                  corner={walk.pets?.[0] ? { ...walk.pets[0], kind: "dog" } : undefined}
+                  corner={walk.pets?.map((pet) => ({ ...pet, kind: "dog" as const }))}
                 />
                 <div className="flex-1 min-w-0">
                   <p className="truncate text-sm font-semibold text-foreground">

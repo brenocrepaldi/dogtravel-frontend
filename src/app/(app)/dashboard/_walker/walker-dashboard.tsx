@@ -250,12 +250,12 @@ export default function WalkerDashboard() {
             ) : (
               <div className="divide-y divide-border/50">
                 {completedWalks.slice(0, 3).map((walk) => {
-                  const firstPet = walk.pets?.[0] ?? { name: walk.petNames[0] ?? "Cão", photoUrl: null };
+                  const pets = walk.pets?.length ? walk.pets : [{ name: walk.petNames[0] ?? "Cão", photoUrl: null }];
                   return (
                     <Link key={walk.id} href={`/walks/${walk.id}`}>
                       <div className="group flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-muted/30 sm:gap-4 sm:px-5 sm:py-4">
                         <WalkListAvatar
-                          main={{ ...firstPet, kind: "dog" }}
+                          main={pets.map((pet) => ({ ...pet, kind: "dog" as const }))}
                           corner={{ name: walk.clientName, photoUrl: walk.clientAvatarUrl, kind: "person" }}
                         />
                         <div className="min-w-0 flex-1">
