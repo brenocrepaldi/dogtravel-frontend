@@ -25,7 +25,7 @@ function TimeSelect({ id, value, options, placeholder, disabled, onChange }: Tim
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
-          'w-full cursor-pointer appearance-none rounded-lg border bg-background px-3 py-2 pr-8 text-base md:text-sm transition-colors',
+          'w-full cursor-pointer appearance-none rounded-lg border bg-background px-3 py-2 pr-8 text-base max-md:h-11 md:text-sm transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-primary/20',
           disabled
             ? 'cursor-not-allowed border-border/30 bg-muted/40 text-muted-foreground/50'
@@ -49,6 +49,17 @@ function TimeSelect({ id, value, options, placeholder, disabled, onChange }: Tim
       />
     </div>
   );
+}
+
+function workDuration(start: string, end: string) {
+  const toMinutes = (hhmm: string) => {
+    const [h = 0, m = 0] = hhmm.split(':').map(Number);
+    return h * 60 + m;
+  };
+  const total = toMinutes(end) - toMinutes(start);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return m === 0 ? `${h}h` : `${h}h${m}min`;
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -126,31 +137,44 @@ export function AvailabilityPicker({ value, onChange }: Props) {
                 {day.label}
               </span>
 
-              {/* Toggle pill */}
-              <span
-                className={cn(
-                  'relative h-5 w-9 shrink-0 rounded-full border-2 transition-all duration-200',
-                  active ? 'border-primary bg-primary' : 'border-border bg-muted',
+              <span className="flex items-center gap-3">
+                {/* On phones the day's schedule reads in the header, replacing the summary line below. */}
+                {active && entry?.start && entry?.end && !hasConflict && (
+                  <span className="text-xs tabular-nums text-muted-foreground md:hidden">
+                    <span className="font-semibold text-foreground">
+                      {entry.start}–{entry.end}
+                    </span>{' '}
+                    · {workDuration(entry.start, entry.end)}
+                  </span>
                 )}
-              >
+
+                {/* Toggle pill */}
                 <span
                   className={cn(
-                    'absolute top-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-all duration-200',
-                    active ? 'left-[18px]' : 'left-0.5',
+                    'relative h-5 w-9 shrink-0 rounded-full border-2 transition-all duration-200',
+                    active ? 'border-primary bg-primary' : 'border-border bg-muted',
                   )}
-                />
+                >
+                  <span
+                    className={cn(
+                      'absolute top-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-all duration-200',
+                      active ? 'left-[18px]' : 'left-0.5',
+                    )}
+                  />
+                </span>
               </span>
             </button>
 
             {/* ── Time selectors ────────────────────────────────── */}
             {active && (
-              <div className="border-t border-border/40 px-4 pb-4 pt-3">
-                <div className="grid grid-cols-2 gap-3">
+              <div className="border-t border-border/40 px-4 pb-4 pt-3 max-md:py-3">
+                {/* Phones: one row "07:00 às 18:00"; md+: two labelled columns. */}
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:grid-cols-2 md:items-stretch md:gap-3">
                   {/* Start */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 max-md:space-y-0">
                     <label
                       htmlFor={`start-${day.key}`}
-                      className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                      className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground max-md:sr-only"
                     >
                       Início
                     </label>
@@ -163,11 +187,15 @@ export function AvailabilityPicker({ value, onChange }: Props) {
                     />
                   </div>
 
+                  <span aria-hidden="true" className="text-sm text-muted-foreground md:hidden">
+                    às
+                  </span>
+
                   {/* End */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 max-md:space-y-0">
                     <label
                       htmlFor={`end-${day.key}`}
-                      className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                      className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground max-md:sr-only"
                     >
                       Término
                     </label>
@@ -191,7 +219,7 @@ export function AvailabilityPicker({ value, onChange }: Props) {
 
                 {/* Friendly summary */}
                 {entry?.start && entry?.end && (
-                  <p className="mt-2.5 text-xs text-muted-foreground">
+                  <p className="mt-2.5 text-xs text-muted-foreground max-md:hidden">
                     Expediente de{' '}
                     <span className="font-semibold text-foreground">
                       {entry.start}
@@ -201,16 +229,7 @@ export function AvailabilityPicker({ value, onChange }: Props) {
                       {entry.end}
                     </span>
                     {' '}·{' '}
-                    {(() => {
-                      const toMinutes = (hhmm: string) => {
-                        const [h = 0, m = 0] = hhmm.split(':').map(Number);
-                        return h * 60 + m;
-                      };
-                      const total = toMinutes(entry.end) - toMinutes(entry.start);
-                      const h = Math.floor(total / 60);
-                      const m = total % 60;
-                      return m === 0 ? `${h}h de trabalho` : `${h}h${m}min de trabalho`;
-                    })()}
+                    {workDuration(entry.start, entry.end)} de trabalho
                   </p>
                 )}
               </div>
