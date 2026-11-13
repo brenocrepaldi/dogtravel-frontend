@@ -18,6 +18,7 @@ import {
   PawPrint,
   ShieldCheck,
   User,
+  Users,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { FlowActions } from "@/app/(app)/walks/_components/flow-actions";
@@ -141,6 +142,9 @@ export function StepConfirm({ data, onBack, onSubmit, submitting }: Props) {
         <SummaryRow icon={Calendar}   label="Data e horário"     value={dateLabel} />
         <SummaryRow icon={Clock}      label="Duração"            value={`${data.durationMinutes} minutos`} />
         <SummaryRow icon={MapPin}     label="Local de partida"   value={data.address || "—"} />
+        {!data.selectedWalkerId && (
+          <SummaryRow icon={Users} label="Passeador" value="Qualquer passeador disponível" />
+        )}
         {selectedWalker && (
           <div className="flex items-start gap-3 py-3 last:pb-0">
             <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0 mt-0.5">
@@ -148,7 +152,7 @@ export function StepConfirm({ data, onBack, onSubmit, submitting }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Passeador solicitado
+                Passeador escolhido
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <p className="text-sm font-medium text-foreground">{selectedWalker.name}</p>

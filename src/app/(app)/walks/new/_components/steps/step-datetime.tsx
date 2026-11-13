@@ -5,7 +5,7 @@ import { FlowActions } from "@/app/(app)/walks/_components/flow-actions";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useAvailableWalkers } from "@/features/walkers/hooks/use-walkers";
+import { useAvailableWalkers, useWalkerById } from "@/features/walkers/hooks/use-walkers";
 import type { WalkFormData } from "../walk-request-form";
 
 const DURATION_OPTIONS = [15, 30, 45, 60] as const;
@@ -26,6 +26,8 @@ export function StepDateTime({ data, updateData, onNext, onBack }: Props) {
     { date: data.date, time: data.time, durationMinutes: data.durationMinutes },
     slotComplete,
   );
+  const { data: chosenWalker } = useWalkerById(data.selectedWalkerId ?? "");
+  const chosenFirstName = chosenWalker?.name.split(" ")[0] ?? "O passeador escolhido";
   const preSelectedUnavailable =
     slotComplete &&
     availableWalkers !== undefined &&
@@ -137,10 +139,10 @@ export function StepDateTime({ data, updateData, onNext, onBack }: Props) {
           </div>
           <div>
             <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-              Passeador indisponível neste horário
+              {chosenFirstName} normalmente não atende neste horário
             </p>
             <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">
-              O passeador selecionado não está disponível nesta data e horário. Você pode continuar e outro passeador será atribuído automaticamente.
+              Escolha outro horário ou continue assim: o pedido vai só para {chosenFirstName}, que decide se aceita. Se não puder, você pode abrir para todos.
             </p>
           </div>
         </div>

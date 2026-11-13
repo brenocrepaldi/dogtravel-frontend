@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { BadgeCheck, CheckCircle2, LogOut, User } from 'lucide-react';
+import { CheckCircle2, LogOut } from 'lucide-react';
 import { useDogs } from '@/features/dogs/hooks/use-dogs';
 import { useCreateWalk } from '@/features/walks/hooks/use-walk-actions';
 import { useWalkById } from '@/features/walks/hooks/use-walks';
@@ -50,7 +50,8 @@ export interface WalkFormData {
 	selectedMethodId: string | null;
 	isFirstRide: boolean;
 	notes: string;
-	// Pre-selected walker (from ?walker=ID query param on /walkers/{id} page)
+	// Walker the request is directed at (null = open to every walker). Preselected by
+	// ?walker=ID when the client starts from a walker's profile.
 	selectedWalkerId: string | null;
 }
 
@@ -151,7 +152,6 @@ export function WalkRequestForm() {
 	const preselectedWalkerId = searchParams.get('walker') ?? '';
 	const { data: pets = [] } = useDogs();
 	const { data: walkToRepeat } = useWalkById(repeatWalkId);
-	const { data: preselectedWalker } = useWalkerById(preselectedWalkerId);
 	const { mutateAsync: createWalk } = useCreateWalk();
 	const [step,    setStep]    = useState(0);
 	const [maxStep, setMaxStep] = useState(0);
@@ -159,6 +159,7 @@ export function WalkRequestForm() {
 		...INITIAL_DATA,
 		selectedWalkerId: preselectedWalkerId || null,
 	});
+	const { data: chosenWalker } = useWalkerById(data.selectedWalkerId ?? '');
 	const [submitting, setSubmitting] = useState(false);
 	const [submitted, setSubmitted] = useState(false);
 	const [showSuccess, setShowSuccess] = useState(false);
@@ -383,24 +384,12 @@ export function WalkRequestForm() {
 						</div>
 						<div className="text-center space-y-1">
 							<p className="text-xl font-bold text-foreground">Passeio solicitado!</p>
-							<p className="text-sm text-muted-foreground">Aguardando aceitação de um passeador.</p>
+							<p className="text-sm text-muted-foreground">
+								{chosenWalker
+									? `Aguardando ${chosenWalker.name.split(' ')[0]} aceitar.`
+									: 'Aguardando aceitação de um passeador.'}
+							</p>
 						</div>
-					</div>
-				</div>
-			)}
-
-			{/* Walker pre-selection banner */}
-			{preselectedWalker && (
-				<div className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
-					<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-bold text-primary">
-						<User className="h-4 w-4" />
-					</div>
-					<div className="min-w-0 flex-1">
-						<div className="flex items-center gap-1.5">
-							<p className="text-sm font-semibold text-foreground truncate">{preselectedWalker.name}</p>
-							{preselectedWalker.verified && <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-primary" />}
-						</div>
-						<p className="text-xs text-muted-foreground mt-0.5">Passeador selecionado · {preselectedWalker.location}</p>
 					</div>
 				</div>
 			)}

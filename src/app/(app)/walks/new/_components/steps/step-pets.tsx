@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { WalkFormData } from "../walk-request-form";
+import { WalkerChoice } from "../walker-choice";
 
 interface Props {
   data: WalkFormData;
@@ -107,6 +108,13 @@ export function StepPets({ data, updateData, onNext, onCancel }: Props) {
             );
           })}
         </div>
+      )}
+
+      {pets.length > 0 && (
+        <WalkerChoice
+          selectedWalkerId={data.selectedWalkerId}
+          onChange={(selectedWalkerId) => updateData({ selectedWalkerId })}
+        />
       )}
 
       {/* Observações */}
