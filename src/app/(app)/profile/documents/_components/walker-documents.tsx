@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  AlertCircle,
   Award,
   CheckCircle2,
   ExternalLink,
@@ -34,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/common/empty-state";
 import {
   DocCardHeader,
   OptionalBadge,
@@ -54,7 +56,7 @@ const CERT_SUGGESTIONS = [
 ];
 
 export function WalkerDocuments() {
-  const { data: docStatus, isLoading } = useDocuments();
+  const { data: docStatus, isLoading, isError, refetch, isRefetching } = useDocuments();
   const { mutate: uploadIdentity, isPending: uploadingIdentity } = useUploadIdentity();
   const { mutate: uploadBackground, isPending: uploadingBackground } = useUploadBackground();
   const { mutate: addCert, isPending: addingCert } = useAddCertificate();
@@ -129,13 +131,41 @@ export function WalkerDocuments() {
   }
 
   if (isLoading) {
+    // Shaped like the cards below (color bar, icon + title header, body), so the page
+    // doesn't jump when the statuses arrive.
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-44 w-full rounded-2xl" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
-        <Skeleton className="h-48 w-full rounded-2xl" />
-        <Skeleton className="h-48 w-full rounded-2xl" />
+      <div className="space-y-4 md:space-y-6" aria-hidden="true">
+        {["h-24", "h-40", "h-28", "h-28"].map((body, i) => (
+          <Card key={i} className="overflow-hidden py-0 gap-0">
+            <div className="h-1 w-full bg-muted" />
+            <div className="flex items-start gap-3 px-4 pb-3 pt-4 md:pb-4 md:pt-5">
+              <Skeleton className="h-9 w-9 shrink-0 rounded-xl" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-44" />
+                <Skeleton className="h-3 w-28" />
+              </div>
+            </div>
+            <Separator />
+            <div className="p-4">
+              <Skeleton className={`w-full rounded-xl ${body}`} />
+            </div>
+          </Card>
+        ))}
       </div>
+    );
+  }
+
+  // Without the real statuses every requirement would read "Não enviado" with upload
+  // boxes, telling an already verified walker to send everything again.
+  if (isError && !docStatus) {
+    return (
+      <EmptyState
+        icon={AlertCircle}
+        title="Não foi possível carregar seus documentos"
+        description="Verifique sua conexão e tente de novo. Os documentos que você já enviou continuam salvos."
+        actionLabel={isRefetching ? "Carregando..." : "Tentar novamente"}
+        onAction={() => refetch()}
+      />
     );
   }
 
