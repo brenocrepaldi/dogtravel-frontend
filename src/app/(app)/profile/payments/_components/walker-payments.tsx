@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Button, TOUCH_TARGET } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -58,13 +58,17 @@ function periodToParams(preset: PeriodPreset): EarningsParams {
 
 function PeriodFilter({ value, onChange }: { value: PeriodPreset; onChange: (p: PeriodPreset) => void }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
+    // Phones: one row that scrolls sideways, edge to edge, with thumb-sized chips.
+    <div className="-mx-4 flex gap-2 overflow-x-auto no-scrollbar px-4 py-1 md:mx-0 md:flex-wrap md:gap-1.5 md:overflow-visible md:px-0 md:py-0">
       {(Object.keys(PERIOD_LABELS) as PeriodPreset[]).map((preset) => (
         <button
           key={preset}
+          type="button"
           onClick={() => onChange(preset)}
+          aria-pressed={value === preset}
           className={cn(
-            'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-150',
+            'relative h-9 shrink-0 px-3.5 rounded-lg text-sm font-medium transition-colors duration-150 md:h-auto md:px-3 md:py-1.5 md:text-xs',
+            TOUCH_TARGET,
             value === preset
               ? 'bg-primary text-primary-foreground'
               : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -202,6 +206,7 @@ function EarningRow({ item }: { item: PaymentHistoryItem }) {
 export function WalkerPayments() {
   const [period, setPeriod] = useState<PeriodPreset>('this_month');
   const { data: history = [], isLoading, isError, refetch } = useWalkerEarnings(periodToParams(period));
+  const periodTotal = history.reduce((sum, item) => sum + item.amount, 0);
 
   return (
     <div className="flex flex-col gap-5 pb-8 md:gap-8 lg:flex-row lg:items-start lg:gap-10">
@@ -229,7 +234,17 @@ export function WalkerPayments() {
         </header>
 
         <section className="space-y-3 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-baseline justify-between gap-3 md:hidden">
+            <h2 className="text-sm font-semibold text-foreground">Histórico</h2>
+            {!isLoading && !isError && history.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                <span className="font-semibold tabular-nums text-foreground">{formatAmount(periodTotal)}</span>
+                {' · '}
+                {history.length} passeio{history.length > 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 max-md:hidden">
             <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
               <History className="w-3 h-3 text-primary" />
             </div>
