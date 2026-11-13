@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
+  AlertCircle,
   ArrowLeft,
   Briefcase,
   Calendar,
@@ -16,12 +17,14 @@ import {
   Tag,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, TOUCH_TARGET } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/common/empty-state";
 import { cn } from "@/lib/utils";
 import { useWalkerProfile, useUpdateWalkerProfile } from "@/features/walkers/hooks/use-walkers";
 import type { AvailabilitySlot, DogSize, WalkerProfileUpdate } from "@/types";
@@ -48,12 +51,45 @@ const EXPERTISE_OPTIONS: { value: string; label: string }[] = [
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
+// Shaped like the section cards (icon + title header, then fields), so the form
+// doesn't jump when it arrives.
 function ProfileSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
-      <div className="h-32 rounded-xl bg-muted" />
-      <div className="h-24 rounded-xl bg-muted" />
-      <div className="h-32 rounded-xl bg-muted" />
+    <div className="space-y-4 md:space-y-6" aria-hidden="true">
+      {["h-28", "h-40", "h-64"].map((body) => (
+        <Card key={body} className="overflow-hidden py-0 gap-0">
+          <div className="flex items-center gap-2.5 border-b border-border/60 px-4 py-3.5 md:px-5">
+            <Skeleton className="h-7 w-7 rounded-lg" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+          <div className="space-y-2 p-4 md:p-5">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className={cn("w-full rounded-lg", body)} />
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+
+function PageHeader() {
+  return (
+    <div className="flex items-center gap-3">
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        render={<Link href="/profile" />}
+        aria-label="Voltar"
+        className="max-md:-ml-2 max-md:size-11"
+      >
+        <ArrowLeft className="h-4 w-4" />
+      </Button>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Perfil profissional</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Informações exibidas para os clientes.</p>
+      </div>
     </div>
   );
 }
@@ -67,13 +103,13 @@ function Section({ icon: Icon, title, children }: {
 }) {
   return (
     <Card className="overflow-hidden py-0 gap-0">
-      <div className="flex items-center gap-2.5 border-b border-border/60 px-5 py-3.5">
+      <div className="flex items-center gap-2.5 border-b border-border/60 px-4 py-3.5 md:px-5">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 shrink-0">
           <Icon className="h-3.5 w-3.5 text-primary" />
         </div>
         <span className="text-sm font-semibold text-foreground">{title}</span>
       </div>
-      <CardContent className="p-5 space-y-4">{children}</CardContent>
+      <CardContent className="p-4 space-y-4 md:p-5">{children}</CardContent>
     </Card>
   );
 }
@@ -109,28 +145,30 @@ function TagsInput({
         <Input
           value={input}
           placeholder="Ex: Pontual, Experiente..."
+          enterKeyHint="done"
+          autoComplete="off"
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") { e.preventDefault(); addTag(); }
           }}
           className="rounded-lg"
         />
-        <Button type="button" variant="outline" size="sm" onClick={addTag} className="shrink-0 rounded-lg">
+        <Button type="button" variant="outline" size="sm" onClick={addTag} className="shrink-0 rounded-lg max-md:h-11 max-md:px-4 max-md:text-sm">
           Adicionar
         </Button>
       </div>
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 max-md:gap-2">
           {tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1 pr-1.5">
+            <Badge key={tag} variant="secondary" className="gap-1 pr-1.5 max-md:h-7 max-md:gap-1.5 max-md:px-2.5 max-md:text-sm">
               {tag}
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="ml-0.5 rounded-sm opacity-60 hover:opacity-100 cursor-pointer"
+                className={cn("relative ml-0.5 rounded-sm opacity-60 hover:opacity-100 cursor-pointer", TOUCH_TARGET)}
                 aria-label={`Remover ${tag}`}
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3 max-md:h-3.5 max-md:w-3.5" />
               </button>
             </Badge>
           ))}
@@ -168,14 +206,17 @@ function CheckboxGroup<T extends string>({
             key={value}
             type="button"
             onClick={() => toggle(value)}
+            aria-pressed={active}
             className={cn(
-              "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer",
+              "relative flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer max-md:h-10 max-md:px-3.5 max-md:text-sm",
+              TOUCH_TARGET,
               active
                 ? "border-primary bg-primary/10 text-primary"
                 : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground",
             )}
           >
-            <CheckSquare className={cn("h-3.5 w-3.5 shrink-0", active ? "opacity-100" : "opacity-30")} />
+            {/* A faded check reads as "checked" on a small screen, so phones show it only when active. */}
+            <CheckSquare className={cn("h-3.5 w-3.5 shrink-0", active ? "opacity-100" : "opacity-30 max-md:hidden")} />
             {label}
           </button>
         );
@@ -190,7 +231,7 @@ export default function WalkerProfilePage() {
   const searchParams = useSearchParams();
   const isOnboarding = searchParams.get("onboarding") === "true";
 
-  const { data: profile, isLoading } = useWalkerProfile();
+  const { data: profile, isLoading, isError, refetch, isRefetching } = useWalkerProfile();
   const { mutate: updateProfile, isPending: isSaving } = useUpdateWalkerProfile();
 
   const [form, setForm] = useState<WalkerProfileUpdate>({
@@ -228,29 +269,34 @@ export default function WalkerProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl space-y-6 pb-8">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-muted" />
-          <div className="h-7 w-48 rounded bg-muted" />
-        </div>
+      <div className="max-w-2xl space-y-4 pb-8 md:space-y-6">
+        <PageHeader />
         <ProfileSkeleton />
       </div>
     );
   }
 
-  return (
-    <div className="max-w-2xl space-y-6 pb-8">
-
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon-sm" render={<Link href="/profile" />} aria-label="Voltar">
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Perfil profissional</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Informações exibidas para os clientes.</p>
-        </div>
+  // Without the saved profile the form would start empty, and saving it would wipe the
+  // walker's real profile, so a failed load offers a retry instead of the form.
+  if (isError && !profile) {
+    return (
+      <div className="max-w-2xl space-y-4 pb-8 md:space-y-6">
+        <PageHeader />
+        <EmptyState
+          icon={AlertCircle}
+          title="Não foi possível carregar seu perfil"
+          description="Verifique sua conexão e tente de novo. Nada do que você salvou foi perdido."
+          actionLabel={isRefetching ? "Carregando..." : "Tentar novamente"}
+          onAction={() => refetch()}
+        />
       </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl space-y-4 pb-8 md:space-y-6">
+
+      <PageHeader />
 
       {/* Onboarding banner — shown only right after walker registration */}
       {isOnboarding && (
@@ -277,9 +323,10 @@ export default function WalkerProfilePage() {
           <Textarea
             value={form.description}
             rows={4}
+            autoCapitalize="sentences"
             placeholder="Descreva sua experiência, abordagem e diferenciais..."
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            className="rounded-lg resize-none"
+            className="rounded-lg resize-none max-md:min-h-40"
           />
         </div>
       </Section>
@@ -293,6 +340,7 @@ export default function WalkerProfilePage() {
           <Input
             value={form.location}
             placeholder="Ex: Pinheiros, São Paulo"
+            enterKeyHint="next"
             onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
             className="rounded-lg"
           />
@@ -304,6 +352,7 @@ export default function WalkerProfilePage() {
           <Input
             value={form.serviceArea}
             placeholder="Ex: Pinheiros, Vila Madalena e Perdizes"
+            enterKeyHint="next"
             onChange={(e) => setForm((f) => ({ ...f, serviceArea: e.target.value }))}
             className="rounded-lg"
           />
@@ -350,9 +399,17 @@ export default function WalkerProfilePage() {
         />
       </Section>
 
-      {/* Save */}
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving} className="gap-2 rounded-lg shadow-sm">
+      {/* Save. Phones: pinned above the bottom nav, so it's in reach from any section of
+          this long form. The app's scroll container already pads for the nav, so bottom-0
+          lands right above it, and a strip below fills that padding so the form doesn't
+          peek out between the bar and the nav or under the nav (same technique as FlowActions,
+          taller strip). */}
+      <div className="flex justify-end max-md:sticky max-md:bottom-0 max-md:z-10 max-md:-mx-4 max-md:border-t max-md:border-border/60 max-md:bg-background max-md:px-4 max-md:py-3 max-md:after:absolute max-md:after:inset-x-0 max-md:after:top-full max-md:after:h-36 max-md:after:bg-background">
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="gap-2 rounded-lg shadow-sm max-md:h-12 max-md:w-full max-md:text-base"
+        >
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isSaving ? "Salvando..." : "Salvar perfil"}
         </Button>
