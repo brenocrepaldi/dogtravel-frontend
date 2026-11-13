@@ -46,6 +46,7 @@ import {
 import { UploadZone } from "./walker-documents-upload-zone";
 import { OnboardingProgressCard } from "./walker-documents-progress-card";
 import { CertRow } from "./walker-documents-cert-row";
+import { BACKGROUND_COPY, IDENTITY_COPY } from "./walker-documents-copy";
 
 // ─── Main component ─────────────────────────────────────────────────────────
 
@@ -183,29 +184,29 @@ export function WalkerDocuments() {
             iconBg="bg-emerald-500/10"
             iconColor="text-emerald-600 dark:text-emerald-400"
             barClass="from-emerald-400/60 via-emerald-500 to-emerald-400/40"
-            title="Verificação de Identidade"
-            description="Documento oficial + selfie segurando o documento"
+            title={IDENTITY_COPY.title}
+            description={IDENTITY_COPY.description}
             status={identityStatus}
             required
           />
           <Separator />
           <CardContent className="space-y-5 py-5 max-md:space-y-4 max-md:py-4">
             {identityStatus === "rejected" && (
-              <RejectedBanner message="Seus documentos foram recusados. Verifique se a foto está nítida, o documento está visível e dentro da validade, e reenvie para nova análise." />
+              <RejectedBanner message={IDENTITY_COPY.rejected} />
             )}
             {needsUpload(identityStatus) && (
               <>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <UploadZone
                     label="Documento oficial"
-                    hint="RG, CNH ou passaporte · PDF ou imagem · máx. 5 MB"
+                    hint={IDENTITY_COPY.docHint}
                     file={identityDoc}
                     onFile={setIdentityDoc}
                     disabled={uploadingIdentity}
                   />
                   <UploadZone
                     label="Selfie com o documento"
-                    hint="Foto segurando o documento aberto · JPG ou PNG · máx. 5 MB"
+                    hint={IDENTITY_COPY.selfieHint}
                     accept=".jpg,.jpeg,.png"
                     file={identitySelfie}
                     onFile={setIdentitySelfie}
@@ -228,10 +229,10 @@ export function WalkerDocuments() {
               </>
             )}
             {identityStatus === "pending" && (
-              <PendingBanner message="Seus documentos foram recebidos e estão em análise. A verificação é realizada em até 3 dias úteis. Você será notificado por e-mail quando concluída." />
+              <PendingBanner message={IDENTITY_COPY.pending} />
             )}
             {identityStatus === "verified" && (
-              <VerifiedBanner message="Identidade verificada e aprovada pela DogTravel. Suas informações estão protegidas e a verificação é válida por 12 meses." />
+              <VerifiedBanner message={IDENTITY_COPY.verified} />
             )}
           </CardContent>
         </Card>
@@ -243,8 +244,8 @@ export function WalkerDocuments() {
             iconBg="bg-blue-500/10"
             iconColor="text-blue-600 dark:text-blue-400"
             barClass="from-blue-400/60 via-blue-500 to-blue-400/40"
-            title="Antecedentes Criminais"
-            description="Certidão emitida nos últimos 90 dias"
+            title={BACKGROUND_COPY.title}
+            description={BACKGROUND_COPY.description}
             status={bgStatus}
             required
           />
@@ -253,11 +254,9 @@ export function WalkerDocuments() {
             <div className="flex items-start gap-3 rounded-xl border border-border/50 bg-muted/30 px-4 py-3.5">
               <FileCheck2 className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
               <div className="space-y-1.5 text-xs leading-relaxed text-muted-foreground">
-                <p>
-                  Exigida para garantir a segurança de tutores e pets em todos os passeios. Pode ser emitida gratuitamente pelo portal do governo federal e deve ter sido emitida nos últimos 90 dias.
-                </p>
+                <p>{BACKGROUND_COPY.why}</p>
                 <a
-                  href="https://www.gov.br/pt-br/servicos/emitir-certidao-de-antecedentes-criminais"
+                  href={BACKGROUND_COPY.govUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
@@ -268,13 +267,13 @@ export function WalkerDocuments() {
               </div>
             </div>
             {bgStatus === "rejected" && (
-              <RejectedBanner message="Sua certidão foi recusada. Verifique se é uma certidão de antecedentes criminais válida, emitida nos últimos 90 dias, e reenvie para nova análise." />
+              <RejectedBanner message={BACKGROUND_COPY.rejected} />
             )}
             {needsUpload(bgStatus) && (
               <>
                 <UploadZone
                   label="Certidão de antecedentes"
-                  hint="PDF ou imagem · emitida nos últimos 90 dias · máx. 5 MB"
+                  hint={BACKGROUND_COPY.hint}
                   file={bgDoc}
                   onFile={setBgDoc}
                   disabled={uploadingBackground}
@@ -295,10 +294,10 @@ export function WalkerDocuments() {
               </>
             )}
             {bgStatus === "pending" && (
-              <PendingBanner message="Certidão recebida e em análise pela equipe DogTravel. A verificação é realizada em até 5 dias úteis. Você será notificado por e-mail quando concluída." />
+              <PendingBanner message={BACKGROUND_COPY.pending} />
             )}
             {bgStatus === "verified" && (
-              <VerifiedBanner message="Antecedentes criminais verificados e aprovados. A checagem é válida por 12 meses a partir da data de emissão do documento." />
+              <VerifiedBanner message={BACKGROUND_COPY.verified} />
             )}
           </CardContent>
         </Card>
