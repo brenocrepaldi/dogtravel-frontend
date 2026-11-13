@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   AlertCircle,
@@ -27,28 +27,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/common/empty-state";
 import { cn } from "@/lib/utils";
 import { useWalkerProfile, useUpdateWalkerProfile } from "@/features/walkers/hooks/use-walkers";
-import type { AvailabilitySlot, DogSize, WalkerProfileUpdate } from "@/types";
+import type { AvailabilitySlot, WalkerProfile, WalkerProfileUpdate } from "@/types";
 import { AvailabilityPicker } from "./_components/availability-picker";
-import { AvailabilitySheetField } from "./_components/availability-sheet-field";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const SIZE_OPTIONS: { value: DogSize; label: string }[] = [
-  { value: "small",  label: "Pequeno" },
-  { value: "medium", label: "Médio" },
-  { value: "large",  label: "Grande" },
-  { value: "giant",  label: "Gigante" },
-];
-
-const EXPERTISE_OPTIONS: { value: string; label: string }[] = [
-  { value: "agitado",       label: "Agitados" },
-  { value: "reativo",       label: "Reativos" },
-  { value: "ansioso",       label: "Ansiosos" },
-  { value: "filhote",       label: "Filhotes" },
-  { value: "idoso",         label: "Idosos" },
-  { value: "medicacao",     label: "Com medicação" },
-  { value: "multiplos-caes", label: "Múltiplos cães" },
-];
+import { ProfileOverview } from "./_components/profile-overview";
+import {
+  EXPERTISE_OPTIONS,
+  SECTION_META,
+  SIZE_OPTIONS,
+  parseSection,
+  summarizeProfile,
+  type SectionKey,
+} from "./_components/profile-sections";
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -75,9 +64,9 @@ function ProfileSkeleton() {
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
-function PageHeader() {
+function PageHeader({ className }: { className?: string }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className={cn("flex items-center gap-3", className)}>
       <Button
         variant="ghost"
         size="icon-sm"
@@ -97,20 +86,23 @@ function PageHeader() {
 
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 
-function Section({ icon: Icon, title, children }: {
+function Section({ icon: Icon, title, className, contentClassName, children }: {
   icon: React.ElementType;
   title: string;
+  className?: string;
+  contentClassName?: string;
   children: React.ReactNode;
 }) {
   return (
-    <Card className="overflow-hidden py-0 gap-0">
-      <div className="flex items-center gap-2.5 border-b border-border/60 px-4 py-3.5 md:px-5">
+    // Phones edit one section per screen, titled by the page header, so the strip is md+ only.
+    <Card className={cn("overflow-hidden py-0 gap-0", className)}>
+      <div className="flex items-center gap-2.5 border-b border-border/60 px-4 py-3.5 max-md:hidden md:px-5">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 shrink-0">
           <Icon className="h-3.5 w-3.5 text-primary" />
         </div>
         <span className="text-sm font-semibold text-foreground">{title}</span>
       </div>
-      <CardContent className="p-4 space-y-4 md:p-5">{children}</CardContent>
+      <CardContent className={cn("p-4 space-y-4 md:p-5", contentClassName)}>{children}</CardContent>
     </Card>
   );
 }
@@ -228,9 +220,56 @@ function CheckboxGroup<T extends string>({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
+// ─── Mobile header ────────────────────────────────────────────────────────────
+
+// Phones: the overview's title, or the open section's title with a back arrow to the overview.
+function MobileHeader({ section, onBack }: { section: SectionKey | null; onBack: () => void }) {
+  const title = section ? SECTION_META[section].title : "Perfil profissional";
+  const hint = section ? SECTION_META[section].hint : "Informações exibidas para os tutores";
+  const backClass =
+    "-ml-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors active:bg-accent/60";
+
+  return (
+    <div className="flex items-center gap-1 md:hidden">
+      {section ? (
+        <button type="button" onClick={onBack} aria-label="Voltar ao perfil profissional" className={backClass}>
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+      ) : (
+        <Link href="/profile" aria-label="Voltar ao perfil" className={backClass}>
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+      )}
+      <div className="min-w-0">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">{title}</h1>
+        <p className="text-sm text-muted-foreground">{hint}</p>
+      </div>
+    </div>
+  );
+}
+
+function formFromProfile(profile: WalkerProfile): WalkerProfileUpdate {
+  return {
+    description:       profile.description,
+    location:          profile.location,
+    serviceArea:       profile.serviceArea,
+    availability:      profile.availability,
+    tags:              [...profile.tags],
+    supportedSizes:    [...profile.supportedSizes],
+    behaviorExpertise: [...profile.behaviorExpertise],
+  };
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+
 export default function WalkerProfilePage() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const isOnboarding = searchParams.get("onboarding") === "true";
+  // Phones: ?secao=<key> edits one section on its own screen; without it, the overview.
+  // md+ ignores it and keeps the full form.
+  const section = parseSection(searchParams.get("secao"));
 
   const { data: profile, isLoading, isError, refetch, isRefetching } = useWalkerProfile();
   const { mutate: updateProfile, isPending: isSaving } = useUpdateWalkerProfile();
@@ -250,23 +289,55 @@ export default function WalkerProfilePage() {
   const [seededFrom, setSeededFrom] = useState<typeof profile>(undefined);
   if (profile && profile !== seededFrom) {
     setSeededFrom(profile);
-    setForm({
-      description:       profile.description,
-      location:          profile.location,
-      serviceArea:       profile.serviceArea,
-      availability:      profile.availability,
-      tags:              [...profile.tags],
-      supportedSizes:    [...profile.supportedSizes],
-      behaviorExpertise: [...profile.behaviorExpertise],
-    });
+    setForm(formFromProfile(profile));
+  }
+
+  // Leaving a section without saving (Cancelar, the back arrow or the phone's back gesture)
+  // drops its edits, so the overview never shows changes that weren't saved.
+  const [openedHere, setOpenedHere] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+  const [prevSection, setPrevSection] = useState(section);
+  if (section !== prevSection) {
+    setPrevSection(section);
+    if (prevSection && !section && !justSaved && profile) setForm(formFromProfile(profile));
+    setJustSaved(false);
+  }
+
+  function sectionHref(key: SectionKey | null) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (key) params.set("secao", key);
+    else params.delete("secao");
+    const query = params.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }
+
+  function openSection(key: SectionKey) {
+    setOpenedHere(true);
+    router.push(sectionHref(key));
+  }
+
+  function closeSection() {
+    // Opened from the overview: step back in history, so the back gesture doesn't return
+    // to the section. Opened from a link: replace it with the overview.
+    if (openedHere) router.back();
+    else router.replace(sectionHref(null));
   }
 
   function handleSave() {
     updateProfile(form, {
-      onSuccess: () => toast.success("Perfil profissional atualizado!"),
+      onSuccess: () => {
+        toast.success("Perfil profissional atualizado!");
+        if (section) {
+          setJustSaved(true);
+          closeSection();
+        }
+      },
       onError:   () => toast.error("Erro ao salvar. Tente novamente."),
     });
   }
+
+  /** Phones show only the open section; md+ shows every section. */
+  const mobileOnly = (key: SectionKey) => (section === key ? undefined : "max-md:hidden");
 
   if (isLoading) {
     return (
@@ -295,13 +366,14 @@ export default function WalkerProfilePage() {
   }
 
   return (
-    <div className="group/form max-w-2xl space-y-4 pb-8 max-md:pb-20 md:space-y-6">
+    <div className={cn("group/form max-w-2xl space-y-4 pb-8 md:space-y-6", section && "max-md:pb-20")}>
 
-      <PageHeader />
+      <MobileHeader section={section} onBack={closeSection} />
+      <PageHeader className="max-md:hidden" />
 
       {/* Onboarding banner — shown only right after walker registration */}
       {isOnboarding && (
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 px-5 py-4 flex items-start gap-3">
+        <div className={cn("rounded-2xl border border-primary/20 bg-primary/5 px-5 py-4 flex items-start gap-3", section && "max-md:hidden")}>
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
             <PartyPopper className="w-4 h-4 text-primary" />
           </div>
@@ -315,10 +387,18 @@ export default function WalkerProfilePage() {
         </div>
       )}
 
+      {!section && profile && (
+        <ProfileOverview
+          preview={{ ...profile, ...form } as WalkerProfile}
+          sections={summarizeProfile(form)}
+          onOpen={openSection}
+        />
+      )}
+
       {/* Sobre você */}
-      <Section icon={Briefcase} title="Sobre você">
+      <Section icon={Briefcase} title="Sobre você" className={mobileOnly("sobre")}>
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground max-md:sr-only">
             Apresentação
           </Label>
           <Textarea
@@ -327,59 +407,60 @@ export default function WalkerProfilePage() {
             autoCapitalize="sentences"
             placeholder="Descreva sua experiência, abordagem e diferenciais..."
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            className="rounded-lg resize-none max-md:min-h-40"
+            className="rounded-lg resize-none max-md:min-h-48"
           />
         </div>
       </Section>
 
       {/* Localização */}
-      <Section icon={MapPin} title="Localização e área de atendimento">
+      <Section icon={MapPin} title="Localização e área de atendimento" className={mobileOnly("local")}>
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground max-md:text-sm max-md:normal-case max-md:tracking-normal max-md:text-foreground">
             Bairro / Cidade
           </Label>
           <Input
             value={form.location}
             placeholder="Ex: Pinheiros, São Paulo"
+            autoCapitalize="words"
             enterKeyHint="next"
             onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
             className="rounded-lg"
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground max-md:text-sm max-md:normal-case max-md:tracking-normal max-md:text-foreground">
             Área de atendimento
           </Label>
           <Input
             value={form.serviceArea}
             placeholder="Ex: Pinheiros, Vila Madalena e Perdizes"
-            enterKeyHint="next"
+            autoCapitalize="words"
+            enterKeyHint="done"
             onChange={(e) => setForm((f) => ({ ...f, serviceArea: e.target.value }))}
             className="rounded-lg"
           />
         </div>
       </Section>
 
-      {/* Disponibilidade */}
-      <Section icon={Calendar} title="Disponibilidade semanal">
+      {/* Disponibilidade — phones get the seven days on their own screen, straight on the page
+          background: the day cards are cards already. */}
+      <Section
+        icon={Calendar}
+        title="Disponibilidade semanal"
+        className={cn(mobileOnly("horarios"), "max-md:bg-transparent max-md:ring-0")}
+        contentClassName="max-md:p-0"
+      >
         <p className="text-xs text-muted-foreground -mt-1 max-md:hidden">
           Ative os dias em que você trabalha e selecione os horários disponíveis em cada um.
         </p>
-        {/* Phones: a summary that opens the days in a bottom sheet. md+: the seven days inline.
-            The picker stays last so the card's spacing on md+ is unchanged. */}
-        <AvailabilitySheetField
-          value={(form.availability as AvailabilitySlot[]) ?? []}
-          onChange={(v) => setForm((f) => ({ ...f, availability: v }))}
-        />
         <AvailabilityPicker
-          className="max-md:hidden"
           value={(form.availability as AvailabilitySlot[]) ?? []}
           onChange={(v) => setForm((f) => ({ ...f, availability: v }))}
         />
       </Section>
 
       {/* Portes atendidos */}
-      <Section icon={CheckSquare} title="Portes atendidos">
+      <Section icon={CheckSquare} title="Portes atendidos" className={mobileOnly("portes")}>
         <CheckboxGroup
           options={SIZE_OPTIONS}
           selected={form.supportedSizes ?? []}
@@ -388,7 +469,7 @@ export default function WalkerProfilePage() {
       </Section>
 
       {/* Especialidades */}
-      <Section icon={CheckSquare} title="Especialidades comportamentais">
+      <Section icon={CheckSquare} title="Especialidades comportamentais" className={mobileOnly("especialidades")}>
         <CheckboxGroup
           options={EXPERTISE_OPTIONS}
           selected={form.behaviorExpertise ?? []}
@@ -397,8 +478,8 @@ export default function WalkerProfilePage() {
       </Section>
 
       {/* Tags personalizadas */}
-      <Section icon={Tag} title="Tags de destaque">
-        <p className="text-xs text-muted-foreground -mt-1">
+      <Section icon={Tag} title="Tags de destaque" className={mobileOnly("tags")}>
+        <p className="text-xs text-muted-foreground -mt-1 max-md:text-sm">
           Palavras-chave que aparecem no seu card de perfil (ex: Pontual, Experiente, Dog Lover).
         </p>
         <TagsInput
@@ -407,19 +488,30 @@ export default function WalkerProfilePage() {
         />
       </Section>
 
-      {/* Save. Phones: floats just above the bottom nav, so it's in reach from any section of
-          this long form. It is position: fixed like the nav itself — a sticky bar inside the
-          scroll container got stuck mid-screen on iOS after the keyboard closed. The page pads
-          its bottom (pb-20) so the last section can scroll clear of it, and it hides while a
-          text field is focused so it never covers what's being typed. */}
-      <div className="flex justify-end max-md:fixed max-md:inset-x-0 max-md:bottom-[calc(5.75rem+env(safe-area-inset-bottom))] max-md:z-30 max-md:px-4 max-md:group-has-[:is(input,textarea):focus]/form:hidden">
+      {/* Save. md+: one button under the whole form. Phones: only on a section's screen, with
+          Cancelar beside it, floating above the bottom nav. It is position: fixed like the nav —
+          a sticky bar inside the scroll container got stuck mid-screen on iOS after the
+          keyboard closed — and hides while a text field is focused so it never covers it. */}
+      <div className={cn(
+        "flex justify-end max-md:fixed max-md:inset-x-0 max-md:bottom-[calc(5.75rem+env(safe-area-inset-bottom))] max-md:z-30 max-md:gap-2 max-md:px-4 max-md:group-has-[:is(input,textarea):focus]/form:hidden",
+        !section && "max-md:hidden",
+      )}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={closeSection}
+          disabled={isSaving}
+          className="h-12 flex-1 rounded-lg bg-background text-base shadow-lg md:hidden"
+        >
+          Cancelar
+        </Button>
         <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="gap-2 rounded-lg shadow-sm max-md:h-12 max-md:w-full max-md:text-base max-md:shadow-lg max-md:shadow-primary/25"
+          className="gap-2 rounded-lg shadow-sm max-md:h-12 max-md:flex-1 max-md:text-base max-md:shadow-lg max-md:shadow-primary/25"
         >
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {isSaving ? "Salvando..." : "Salvar perfil"}
+          {isSaving ? "Salvando..." : <><span className="md:hidden">Salvar</span><span className="max-md:hidden">Salvar perfil</span></>}
         </Button>
       </div>
     </div>
