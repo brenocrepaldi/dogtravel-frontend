@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Camera, Dog, Info, Ruler, Sparkles, X } from "lucide-react";
+import { AlertCircle, Camera, Dog, Info, PawPrint, Ruler, Sparkles, Trash2, X } from "lucide-react";
 import {
   PET_IMAGE_ACCEPT,
   validatePetImage,
@@ -75,6 +75,8 @@ interface PetFormSheetProps {
   onOpenChange: (open: boolean) => void;
   petToEdit?: PetDraft | null;
   onSave: (pet: PetDraft) => void;
+  /** Editing only: removes the pet. Phones reach removal from here, not from the list. */
+  onRemove?: () => void;
 }
 
 // Campo de input estilizado com label integrado
@@ -166,6 +168,44 @@ function PhotoUpload({ value, onChange }: PhotoUploadProps) {
         aria-label="Enviar foto do pet"
       />
 
+      {/* Phones: the photo as a big avatar on top of the form, like a contact card. */}
+      <div className="flex flex-col items-center gap-2 md:hidden">
+        <button
+          type="button"
+          onClick={openFilePicker}
+          aria-label={value ? "Trocar foto do pet" : "Adicionar foto do pet"}
+          className="relative h-24 w-24 rounded-3xl ring-1 ring-border/60 transition-transform active:scale-95"
+        >
+          <span className="absolute inset-0 overflow-hidden rounded-3xl bg-amber-500/10">
+            <span className="flex h-full w-full items-center justify-center">
+              <PawPrint className="h-9 w-9 text-amber-600 dark:text-amber-400" />
+            </span>
+            {value && <Image src={value} alt="" fill sizes="96px" className="object-cover" />}
+          </span>
+          <span className="absolute -right-1.5 -bottom-1.5 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-background">
+            <Camera className="h-4 w-4" />
+          </span>
+        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={openFilePicker}
+            className="h-11 rounded-lg px-3 text-sm font-medium text-primary active:bg-primary/5"
+          >
+            {value ? "Trocar foto" : "Adicionar foto"}
+          </button>
+          {value && (
+            <button
+              type="button"
+              onClick={() => onChange(null)}
+              className="h-11 rounded-lg px-3 text-sm font-medium text-muted-foreground active:bg-muted"
+            >
+              Remover
+            </button>
+          )}
+        </div>
+      </div>
+
       <div
         role="button"
         tabIndex={0}
@@ -183,7 +223,7 @@ function PhotoUpload({ value, onChange }: PhotoUploadProps) {
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         className={cn(
-          "relative flex items-center gap-4 p-4 rounded-2xl border border-dashed bg-muted/20 transition-all duration-200 cursor-pointer group",
+          "relative flex items-center gap-4 p-4 rounded-2xl border border-dashed bg-muted/20 transition-all duration-200 cursor-pointer group max-md:hidden",
           isDragging
             ? "border-primary/50 bg-primary/5"
             : "border-border hover:bg-muted/30 hover:border-border/80"
@@ -257,7 +297,7 @@ function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string })
       <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center text-primary shrink-0">
         {icon}
       </div>
-      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider max-md:text-sm max-md:normal-case max-md:tracking-normal max-md:text-foreground">
         {label}
       </span>
       <div className="flex-1 h-px bg-border/60" />
@@ -270,7 +310,9 @@ export function PetFormSheet({
   onOpenChange,
   petToEdit,
   onSave,
+  onRemove,
 }: PetFormSheetProps) {
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [formData, setFormData] = useState<PetFormState>(() =>
     toFormState(petToEdit)
   );
@@ -318,15 +360,25 @@ export function PetFormSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="center"
-        className="flex flex-col p-0 overflow-hidden border-border/60 sm:max-w-xl"
+        // Phones: a bottom sheet (the app's pattern for editing on a phone) instead of a
+        // centered dialog; md+ keeps the dialog.
+        className={cn(
+          "flex flex-col p-0 overflow-hidden border-border/60 sm:max-w-xl",
+          "max-md:data-[side=center]:top-auto max-md:data-[side=center]:bottom-0 max-md:data-[side=center]:left-0",
+          "max-md:data-[side=center]:w-full max-md:data-[side=center]:max-w-none max-md:data-[side=center]:max-h-[92dvh]",
+          "max-md:data-[side=center]:translate-x-0 max-md:data-[side=center]:translate-y-0",
+          "max-md:data-[side=center]:rounded-b-none max-md:data-[side=center]:border-x-0 max-md:data-[side=center]:border-b-0",
+          "max-md:data-[side=center]:data-starting-style:scale-100 max-md:data-[side=center]:data-ending-style:scale-100",
+          "max-md:data-[side=center]:data-starting-style:translate-y-10 max-md:data-[side=center]:data-ending-style:translate-y-10",
+        )}
       >
         {/* ── Header do sheet ──────────────────────────────── */}
-        <div className="relative px-6 pt-6 pb-5 border-b border-border/50 bg-card shrink-0">
+        <div className="relative px-6 pt-6 pb-5 border-b border-border/50 bg-card shrink-0 max-md:px-4 max-md:pt-4 max-md:pb-3 max-md:pr-14">
           {/* Faixa decorativa no topo */}
-          <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent max-md:hidden" />
 
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center shrink-0 mt-0.5">
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center shrink-0 mt-0.5 max-md:hidden">
               <Dog className="w-5 h-5 text-primary" />
             </div>
             <SheetHeader className="p-0 space-y-0.5 text-left">
@@ -345,7 +397,7 @@ export function PetFormSheet({
         {/* ── Formulário ──────────────────────────────────── */}
         <form
           onSubmit={handleSubmit}
-          className="flex-1 overflow-y-auto px-6 py-6 space-y-6"
+          className="flex-1 overflow-y-auto overscroll-contain px-6 py-6 space-y-6 max-md:px-4 max-md:py-5"
         >
           <PhotoUpload
             value={formData.photoUrl}
@@ -365,6 +417,9 @@ export function PetFormSheet({
               <Input
                 id="pet-name"
                 placeholder="Ex: Rex"
+                autoCapitalize="words"
+                autoComplete="off"
+                enterKeyHint="next"
                 value={formData.name}
                 onChange={(e) => set("name")(e.target.value)}
                 className={cn(
@@ -382,6 +437,9 @@ export function PetFormSheet({
                 <Input
                   id="pet-breed"
                   placeholder="Ex: Poodle"
+                  autoCapitalize="words"
+                  autoComplete="off"
+                  enterKeyHint="next"
                   value={formData.breed}
                   onChange={(e) => set("breed")(e.target.value)}
                   className={cn(
@@ -398,8 +456,10 @@ export function PetFormSheet({
                 <Input
                   id="pet-age"
                   type="number"
+                  inputMode="numeric"
                   min="0"
                   max="30"
+                  enterKeyHint="next"
                   placeholder="Ex: 3"
                   value={formData.age}
                   onChange={(e) => set("age")(e.target.value)}
@@ -429,7 +489,7 @@ export function PetFormSheet({
                       setFormData((prev) => ({ ...prev, gender: option.value }))
                     }
                     className={cn(
-                      "flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all cursor-pointer",
+                      "flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all cursor-pointer max-md:h-11",
                       formData.gender === option.value
                         ? option.value === "male"
                           ? "border-blue-500/50 bg-blue-500/10 text-blue-700 dark:text-blue-400"
@@ -453,14 +513,41 @@ export function PetFormSheet({
             />
 
             <Field label="Porte do cão" required htmlFor="pet-size">
+              {/* Phones: the four sizes as buttons, one tap instead of a dropdown. */}
+              <div className="grid grid-cols-2 gap-2 md:hidden" role="group" aria-label="Porte do cão">
+                {DOG_SIZE_TEXT_OPTIONS.map((option) => {
+                  const [label, weight] = option.label.replace(")", "").split(" (");
+                  const active = formData.size === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => set("size")(option.value)}
+                      className={cn(
+                        "flex h-14 flex-col items-center justify-center rounded-lg border text-sm font-medium transition-colors",
+                        active
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-foreground active:bg-muted/60",
+                      )}
+                    >
+                      {label}
+                      <span className={cn("text-xs font-normal", active ? "text-primary/80" : "text-muted-foreground")}>
+                        {weight}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
               <Select
+                items={DOG_SIZE_TEXT_OPTIONS}
                 value={formData.size}
                 onValueChange={(v) => set("size")(v as DogSize)}
               >
                 <SelectTrigger
                   id="pet-size"
                   className={cn(
-                    "w-full",
+                    "w-full max-md:hidden",
                     errors.size && "border-destructive/70"
                   )}
                 >
@@ -498,7 +585,8 @@ export function PetFormSheet({
               <textarea
                 id="pet-behavior"
                 rows={4}
-                className="flex w-full rounded-md border border-input bg-transparent px-3 py-2.5 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-all"
+                autoCapitalize="sentences"
+                className="flex w-full rounded-md border border-input bg-transparent px-3 py-2.5 text-sm max-md:text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-all"
                 placeholder="Ex: Muito brincalhão, mas tem medo de motos. Puxa muito a guia no começo do passeio."
                 value={formData.behavior}
                 onChange={(e) => set("behavior")(e.target.value)}
@@ -508,22 +596,60 @@ export function PetFormSheet({
               </p>
             </Field>
           </div>
+
+          {/* Phones: removal lives here, at the end of the dog's sheet, behind a confirmation. */}
+          {isEditing && onRemove && (
+            <div className="border-t border-border/50 pt-4 md:hidden">
+              {confirmingRemove ? (
+                <div className="space-y-3 rounded-xl border border-destructive/20 bg-destructive/5 p-3">
+                  <p className="flex items-center gap-2 text-sm font-medium text-destructive">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    Remover {petToEdit.name}? Isso não pode ser desfeito.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button type="button" variant="outline" className="h-11" onClick={() => setConfirmingRemove(false)}>
+                      Manter
+                    </Button>
+                    <Button
+                      type="button"
+                      className="h-11 bg-destructive text-white hover:bg-destructive/90"
+                      onClick={() => {
+                        onRemove();
+                        onOpenChange(false);
+                      }}
+                    >
+                      Sim, remover
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmingRemove(true)}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-lg text-sm font-medium text-destructive active:bg-destructive/5"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Remover {petToEdit.name}
+                </button>
+              )}
+            </div>
+          )}
         </form>
 
         {/* ── Footer com ações ─────────────────────────────── */}
-        <div className="shrink-0 px-6 py-4 border-t border-border/50 bg-card/80 backdrop-blur-sm">
+        <div className="shrink-0 px-6 py-4 border-t border-border/50 bg-card/80 backdrop-blur-sm max-md:px-4 max-md:pt-3 max-md:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
           <div className="flex items-center gap-3">
             <Button
               type="button"
               variant="outline"
-              className="flex-1"
+              className="flex-1 max-md:h-12 max-md:text-base"
               onClick={() => onOpenChange(false)}
             >
               Cancelar
             </Button>
             <Button
               type="submit"
-              className="flex-1 shadow-sm hover:shadow-md"
+              className="flex-1 shadow-sm hover:shadow-md max-md:h-12 max-md:text-base"
               onClick={handleSubmit}
             >
               {isEditing ? "Salvar alterações" : "Adicionar cão"}
