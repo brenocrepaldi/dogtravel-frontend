@@ -18,7 +18,7 @@ import { QuickActions, type QuickActionItem } from "../_components/quick-actions
 import { ActiveWalkBanner } from "../_components/active-walk-banner";
 import { SectionHeader } from "../_components/section-header";
 import { HeroReputation } from "../_components/hero-reputation";
-import { WalkListAvatar } from "../_components/walk-list-avatar";
+import { WalkListAvatar } from "@/components/common/walk-list-avatar";
 import { AvailabilityCard } from "./availability-card";
 import { NextWalkCard, findNextWalk } from "./next-walk-card";
 

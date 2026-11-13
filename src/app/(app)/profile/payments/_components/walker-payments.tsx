@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { Button, TOUCH_TARGET } from '@/components/ui/button';
 import {
   Card,
@@ -23,7 +24,9 @@ import {
 import { cn } from '@/lib/utils';
 import { useWalkerEarnings } from '@/features/walkers/hooks/use-walkers';
 import { useWalkerStats } from '@/features/stats/hooks/use-stats';
-import type { EarningsParams, PaymentHistoryItem } from '@/types';
+import { useWalks } from '@/features/walks/hooks/use-walks';
+import { WalkListAvatar } from '@/components/common/walk-list-avatar';
+import type { EarningsParams, PaymentHistoryItem, WalkRecord } from '@/types';
 
 // ─── Period filter ────────────────────────────────────────────────────────────
 
@@ -160,18 +163,71 @@ function EarningsSidebar() {
 
 // ─── Earning row ──────────────────────────────────────────────────────────────
 
-function EarningRow({ item }: { item: PaymentHistoryItem }) {
+const STATUS_PILL: Record<PaymentHistoryItem['status'], { label: string; className: string }> = {
+  paid: {
+    label: 'Concluído',
+    className: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+  },
+  pending: {
+    label: 'Pendente',
+    className: 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  },
+  failed: {
+    label: 'Falha',
+    className: 'border-red-500/20 bg-red-500/10 text-red-700 dark:text-red-400',
+  },
+};
+
+/**
+ * Phones: the same row as the dashboard's "Últimos passeios" (dog first, tutor in
+ * the corner, "+R$" in emerald). md+ keeps the original row. `walk` comes from the
+ * walker's cached walks list and may be missing, so everything falls back to the
+ * payment's own description.
+ */
+function EarningRow({ item, walk }: { item: PaymentHistoryItem; walk?: WalkRecord }) {
+  const firstPet = walk?.pets?.[0] ?? { name: walk?.petNames[0] ?? item.description, photoUrl: null };
+  const pill = STATUS_PILL[item.status];
+
   return (
     <Link href={`/walks/${item.walkId}`}>
-      <div className="group flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors duration-150 cursor-pointer">
-        <div className="w-9 h-9 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center shrink-0 text-xs font-semibold text-primary">
+      <div className="group flex items-center gap-3 px-4 py-3.5 hover:bg-muted/30 transition-colors duration-150 cursor-pointer md:gap-4 md:px-5 md:py-4">
+        <div className="md:hidden">
+          <WalkListAvatar
+            main={{ ...firstPet, kind: 'dog' }}
+            corner={walk ? { name: walk.clientName, photoUrl: walk.clientAvatarUrl, kind: 'person' } : undefined}
+          />
+        </div>
+        <div className="min-w-0 flex-1 md:hidden">
+          <p className="truncate text-sm font-semibold text-foreground">
+            {walk ? walk.petNames.join(' & ') : item.description}
+          </p>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+            {walk ? `${walk.clientName} · ${formatDate(item.date)}` : formatDate(item.date)}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1 md:hidden">
+          <span
+            className={cn(
+              'text-sm font-bold tabular-nums',
+              item.status === 'paid' ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground',
+            )}
+          >
+            {item.status === 'paid' ? '+' : ''}
+            {formatAmount(item.amount)}
+          </span>
+          <span className={cn('inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium', pill.className)}>
+            {pill.label}
+          </span>
+        </div>
+
+        <div className="max-md:hidden w-9 h-9 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center shrink-0 text-xs font-semibold text-primary">
           {item.description.charAt(0).toUpperCase()}
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 max-md:hidden">
           <span className="text-sm font-semibold text-foreground">{item.description}</span>
           <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.date)}</p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0 max-md:hidden">
           <div className="text-right">
             <p className="text-sm font-bold text-foreground tabular-nums">
               {formatAmount(item.amount)}
@@ -207,6 +263,13 @@ export function WalkerPayments() {
   const [period, setPeriod] = useState<PeriodPreset>('this_month');
   const { data: history = [], isLoading, isError, refetch } = useWalkerEarnings(periodToParams(period));
   const periodTotal = history.reduce((sum, item) => sum + item.amount, 0);
+
+  // Same query (and cache) the bottom nav already keeps for the walker: the dogs'
+  // photos for the rows cost no extra request.
+  const { data: session } = useSession();
+  const userId = session?.user?.id ?? '';
+  const { data: walks = [] } = useWalks('walker', userId, { enabled: !!userId });
+  const walksById = useMemo(() => new Map(walks.map((w) => [w.id, w])), [walks]);
 
   return (
     <div className="flex flex-col gap-5 pb-8 md:gap-8 lg:flex-row lg:items-start lg:gap-10">
@@ -297,7 +360,7 @@ export function WalkerPayments() {
           {!isLoading && !isError && history.length > 0 && (
             <div className="rounded-2xl border border-border/60 bg-card overflow-hidden divide-y divide-border/50">
               {history.map((item: PaymentHistoryItem) => (
-                <EarningRow key={item.id} item={item} />
+                <EarningRow key={item.id} item={item} walk={walksById.get(item.walkId)} />
               ))}
             </div>
           )}
