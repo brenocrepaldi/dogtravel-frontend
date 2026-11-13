@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
+  AlertCircle,
   ArrowLeft,
   Briefcase,
   Calendar,
@@ -22,6 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/common/empty-state";
 import { cn } from "@/lib/utils";
 import { useWalkerProfile, useUpdateWalkerProfile } from "@/features/walkers/hooks/use-walkers";
 import type { AvailabilitySlot, DogSize, WalkerProfileUpdate } from "@/types";
@@ -48,12 +51,45 @@ const EXPERTISE_OPTIONS: { value: string; label: string }[] = [
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
+// Shaped like the section cards (icon + title header, then fields), so the form
+// doesn't jump when it arrives.
 function ProfileSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
-      <div className="h-32 rounded-xl bg-muted" />
-      <div className="h-24 rounded-xl bg-muted" />
-      <div className="h-32 rounded-xl bg-muted" />
+    <div className="space-y-4 md:space-y-6" aria-hidden="true">
+      {["h-28", "h-40", "h-64"].map((body) => (
+        <Card key={body} className="overflow-hidden py-0 gap-0">
+          <div className="flex items-center gap-2.5 border-b border-border/60 px-4 py-3.5 md:px-5">
+            <Skeleton className="h-7 w-7 rounded-lg" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+          <div className="space-y-2 p-4 md:p-5">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className={cn("w-full rounded-lg", body)} />
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+
+function PageHeader() {
+  return (
+    <div className="flex items-center gap-3">
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        render={<Link href="/profile" />}
+        aria-label="Voltar"
+        className="max-md:-ml-2 max-md:size-11"
+      >
+        <ArrowLeft className="h-4 w-4" />
+      </Button>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Perfil profissional</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Informações exibidas para os clientes.</p>
+      </div>
     </div>
   );
 }
@@ -195,7 +231,7 @@ export default function WalkerProfilePage() {
   const searchParams = useSearchParams();
   const isOnboarding = searchParams.get("onboarding") === "true";
 
-  const { data: profile, isLoading } = useWalkerProfile();
+  const { data: profile, isLoading, isError, refetch, isRefetching } = useWalkerProfile();
   const { mutate: updateProfile, isPending: isSaving } = useUpdateWalkerProfile();
 
   const [form, setForm] = useState<WalkerProfileUpdate>({
@@ -233,12 +269,26 @@ export default function WalkerProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl space-y-6 pb-8">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-muted" />
-          <div className="h-7 w-48 rounded bg-muted" />
-        </div>
+      <div className="max-w-2xl space-y-4 pb-8 md:space-y-6">
+        <PageHeader />
         <ProfileSkeleton />
+      </div>
+    );
+  }
+
+  // Without the saved profile the form would start empty, and saving it would wipe the
+  // walker's real profile, so a failed load offers a retry instead of the form.
+  if (isError && !profile) {
+    return (
+      <div className="max-w-2xl space-y-4 pb-8 md:space-y-6">
+        <PageHeader />
+        <EmptyState
+          icon={AlertCircle}
+          title="Não foi possível carregar seu perfil"
+          description="Verifique sua conexão e tente de novo. Nada do que você salvou foi perdido."
+          actionLabel={isRefetching ? "Carregando..." : "Tentar novamente"}
+          onAction={() => refetch()}
+        />
       </div>
     );
   }
@@ -246,22 +296,7 @@ export default function WalkerProfilePage() {
   return (
     <div className="max-w-2xl space-y-4 pb-8 md:space-y-6">
 
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          render={<Link href="/profile" />}
-          aria-label="Voltar"
-          className="max-md:-ml-2 max-md:size-11"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Perfil profissional</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Informações exibidas para os clientes.</p>
-        </div>
-      </div>
+      <PageHeader />
 
       {/* Onboarding banner — shown only right after walker registration */}
       {isOnboarding && (
