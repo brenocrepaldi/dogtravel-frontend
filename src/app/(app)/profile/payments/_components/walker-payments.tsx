@@ -197,8 +197,8 @@ export function WalkerPayments() {
   const { data: history = [], isLoading, isError, refetch } = useWalkerEarnings(periodToParams(period));
 
   return (
-    <div className="flex flex-col gap-8 pb-8 lg:flex-row lg:items-start lg:gap-10">
-      <div className="flex min-w-0 flex-1 flex-col gap-8">
+    <div className="flex flex-col gap-5 pb-8 md:gap-8 lg:flex-row lg:items-start lg:gap-10">
+      <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-8">
         <header className="space-y-1.5">
           <div className="flex items-center gap-3">
             <Button
@@ -206,6 +206,7 @@ export function WalkerPayments() {
               size="icon-sm"
               render={<Link href="/profile" />}
               aria-label="Voltar ao perfil"
+              className="max-md:hidden"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -213,7 +214,7 @@ export function WalkerPayments() {
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
                 Meus Ganhos
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="hidden text-sm text-muted-foreground md:block">
                 Acompanhe seus repasses e histórico de serviços.
               </p>
             </div>
@@ -281,7 +282,8 @@ export function WalkerPayments() {
         </section>
       </div>
 
-      <aside className="w-full shrink-0 lg:w-72 lg:sticky lg:top-37 lg:self-start">
+      {/* On phones this is the Ganhos tab: the balance is the first thing to see. */}
+      <aside className="w-full shrink-0 max-md:order-first lg:w-72 lg:sticky lg:top-37 lg:self-start">
         <EarningsSidebar />
       </aside>
     </div>
