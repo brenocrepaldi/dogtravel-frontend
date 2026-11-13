@@ -20,8 +20,22 @@ export default async function WalkerDocumentsPage() {
   return (
     <div className="max-w-2xl space-y-4 pb-8 md:space-y-6">
 
-      {/* Header */}
-      <div>
+      {/* Header — phones: compact title for the list layout; md+: the original header. */}
+      <div className="flex items-center gap-1 md:hidden">
+        <Link
+          href="/profile"
+          aria-label="Voltar ao perfil"
+          className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors active:bg-accent/60"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Documentos</h1>
+          <p className="text-sm text-muted-foreground">Verificação e certificações</p>
+        </div>
+      </div>
+
+      <div className="max-md:hidden">
         <div className="flex items-center gap-3">
           <Link
             href="/profile"
