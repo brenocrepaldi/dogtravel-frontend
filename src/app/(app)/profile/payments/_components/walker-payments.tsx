@@ -105,6 +105,13 @@ function EarningsSidebar() {
               Seus ganhos
             </CardTitle>
           </div>
+          {/* Phones: today's earnings ride in the header instead of taking a row. */}
+          {!isLoading && (
+            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-primary-foreground/10 px-2.5 py-1 text-xs text-primary-foreground/80 md:hidden">
+              <TrendingUp className="h-3 w-3 shrink-0" />
+              Hoje <span className="font-semibold tabular-nums text-primary-foreground">{formatAmount(stats?.earningsToday ?? 0)}</span>
+            </span>
+          )}
         </div>
       </CardHeader>
 
@@ -125,7 +132,7 @@ function EarningsSidebar() {
               </p>
             </div>
 
-            <div className="flex items-center gap-1.5 rounded-lg bg-primary-foreground/10 px-3 py-2">
+            <div className="flex items-center gap-1.5 rounded-lg bg-primary-foreground/10 px-3 py-2 max-md:hidden">
               <TrendingUp className="w-3.5 h-3.5 text-primary-foreground/70 shrink-0" />
               <span className="text-xs text-primary-foreground/80">
                 Hoje: <span className="font-semibold">{formatAmount(stats?.earningsToday ?? 0)}</span>
@@ -137,7 +144,7 @@ function EarningsSidebar() {
         <Button
           variant="secondary"
           size="sm"
-          className="w-full rounded-md gap-1.5"
+          className="w-full rounded-md gap-1.5 max-md:h-11 max-md:text-sm"
         >
           <ArrowUpRight className="w-3.5 h-3.5" />
           Solicitar saque
