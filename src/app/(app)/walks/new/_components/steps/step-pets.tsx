@@ -11,7 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { WalkFormData } from "../walk-request-form";
-import { WalkerChoice } from "../walker-choice";
+import { WalkerInviteBanner } from "../walker-invite-banner";
+import { saveWalkRequestDraft } from "../walk-request-draft";
 
 interface Props {
   data: WalkFormData;
@@ -33,6 +34,20 @@ export function StepPets({ data, updateData, onNext, onCancel }: Props) {
 
   return (
     <div className="space-y-6">
+      {pets.length > 0 && (
+        <WalkerInviteBanner
+          selectedWalkerId={data.selectedWalkerId}
+          onBeforePick={() =>
+            saveWalkRequestDraft({
+              selectedPetIds: data.selectedPetIds,
+              notes: data.notes,
+              selectedWalkerId: data.selectedWalkerId,
+            })
+          }
+          onClear={() => updateData({ selectedWalkerId: null })}
+        />
+      )}
+
       <div>
         <h2 className="text-lg font-semibold">Quais cães vão passear?</h2>
         <p className="text-sm text-muted-foreground">Selecione os pets para validar compatibilidade com o passeador.</p>
@@ -108,13 +123,6 @@ export function StepPets({ data, updateData, onNext, onCancel }: Props) {
             );
           })}
         </div>
-      )}
-
-      {pets.length > 0 && (
-        <WalkerChoice
-          selectedWalkerId={data.selectedWalkerId}
-          onChange={(selectedWalkerId) => updateData({ selectedWalkerId })}
-        />
       )}
 
       {/* Observações */}

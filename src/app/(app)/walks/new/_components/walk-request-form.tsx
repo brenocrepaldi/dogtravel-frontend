@@ -28,6 +28,7 @@ import { StepPrice } from './steps/step-price';
 import { StepPayment } from './steps/step-payment';
 import { StepConfirm } from './steps/step-confirm';
 import { StepPixPayment } from './steps/step-pix-payment';
+import { takeWalkRequestDraft } from './walk-request-draft';
 import { PIX_INSTANT_ID } from '@/config/pricing';
 import type { CreateWalkDto } from '@/types';
 
@@ -205,6 +206,22 @@ export function WalkRequestForm() {
 		});
 	}, [prefilledWalkId]);
 
+	// Coming back from picking a walker on /walkers: restore what step 1 already had. A walker
+	// in the URL is the one just picked; without it (the client backed out) keep the old one.
+	useEffect(() => {
+		const draft = takeWalkRequestDraft();
+		if (!draft) return;
+		// Syncing from sessionStorage, which only exists in the browser, so it can't be read
+		// during render without a hydration mismatch.
+		// eslint-disable-next-line react-hooks/set-state-in-effect
+		setData((previous) => ({
+			...previous,
+			selectedPetIds: draft.selectedPetIds,
+			notes: draft.notes,
+			selectedWalkerId: preselectedWalkerId || draft.selectedWalkerId,
+		}));
+	}, [preselectedWalkerId]);
+
 	function updateData(partial: Partial<WalkFormData>) {
 		setData((prev) => ({ ...prev, ...partial }));
 	}
@@ -317,6 +334,8 @@ export function WalkRequestForm() {
 
 			const anchor = (e.target as HTMLElement).closest('a');
 			if (!anchor) return;
+			// Links that park the draft first (picking a walker) come back to it: nothing is lost.
+			if (anchor.hasAttribute('data-keeps-draft')) return;
 
 			const href = anchor.getAttribute('href');
 			if (!href) return;
