@@ -13,7 +13,17 @@ import { WalkerAvatar } from './walker-avatar';
 // Tags beyond this count collapse into a "+n" badge on mobile
 const MOBILE_TAG_LIMIT = 3;
 
-export function WalkerCard({ walker, index }: { walker: WalkerProfile; index: number }) {
+export function WalkerCard({
+	walker,
+	index,
+	pickMode = false,
+}: {
+	walker: WalkerProfile;
+	index: number;
+	/** The client is choosing a walker for a request already in progress (see /walkers?pick=1). */
+	pickMode?: boolean;
+}) {
+	const profileHref = pickMode ? `/walkers/${walker.id}?pick=1` : `/walkers/${walker.id}`;
 	const hiddenTagCount = Math.max(walker.tags.length - MOBILE_TAG_LIMIT, 0);
 
 	return (
@@ -39,7 +49,7 @@ export function WalkerCard({ walker, index }: { walker: WalkerProfile; index: nu
 							<div className="flex items-center gap-1.5 flex-wrap">
 								<h3 className="text-base font-semibold text-foreground leading-tight">
 									{/* Stretched link: on mobile the whole card opens the profile */}
-									<Link href={`/walkers/${walker.id}`} className="after:absolute after:inset-0 lg:after:hidden">
+									<Link href={profileHref} className="after:absolute after:inset-0 lg:after:hidden">
 										{walker.name}
 									</Link>
 								</h3>
@@ -126,13 +136,13 @@ export function WalkerCard({ walker, index }: { walker: WalkerProfile; index: nu
 							'relative z-10 w-full mt-auto lg:h-9 lg:px-2.5',
 						)}
 					>
-						Agendar passeio
+						{pickMode ? 'Escolher' : 'Agendar passeio'}
 					</Link>
 				</div>
 
 				{/* Rodapé do card — só no desktop */}
 				<Link
-					href={`/walkers/${walker.id}`}
+					href={profileHref}
 					className="hidden lg:flex items-center justify-center gap-1 text-[11px] text-primary/80 hover:text-primary transition-colors font-medium border-t border-border/40 bg-muted/20"
 				>
 					<div className="shrink-0 px-5 py-3 flex items-center">

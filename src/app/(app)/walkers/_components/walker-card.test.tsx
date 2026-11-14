@@ -54,4 +54,11 @@ describe('WalkerCard', () => {
 		expect(screen.getByRole('link', { name: 'João Pedro Santos' })).toHaveAttribute('href', '/walkers/w1');
 		expect(screen.getByRole('link', { name: 'Agendar passeio' })).toHaveAttribute('href', '/walks/new?walker=w1');
 	});
+
+	it('in pick mode, picks the walker for the request in progress and keeps the mode on the profile', () => {
+		render(<WalkerCard walker={walker} index={0} pickMode />);
+
+		expect(screen.getByRole('link', { name: 'João Pedro Santos' })).toHaveAttribute('href', '/walkers/w1?pick=1');
+		expect(screen.getByRole('link', { name: 'Escolher' })).toHaveAttribute('href', '/walks/new?walker=w1');
+	});
 });

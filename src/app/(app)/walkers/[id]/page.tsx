@@ -28,6 +28,7 @@ import { DOG_SIZE_LABEL } from '@/lib/pets';
 import { Separator } from '@/components/ui/separator';
 import { WalkerReviewsSection } from './_components/walker-reviews-section';
 import { WalkerAvailabilityBadge } from './_components/walker-availability-badge';
+import { PickWalkerBar } from '../_components/pick-walker-bar';
 
 export const metadata: Metadata = { title: 'Perfil do Passeador | DogTravel' };
 
@@ -117,8 +118,18 @@ function SidebarTrustRow({ verified, label }: { verified: boolean; label: string
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default async function WalkerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function WalkerDetailPage({
+	params,
+	searchParams,
+}: {
+	params: Promise<{ id: string }>;
+	searchParams: Promise<{ pick?: string }>;
+}) {
 	const { id } = await params;
+	// ?pick=1: the client is choosing a walker for a request already in progress, so the CTAs
+	// pick this walker and the way back leads to the list in the same mode.
+	const pickMode = (await searchParams).pick === '1';
+	const listHref = pickMode ? '/walkers?pick=1' : '/walkers';
 	const walker = await WalkersApi.getById(id);
 
 	if (!walker) notFound();
@@ -137,12 +148,15 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 		: undefined;
 
 	const firstName = walker.name.split(' ')[0];
+	const ctaLabel = pickMode ? `Escolher ${firstName}` : `Agendar passeio com ${firstName}`;
 
 	return (
 		<div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-10">
+			{pickMode && <PickWalkerBar />}
+
 			{/* Back */}
 			<Link
-				href="/walkers"
+				href={listHref}
 				className={cn(
 					buttonVariants({ variant: 'ghost', size: 'sm' }),
 					'-ml-2 h-11 self-start text-muted-foreground hover:text-foreground md:h-7',
@@ -338,7 +352,7 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 							href={`/walks/new?walker=${walker.id}`}
 							className={cn(buttonVariants({ size: 'xl' }), 'shrink-0 shadow-sm')}
 						>
-							Agendar passeio
+							{pickMode ? `Escolher ${firstName}` : 'Agendar passeio'}
 						</Link>
 					</div>
 				</div>
@@ -376,7 +390,7 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 									className={cn(buttonVariants({ size: 'xl' }), 'w-full shadow-sm')}
 								>
 									<CalendarClock className="w-4 h-4 mr-2 shrink-0" />
-									Agendar passeio com {firstName}
+									{ctaLabel}
 								</Link>
 								<p className="text-center text-[11px] text-muted-foreground leading-relaxed">
 									Escolha data, horário e pets na próxima etapa
@@ -411,7 +425,7 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 
 							{/* Link voltar */}
 							<Link
-								href="/walkers"
+								href={listHref}
 								className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
 							>
 								<ArrowLeft className="w-3.5 h-3.5" />
@@ -430,7 +444,7 @@ export default async function WalkerDetailPage({ params }: { params: Promise<{ i
 					className={cn(buttonVariants({ size: 'xl' }), 'w-full shadow-sm')}
 				>
 					<CalendarClock className="w-4 h-4 mr-2 shrink-0" />
-					Agendar passeio com {firstName}
+					{ctaLabel}
 				</Link>
 			</div>
 		</div>

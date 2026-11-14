@@ -26,7 +26,7 @@ function inferBehaviorNeeds(notes: string | undefined) {
 
 // ─── Main Explorer ────────────────────────────────────────────────────────────
 
-export function WalkersExplorer() {
+export function WalkersExplorer({ pickMode = false }: { pickMode?: boolean }) {
 	const { data: pets = [] } = useDogs();
 
 	// query + size drive the API fetch; trustPack + fitMyPets are client-side only
@@ -187,7 +187,7 @@ export function WalkersExplorer() {
 
 						<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 items-start">
 							{filteredWalkers.map((walker, index) => (
-								<WalkerCard key={walker.id} walker={walker} index={index} />
+								<WalkerCard key={walker.id} walker={walker} index={index} pickMode={pickMode} />
 							))}
 						</div>
 
