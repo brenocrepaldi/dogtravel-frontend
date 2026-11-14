@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { toast } from 'sonner';
+import { useOpenWalk } from '@/features/walks/hooks/use-walk-actions';
 import { buttonVariants } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import type { WalkRecord } from '@/types';
-import { AlertCircle, CalendarDays, Clock, MapPin, Star, X } from 'lucide-react';
+import { AlertCircle, CalendarDays, Clock, MapPin, Star, UserX, Users, X } from 'lucide-react';
 import { PetChip } from './pet-chip';
 
 // ── Status config ──────────────────────────────────────────────────────────
@@ -39,8 +41,19 @@ const statusMap: Record<WalkRecord['status'], { label: string; dot: string; pill
 	},
 };
 
-function StatusPill({ status }: { status: WalkRecord['status'] }) {
-	const cfg = statusMap[status];
+// A pending request directed at one walker isn't "searching": it waits on that walker, or
+// (once they decline) on the client. Same pill shape, different words and tone.
+const DIRECTED_PILL = { label: 'Aguardando', pill: statusMap.pending.pill };
+const DECLINED_PILL = { label: 'Recusado', pill: statusMap.cancelled.pill, dot: statusMap.cancelled.dot };
+
+function StatusPill({
+	status,
+	override,
+}: {
+	status: WalkRecord['status'];
+	override?: { label: string; pill: string; dot?: string };
+}) {
+	const cfg = { ...statusMap[status], ...override };
 	return (
 		<span
 			className={cn(
@@ -48,7 +61,7 @@ function StatusPill({ status }: { status: WalkRecord['status'] }) {
 				cfg.pill,
 			)}
 		>
-			{status === 'pending' ? (
+			{status === 'pending' && override !== DECLINED_PILL ? (
 				<span className="relative flex w-1.5 h-1.5 shrink-0">
 					<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
 					<span className="relative inline-flex w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -74,9 +87,17 @@ export function WalkCard({
 	const isPending   = walk.status === 'accepted';
 	const isCancelled = walk.status === 'cancelled';
 
-	const [confirmingCancel, setConfirmingCancel] = useState(false);
+	// Pending + a chosen walker: the header shows who has the request instead of "Procurando".
+	const isDirected = isSearching && walk.requestMode === 'directed';
+	const isDeclined = isSearching && walk.requestMode === 'declined';
+	const isOpenSearch = isSearching && !isDirected && !isDeclined;
 
-	const walkerName = walk.participants.find((p) => p.role === 'walker')?.name ?? 'Passeador';
+	const [confirmingCancel, setConfirmingCancel] = useState(false);
+	const openWalk = useOpenWalk();
+
+	const walkerName =
+		walk.walkerName ?? walk.participants.find((p) => p.role === 'walker')?.name ?? 'Passeador';
+	const walkerFirstName = walkerName.split(' ')[0];
 	const hasReview = walk.hasReview ?? false;
 
 	const walkerInitials = walkerName
@@ -85,6 +106,13 @@ export function WalkCard({
 		.slice(0, 2)
 		.join('')
 		.toUpperCase();
+
+	function handleOpen() {
+		openWalk.mutate(walk.id, {
+			onSuccess: () => toast.success('Pedido aberto para todos os passeadores.'),
+			onError: () => toast.error('Não foi possível abrir o pedido. Tente novamente.'),
+		});
+	}
 
 	return (
 		<div
@@ -107,7 +135,7 @@ export function WalkCard({
 
 			{/* Header */}
 			<div className="px-4 pt-4 pb-3 md:px-5 md:pt-5 md:pb-4 flex items-start justify-between gap-3">
-				{isSearching ? (
+				{isOpenSearch ? (
 					<div className="flex items-center gap-3 min-w-0">
 						<div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 bg-amber-500/10 ring-1 ring-amber-500/20">
 							<CalendarDays className="w-4 h-4 text-amber-600 dark:text-amber-400" />
@@ -142,13 +170,16 @@ export function WalkCard({
 						</div>
 					</div>
 				)}
-				{isSearching ? (
+				{isOpenSearch ? (
 					<span className="relative flex w-2.5 h-2.5 shrink-0 mt-1">
 						<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
 						<span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-amber-400" />
 					</span>
 				) : (
-					<StatusPill status={walk.status} />
+					<StatusPill
+						status={walk.status}
+						override={isDirected ? DIRECTED_PILL : isDeclined ? DECLINED_PILL : undefined}
+					/>
 				)}
 			</div>
 
@@ -156,6 +187,14 @@ export function WalkCard({
 
 			{/* Info */}
 			<div className="px-4 py-3 flex-1 space-y-2.5 md:px-5 md:py-4 md:space-y-3">
+				{isDeclined && (
+					<div className="flex items-start gap-2 rounded-lg bg-amber-500/[0.08] px-3 py-2 text-sm text-foreground">
+						<UserX className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+						<span>
+							{walkerFirstName} não pode fazer este passeio. Abra para todos ou cancele.
+						</span>
+					</div>
+				)}
 				<div className="flex items-center justify-between gap-2">
 					<div className="flex flex-wrap items-center gap-1.5 min-w-0">
 						{walk.petNames.map((name, i) => (
@@ -215,7 +254,7 @@ export function WalkCard({
 					</div>
 				)}
 
-				{isSearching && !confirmingCancel && (
+				{isOpenSearch && !confirmingCancel && (
 					<button
 						type="button"
 						onClick={() => setConfirmingCancel(true)}
@@ -229,7 +268,33 @@ export function WalkCard({
 					</button>
 				)}
 
-				{isPending && !confirmingCancel && (
+				{isDeclined && !confirmingCancel && (
+					<div className="grid grid-cols-2 gap-2">
+						<button
+							type="button"
+							onClick={() => setConfirmingCancel(true)}
+							disabled={openWalk.isPending}
+							className={cn(
+								buttonVariants({ variant: 'outline', size: 'lg' }),
+								'h-11 md:h-9 rounded-lg w-full gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/5 hover:border-destructive/50 cursor-pointer',
+							)}
+						>
+							<X className="w-3.5 h-3.5" />
+							Cancelar
+						</button>
+						<button
+							type="button"
+							onClick={handleOpen}
+							disabled={openWalk.isPending}
+							className={cn(buttonVariants({ size: 'lg' }), 'h-11 md:h-9 rounded-lg w-full gap-1.5 cursor-pointer')}
+						>
+							<Users className="w-3.5 h-3.5" />
+							Abrir para todos
+						</button>
+					</div>
+				)}
+
+				{(isPending || isDirected) && !confirmingCancel && (
 					<div className="grid grid-cols-2 gap-2">
 						<Link
 							href={`/walks/${walk.id}`}

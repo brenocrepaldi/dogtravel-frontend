@@ -9,6 +9,7 @@ vi.mock('@/features/walks/hooks/use-walks', () => ({
 }));
 vi.mock('@/features/walks/hooks/use-walk-actions', () => ({
 	useCancelWalk: () => ({ mutate: vi.fn() }),
+	useOpenWalk: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 describe('WalksClient', () => {
